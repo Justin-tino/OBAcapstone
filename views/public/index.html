@@ -7,301 +7,1422 @@
   <title>OBA System — Office of Business Affairs | PSAU</title>
   <meta name="description"
     content="Web-based Integrated Sales Monitoring, Inventory, and Financial Reporting System for Office of Business Affairs — PSAU">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
   <style>
-    body {
-      background: var(--white);
-      font-family: var(--font-main);
+    :root {
+      --green-dark: #0f2e14;
+      --green-deep: #1a4a20;
+      --green: #2e7d32;
+      --green-mid: #4caf50;
+      --green-light: #e8f5e9;
+      --gold: #f5c518;
+      --gold-light: #fef3c7;
+      --cream: #faf7f2;
+      --slate: #0f172a;
+      --slate-light: #f1f5f9;
+      --radius-xl: 24px;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      color: var(--slate);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ── */
     .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 60px;
-      background: var(--white);
-      border-bottom: 1px solid var(--gray-200);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: var(--shadow-sm);
+      padding: 18px 8%;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .navbar.scrolled {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      padding: 12px 8%;
     }
 
     .navbar-logo {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 1.3rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.2rem;
       font-weight: 800;
-      color: var(--black);
+      color: #fff;
       text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .navbar.scrolled .navbar-logo {
+      color: var(--slate);
     }
 
     .navbar-logo span {
+      color: var(--gold);
+    }
+
+    .navbar.scrolled .navbar-logo span {
       color: var(--green);
     }
 
     .navbar-logo img {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       object-fit: contain;
+      border-radius: 8px;
     }
 
     .navbar-links {
       display: flex;
       align-items: center;
-      gap: 28px;
+      gap: 32px;
     }
 
     .navbar-links a {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
-      color: var(--gray-600);
+      color: rgba(255, 255, 255, 0.7);
       text-decoration: none;
-      transition: 0.2s;
+      transition: color 0.3s ease;
+      position: relative;
     }
 
-    .navbar-links a:hover,
-    .navbar-links a.active {
+    .navbar.scrolled .navbar-links a {
+      color: var(--slate);
+      opacity: 0.7;
+    }
+
+    .navbar-links a:hover {
+      color: #fff;
+    }
+
+    .navbar.scrolled .navbar-links a:hover {
       color: var(--green);
-      font-weight: 600;
+      opacity: 1;
     }
 
+    .navbar-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .navbar.scrolled .navbar-links a::after {
+      background: var(--green);
+    }
+
+    .navbar-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      background: #fff;
+      color: var(--green-dark) !important;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 600 !important;
+      font-size: 0.88rem !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .navbar.scrolled .nav-cta {
+      background: var(--green);
+      color: #fff !important;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 24px rgba(46, 125, 50, 0.2) !important;
+      color: var(--green-dark) !important;
+    }
+
+    .navbar.scrolled .nav-cta:hover {
+      color: #fff !important;
+      background: var(--green-deep) !important;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+
+    .hamburger span {
+      width: 24px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .navbar.scrolled .hamburger span {
+      background: var(--slate);
+    }
+
+    /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, rgba(30, 80, 30, 0.9), rgba(15, 40, 15, 0.95)), url('/images/psaubg.jpg') center/cover;
-      padding: 120px 60px;
-      text-align: center;
-      color: white;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      min-height: 100vh;
+      background: linear-gradient(to right, rgba(15, 46, 20, 0.96) 35%, rgba(15, 46, 20, 0.75) 70%, rgba(15, 46, 20, 0.2) 100%), url('/images/psaubg.jpg') no-repeat center center / cover;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 160px 80px 120px 8%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-left::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 10%;
+      height: 80%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 16px 6px 6px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 32px;
+      width: fit-content;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: inline-block;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+      }
     }
 
     .hero h1 {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 4rem;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--gold) 0%, #fbbf24 40%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .hero p {
-      font-size: 1.2rem;
-      max-width: 800px;
-      margin: 0 auto 30px;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .section {
-      padding: 80px 60px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-title {
-      font-size: 2.2rem;
-      color: var(--black);
-      margin-bottom: 40px;
-      text-align: center;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: center;
-    }
-
-    .about-text p {
       font-size: 1.1rem;
-      color: var(--gray-600);
-      line-height: 1.8;
-      margin-bottom: 20px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 500px;
+      margin-bottom: 40px;
     }
 
-    .mv-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-top: 40px;
-    }
-
-    .mv-card {
-      background: var(--gray-50);
-      padding: 40px;
-      border-radius: 12px;
-      border-top: 4px solid var(--green);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .mv-card h3 {
-      font-size: 1.5rem;
-      color: var(--green);
-      margin-bottom: 16px;
+    .hero-actions {
       display: flex;
       align-items: center;
+      gap: 16px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
       gap: 10px;
+      background: var(--gold);
+      color: var(--green-dark);
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border: none;
+      cursor: pointer;
     }
 
-    .mv-card p {
-      font-size: 1.05rem;
-      color: var(--gray-600);
-      line-height: 1.7;
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(245, 197, 24, 0.25);
     }
 
-    .why-oba {
-      background: var(--green-light);
-      padding: 80px 60px;
+    .btn-primary svg {
+      transition: transform 0.3s ease;
     }
 
-    .why-oba-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
+    .btn-primary:hover svg {
+      transform: translateX(4px);
     }
 
-    .reason-card {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: var(--shadow-sm);
-      text-align: center;
+    .btn-outline-light {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .reason-icon {
-      width: 60px;
-      height: 60px;
-      background: rgba(45, 106, 46, 0.1);
-      color: var(--green);
-      border-radius: 50%;
+    .btn-outline-light:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Hero right */
+    .hero-right {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px;
+      overflow: hidden;
     }
 
-    footer {
-      background: var(--black);
-      color: rgba(255, 255, 255, 0.6);
+    .hero-right::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(46, 125, 50, 0.15) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .hero-image-wrapper {
+      position: relative;
+      width: 95%;
+      max-width: 640px;
+      z-index: 1;
+    }
+
+    .hero-image-wrapper img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-xl);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-image-wrapper::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: calc(var(--radius-xl) + 8px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      z-index: -1;
+    }
+
+    /* Floating stat card */
+    .floating-card {
+      position: absolute;
+      bottom: -30px;
+      left: -40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      padding: 20px 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .floating-card .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--green-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+    }
+
+    .floating-card .stat-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--slate);
+      line-height: 1.2;
+    }
+
+    .floating-card .stat-label {
+      font-size: 0.8rem;
+      color: var(--slate);
+      opacity: 0.6;
+    }
+
+    /* Decorative circles */
+    .deco-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .deco-circle-1 {
+      width: 400px;
+      height: 400px;
+      top: -100px;
+      right: -100px;
+    }
+
+    .deco-circle-2 {
+      width: 200px;
+      height: 200px;
+      bottom: 60px;
+      right: 20%;
+    }
+
+    /* ── SCROLL TRUST BAR ── */
+    .trust-bar {
+      background: #fff;
+      padding: 40px 8%;
       text-align: center;
-      padding: 30px 40px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .trust-bar p {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--slate);
+      opacity: 0.4;
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .trust-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .trust-logos span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--slate);
+      opacity: 0.3;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      background: var(--green-dark);
+      padding: 60px 8%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats-strip::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(46, 125, 50, 0.15) 0%, transparent 60%);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .stat-item p {
       font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+    }
+
+    /* ── SECTION BASE ── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--green);
+      margin-bottom: 16px;
+    }
+
+    .section-label .line {
+      width: 32px;
+      height: 2px;
+      background: var(--green);
+    }
+
+    .section-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      color: var(--slate);
+      margin-bottom: 20px;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--slate);
+      opacity: 0.6;
+      max-width: 560px;
+    }
+
+    /* ── ABOUT ── */
+    .about {
+      padding: 120px 8%;
+      position: relative;
+      background: linear-gradient(to left, rgba(250, 247, 242, 0.97) 35%, rgba(250, 247, 242, 0.75) 65%, rgba(250, 247, 242, 0.3) 100%), url('/images/oba.jpg') no-repeat center center / cover;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .about-visual {
+      position: relative;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .about-visual .exp-badge {
+      position: relative;
+      background: var(--green);
+      color: #fff;
+      padding: 24px 32px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 16px 32px rgba(46, 125, 50, 0.25);
+    }
+
+    .about-visual .exp-badge .num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      display: block;
+    }
+
+    .about-visual .exp-badge .lbl {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .about-content p {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--slate);
+      opacity: 0.65;
+      margin-bottom: 20px;
+    }
+
+    .about-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 32px;
+    }
+
+    .about-tags span {
+      background: var(--green-light);
+      color: var(--green);
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    /* ── MODULES ── */
+    .modules {
+      padding: 120px 8%;
+      background: #fff;
+      position: relative;
+    }
+
+    .modules::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.06), transparent);
+    }
+
+    .modules-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .modules-header .section-sub {
+      margin: 0 auto;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .module-card {
+      position: relative;
+      padding: 40px 36px;
+      border-radius: var(--radius-xl);
+      background: var(--cream);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: default;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-deep) 100%);
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .module-card:hover::before {
+      opacity: 1;
+    }
+
+    .module-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+    }
+
+    .module-card>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    .module-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--green);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      transition: all 0.4s ease;
+    }
+
+    .module-card:hover .module-icon {
+      background: var(--gold);
+      color: var(--green-dark);
+      transform: scale(1.05) rotate(-4deg);
+    }
+
+    .module-card h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--slate);
+      margin-bottom: 12px;
+      transition: color 0.3s ease;
+    }
+
+    .module-card:hover h3 {
+      color: #fff;
+    }
+
+    .module-card p {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--slate);
+      opacity: 0.6;
+      transition: color 0.3s ease;
+    }
+
+    .module-card:hover p {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .module-number {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--slate);
+      opacity: 0.03;
+      line-height: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .module-card:hover .module-number {
+      color: rgba(255, 255, 255, 0.06);
+    }
+
+    /* ── WHY OBA (timeline style) ── */
+    .why {
+      padding: 120px 8%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .why-header {
+      margin-bottom: 72px;
+    }
+
+    .why-list {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .why-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 32px;
+      padding: 32px 40px;
+      border-radius: var(--radius-xl);
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .why-item:hover {
+      transform: translateX(8px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.04);
+    }
+
+    .why-num {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: var(--green);
+      opacity: 0.2;
+      line-height: 1;
+    }
+
+    .why-item h4 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--slate);
+      margin-bottom: 8px;
+    }
+
+    .why-item p {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--slate);
+      opacity: 0.6;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 100px 8%;
+      background: var(--green-dark);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(245, 197, 24, 0.06) 0%, transparent 60%);
+    }
+
+    .cta-section .section-title {
+      color: #fff;
+    }
+
+    .cta-section .section-sub {
+      color: rgba(255, 255, 255, 0.5);
+      margin: 0 auto 40px;
+    }
+
+    .cta-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--slate);
+      padding: 64px 8% 40px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .footer-brand .navbar-logo {
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .footer-brand p {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.4);
+      max-width: 320px;
+    }
+
+    .footer-col h5 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 20px;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.5);
+      text-decoration: none;
+      padding: 4px 0;
+      transition: color 0.3s ease;
+    }
+
+    .footer-col a:hover {
+      color: var(--gold);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 24px;
+      font-size: 0.82rem;
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .reveal-scale {
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-scale.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .stagger-1 {
+      transition-delay: 0.1s;
+    }
+
+    .stagger-2 {
+      transition-delay: 0.2s;
+    }
+
+    .stagger-3 {
+      transition-delay: 0.3s;
+    }
+
+    .stagger-4 {
+      transition-delay: 0.4s;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        background: linear-gradient(to bottom, rgba(15, 46, 20, 0.96) 40%, rgba(15, 46, 20, 0.75) 100%), url('/images/psaubg.jpg') no-repeat center center / cover;
+      }
+
+      .hero-left {
+        padding: 140px 8% 60px;
+      }
+
+      .hero-left::after {
+        display: none;
+      }
+
+      .hero-right {
+        display: none;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+      }
+
+      .hero-image-wrapper {
+        width: 100%;
+        max-width: 520px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+
+      .about {
+        background: linear-gradient(to bottom, rgba(250, 247, 242, 0.4) 0%, rgba(250, 247, 242, 0.97) 40%), url('/images/oba.jpg') no-repeat center center / cover;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .about-visual {
+        min-height: 250px;
+      }
+
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modules-header .section-title {
+        font-size: 2rem;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 14px 5%;
+      }
+
+      .navbar-links {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .navbar-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(16px);
+        padding: 20px 5%;
+        gap: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      }
+
+      .navbar-links.open a {
+        color: var(--slate) !important;
+      }
+
+      .hero h1 {
+        font-size: 2.4rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-actions a {
+        text-align: center;
+        justify-content: center;
+      }
+
+      .floating-card {
+        left: 16px;
+        right: 16px;
+        bottom: -30px;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+      }
+
+      .stats-grid {
+        gap: 16px;
+      }
+
+      .section-title {
+        font-size: 2rem !important;
+      }
+
+      .about,
+      .modules,
+      .why,
+      .cta-section {
+        padding: 80px 5%;
+      }
+
+      .why-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-visual .exp-badge {
+        right: auto;
+      }
+
+      .trust-logos {
+        gap: 24px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <nav class="navbar">
+  <nav class="navbar" id="navbar">
     <a href="/" class="navbar-logo">
-      <img src="/images/psaulogo.png" alt="PSAU Logo">
-      PSAU <span>OBA System</span>
+      <img src="/images/psaulogo.png" alt="PSAU">
+      OBA <span>System</span>
     </a>
-    <div class="navbar-links">
-      <a href="/" class="active">Home</a>
+    <div class="navbar-links" id="navLinks">
+      <a href="/">Home</a>
       <a href="/features">Features</a>
+      <a href="/login" class="nav-cta">Get Started</a>
     </div>
-    <div>
-      <a href="/login" class="btn btn-green">System Login</a>
-    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <header class="hero">
-    <h1>Smart Inventory, Smarter Decisions</h1>
-    <p>A unified, web-based platform for Multi-Business Monitoring, Inventory Management, and Financial Reporting
-      designed specifically for the Office of Business Affairs at Pampanga State Agricultural University.</p>
-    <a href="/features" class="btn btn-outline"
-      style="color:white; border-color:white; padding: 12px 24px; font-size: 1.1rem; margin-top: 20px;">Explore
-      Features</a>
-  </header>
-
-  <section class="section">
-    <div class="grid-2">
-      <div class="about-text">
-        <h2 style="font-size: 2.2rem; margin-bottom: 24px; color: var(--black);">About the Office of Business Affairs
-          (OBA)</h2>
-        <p>The Office of Business Affairs (OBA) at Pampanga State Agricultural University oversees diverse
-          revenue-generating activities across the campus. From agricultural produce to rental properties, OBA is the
-          backbone of the university's commercial and trading operations.</p>
-        <p>To align with the standards of public higher education institutions, the OBA System was developed to
-          centralize and automate sales monitoring, inventory control, and financial operations into one secure,
-          real-time platform.</p>
-      </div>
-      <div>
-        <img src="/images/psaubg.jpg" alt="PSAU Campus"
-          style="width: 100%; border-radius: 12px; box-shadow: var(--shadow-md);">
+    <div class="hero-left">
+      <h1 class="reveal visible stagger-1">
+        Where Every<br>
+        <span class="gradient-text">Business Unit</span><br>
+        Tells Its Story
+      </h1>
+      <p class="reveal visible stagger-2">A unified platform for sales monitoring, inventory control, and financial
+        reporting — built for the Office of Business Affairs at PSAU.</p>
+      <div class="hero-actions reveal visible stagger-3">
+        <a href="/features" class="btn-primary">
+          Explore the Platform
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </a>
+        <a href="/login" class="btn-outline-light">Sign In</a>
       </div>
     </div>
+    <div class="hero-right">
+      <div class="deco-circle deco-circle-1"></div>
+      <div class="deco-circle deco-circle-2"></div>
+    </div>
+  </header>
 
-    <div class="mv-cards">
-      <div class="mv-card">
-        <h3>
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-          </svg>
-          Our Mission
-        </h3>
-        <p>To provide efficient, transparent, and technology-driven management of all revenue-generating projects at
-          Pampanga State Agricultural University, ensuring accurate financial reporting and sustainable business
-          operations that contribute to the university's growth.</p>
+  <section class="trust-bar reveal">
+    <p>Trusted by the entire PSAU Business Ecosystem</p>
+    <div class="trust-logos">
+      <span>Rental Division</span>
+      <span>Business Center</span>
+      <span>Agricultural Unit</span>
+      <span>Non-Agri Services</span>
+      <span>Main Campus Ops</span>
+    </div>
+  </section>
+
+  <section class="about">
+    <div class="about-grid">
+      <div class="about-visual reveal-left">
       </div>
-      <div class="mv-card">
-        <h3>
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <circle cx="12" cy="12" r="4" />
-            <line x1="21.17" y1="8" x2="12" y2="8" />
-            <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
-            <line x1="10.88" y1="21.94" x2="15.46" y2="14" />
-          </svg>
-          Our Vision
-        </h3>
-        <p>To be a premier, self-sustaining business division within the university system, recognized for its automated
-          processes, accountability, and outstanding contribution to the agricultural and commercial sectors of the
-          region.</p>
+      <div class="about-content reveal-right">
+        <div class="section-label">
+          <span class="line"></span> About OBA
+        </div>
+        <h2 class="section-title">The Financial Engine of PSAU</h2>
+        <p>The Office of Business Affairs (OBA) manages all revenue-generating activities across Pampanga State
+          Agricultural University — from agricultural produce and rental properties to commercial businesses and
+          non-agricultural services.</p>
+        <p>Our integrated system centralizes sales, inventory, and financial reporting into one real-time platform,
+          eliminating manual records and ensuring every peso is accounted for.</p>
+        <div class="about-tags">
+          <span>Real-time Tracking</span>
+          <span>COA-Compliant Reports</span>
+          <span>Role-based Access</span>
+          <span>Audit Trail</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="why-oba">
-    <h2 class="section-title">Why the OBA System Matters</h2>
-    <div class="why-oba-grid">
-      <div class="reason-card">
-        <div class="reason-icon">
-          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-          </svg>
-        </div>
-        <h4 style="font-size:1.2rem; margin-bottom:12px">Financial Transparency</h4>
-        <p style="color:var(--gray-600); line-height:1.6">Automated calculation and COA-compliant reporting ensures
-          every peso is tracked, accounted for, and correctly attributed to the right business unit.</p>
+  <section class="modules">
+    <div class="modules-header reveal">
+      <div class="section-label" style="justify-content:center">
+        <span class="line"></span> Core Modules
       </div>
-      <div class="reason-card">
-        <div class="reason-icon">
-          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-            <line x1="8" y1="21" x2="16" y2="21" />
-            <line x1="12" y1="17" x2="12" y2="21" />
+      <h2 class="section-title">Everything You Need to<br>Run Business Operations</h2>
+      <p class="section-sub">From point-of-sale to financial reports, the OBA System covers every aspect of business
+        management.</p>
+    </div>
+    <div class="modules-grid">
+      <div class="module-card reveal-scale stagger-1">
+        <div class="module-number">01</div>
+        <div class="module-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect x="8" y="2" width="8" height="4" rx="1" />
           </svg>
         </div>
-        <h4 style="font-size:1.2rem; margin-bottom:12px">Real-Time Operations</h4>
-        <p style="color:var(--gray-600); line-height:1.6">From stock deductions to sales logging, all operations reflect
-          instantly across the network, ending the era of manual, delayed record-keeping.</p>
+        <h3>Point of Sale</h3>
+        <p>Fast, intuitive POS interface for daily transactions with automatic inventory deduction and receipt
+          generation.</p>
       </div>
-      <div class="reason-card">
-        <div class="reason-icon">
-          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <div class="module-card reveal-scale stagger-2">
+        <div class="module-number">02</div>
+        <div class="module-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
           </svg>
         </div>
-        <h4 style="font-size:1.2rem; margin-bottom:12px">Secure Accountability</h4>
-        <p style="color:var(--gray-600); line-height:1.6">Role-based access controls and a strict audit trail mean the
-          administration always knows who recorded what, and when.</p>
+        <h3>Inventory Control</h3>
+        <p>Real-time stock tracking with low-stock alerts, expiry monitoring, and multi-business inventory management.
+        </p>
+      </div>
+      <div class="module-card reveal-scale stagger-3">
+        <div class="module-number">03</div>
+        <div class="module-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+        </div>
+        <h3>Sales Analytics</h3>
+        <p>Interactive dashboards with revenue trends, category breakdowns, and export-ready reports for stakeholders.
+        </p>
+      </div>
+      <div class="module-card reveal-scale stagger-4">
+        <div class="module-number">04</div>
+        <div class="module-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+          </svg>
+        </div>
+        <h3>Financial Reports</h3>
+        <p>COA-compliant financial statements, expense tracking, and automated audit logs for full transparency.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="why">
+    <div class="why-header reveal">
+      <div class="section-label">
+        <span class="line"></span> Why OBA System
+      </div>
+      <h2 class="section-title">Built for Accountability,<br>Designed for Efficiency</h2>
+    </div>
+    <div class="why-list">
+      <div class="why-item reveal-left stagger-1">
+        <div class="why-num">01</div>
+        <div>
+          <h4>End Manual Record-Keeping</h4>
+          <p>Automate sales logging, inventory tracking, and report generation — no more spreadsheets or paper trails.
+          </p>
+        </div>
+      </div>
+      <div class="why-item reveal-left stagger-2">
+        <div class="why-num">02</div>
+        <div>
+          <h4>Real-Time Visibility</h4>
+          <p>Every transaction reflects instantly across the network. Management gets a live view of all business units.
+          </p>
+        </div>
+      </div>
+      <div class="why-item reveal-left stagger-3">
+        <div class="why-num">03</div>
+        <div>
+          <h4>Role-Based Security</h4>
+          <p>Granular access controls ensure the right people see the right data. Full audit trail for every action
+            taken.</p>
+        </div>
+      </div>
+      <div class="why-item reveal-left stagger-4">
+        <div class="why-num">04</div>
+        <div>
+          <h4>COA-Compliant Reporting</h4>
+          <p>Financial reports follow Commission on Audit standards, making submissions and reviews seamless.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="reveal">
+      <div class="section-label" style="justify-content:center">
+        <span class="line" style="background:var(--gold)"></span> Get Started
+      </div>
+      <h2 class="section-title">Ready to Transform<br>Business Operations?</h2>
+      <p class="section-sub">Join the PSAU business ecosystem in the journey toward automated, transparent, and
+        accountable operations.</p>
+      <div class="cta-actions">
+        <a href="/login" class="btn-primary">
+          Access the System
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </a>
+        <a href="/features" class="btn-outline-light">View All Features</a>
       </div>
     </div>
   </section>
 
   <footer>
-    <p>© 2026 OBA System · Pampanga State Agricultural University</p>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="navbar-logo">
+          <img src="/images/psaulogo.png" alt="PSAU">
+          OBA <span>System</span>
+        </a>
+        <p>Office of Business Affairs · Pampanga State Agricultural University<br>Integrated Sales, Inventory &
+          Financial Reporting System</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="/features">Features</a>
+        <a href="/login">Login</a>
+      </div>
+      <div class="footer-col">
+        <h5>Categories</h5>
+        <a href="#">Rental</a>
+        <a href="#">Business</a>
+        <a href="#">Agriculture</a>
+        <a href="#">Non-Agriculture</a>
+        <a href="#">Main</a>
+      </div>
+      <div class="footer-col">
+        <h5>PSAU</h5>
+        <a href="https://psau.edu.ph" target="_blank">University Website</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 OBA System &mdash; Pampanga State Agricultural University. All rights reserved.</p>
+    </div>
   </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // ── Navbar scroll effect ──
+      const navbar = document.getElementById('navbar');
+      let scrolled = false;
+      window.addEventListener('scroll', () => {
+        const isScrolled = window.scrollY > 40;
+        if (isScrolled !== scrolled) {
+          scrolled = isScrolled;
+          navbar.classList.toggle('scrolled', isScrolled);
+        }
+      });
+
+      // ── Mobile hamburger ──
+      const hamburger = document.getElementById('hamburger');
+      const navLinks = document.getElementById('navLinks');
+      if (hamburger) {
+        hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+      }
+
+      // ── Scroll reveal ──
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+        if (!el.classList.contains('visible')) observer.observe(el);
+      });
+
+      // ── Counter animation ──
+      const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const el = entry.target;
+            const target = parseInt(el.dataset.target);
+            if (isNaN(target)) return;
+            let current = 0;
+            const increment = Math.max(1, Math.floor(target / 60));
+            const timer = setInterval(() => {
+              current += increment;
+              if (current >= target) {
+                current = target;
+                clearInterval(timer);
+              }
+              const hasSpan = el.querySelector('span');
+              if (hasSpan) {
+                el.innerHTML = current.toLocaleString() + ' <span style="font-size:1.2rem">%</span>';
+              } else {
+                el.textContent = current.toLocaleString();
+              }
+            }, 25);
+            counterObserver.unobserve(el);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      document.querySelectorAll('.stat-value[data-target]').forEach(el => counterObserver.observe(el));
+    });
+  </script>
 </body>
 
 </html>

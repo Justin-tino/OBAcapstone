@@ -8,33 +8,119 @@
   <link rel="stylesheet" href="/css/print.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    .welcome-card { background: var(--white); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 20px; border: 1px solid var(--gray-200); }
-    .welcome-card h2 { font-size: 1.4rem; margin-bottom: 4px; }
-    .welcome-card p { font-size: 0.9rem; color: var(--gray-600); margin: 0; }
-    .kpi-card .kpi-icon-box { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; position: absolute; top: 18px; right: 18px; }
-    .kpi-card .kpi-sub { font-size: 0.75rem; color: var(--gray-400); margin-top: 2px; }
+    .welcome-card {
+      background: linear-gradient(135deg, #163618 0%, #0c1f0d 100%);
+      color: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      margin-bottom: 24px;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(22, 54, 24, 0.2);
+    }
+    .welcome-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 197, 24, 0.15) 0%, rgba(245, 197, 24, 0) 70%);
+      pointer-events: none;
+    }
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      right: 10%;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0) 70%);
+      pointer-events: none;
+    }
+    .welcome-card h2 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #fff;
+      letter-spacing: -0.025em;
+    }
+    .welcome-card p {
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.85);
+      margin: 0;
+    }
+    .kpi-card .kpi-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      transition: var(--transition);
+    }
+    .kpi-card:hover .kpi-icon-box {
+      transform: scale(1.1);
+    }
+    .kpi-card .kpi-sub { font-size: 0.78rem; color: var(--gray-400); margin-top: 4px; }
     .kpi-card.yellow .kpi-icon-box { background: var(--yellow-light); color: var(--yellow-dark); }
     .kpi-card.green .kpi-icon-box { background: var(--green-light); color: var(--green); }
     .kpi-card.danger .kpi-icon-box { background: var(--danger-light); color: var(--danger); }
     .kpi-card.black .kpi-icon-box { background: var(--gray-100); color: var(--black); }
-    .chart-section { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
-    .low-stock-list { max-height: 300px; overflow-y: auto; }
-    .low-stock-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-200); }
+    .chart-section { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .low-stock-list { max-height: 300px; overflow-y: auto; padding-right: 4px; }
+    .low-stock-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
     .low-stock-item:last-child { border-bottom: none; }
-    .low-stock-name { font-size: 0.88rem; font-weight: 600; }
-    .low-stock-badge { padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
-    .low-stock-badge.low { background: #FFF3CD; color: #856404; }
-    .low-stock-badge.critical { background: #FFCCCC; color: #CC0000; }
+    .low-stock-name { font-size: 0.9rem; font-weight: 600; color: var(--black); }
+    .low-stock-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .low-stock-badge.low { background: var(--yellow-light); color: var(--yellow-dark); }
+    .low-stock-badge.critical { background: #fee2e2; color: #ef4444; }
     .low-stock-badge.out { background: var(--danger-light); color: var(--danger); }
-    .top-product-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--gray-200); }
+    .top-product-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
     .top-product-item:last-child { border-bottom: none; }
-    .top-product-rank { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 800; }
-    .top-product-rank.gold { background: #FFD700; color: #000; }
-    .top-product-rank.silver { background: #C0C0C0; color: #000; }
-    .top-product-rank.bronze { background: #CD7F32; color: #fff; }
-    .top-product-rank.default { background: var(--gray-200); color: var(--gray-600); }
-    .bottom-section { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
-    .biz-compare-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-200); }
+    .top-product-rank {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .top-product-rank.gold { background: #fef08a; color: #a16207; }
+    .top-product-rank.silver { background: #e2e8f0; color: #475569; }
+    .top-product-rank.bronze { background: #ffedd5; color: #c2410c; }
+    .top-product-rank.default { background: var(--gray-100); color: var(--gray-500); }
+    .bottom-section { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; }
+    .biz-compare-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
     .biz-compare-item:last-child { border-bottom: none; }
     .biz-compare-bar { height: 8px; border-radius: 4px; flex: 1; background: var(--gray-100); overflow: hidden; }
     .biz-compare-bar .fill { height: 100%; border-radius: 4px; }
@@ -97,13 +183,13 @@
       </div>
 
       <!-- Date Range Filter -->
-      <div class="filters-bar" style="margin-bottom:20px">
+      <div class="filters-bar">
         <div class="filter-item"><div class="filter-label">Date From</div><input type="date" id="fDateFrom" class="filter-control"></div>
         <div class="filter-item"><div class="filter-label">Date To</div><input type="date" id="fDateTo" class="filter-control"></div>
         <div class="filter-item"><div class="filter-label">Business Unit</div>
           <select id="fBizUnit" class="filter-control"><option value="">All Categories</option><option value="RENTAL">Rental</option><option value="BUSINESS">Business</option><option value="AGRI">Agriculture</option><option value="NON_AGRI">Non-Agriculture</option><option value="MAIN">Main</option></select>
         </div>
-        <button class="btn btn-primary btn-sm" style="margin-top:18px" onclick="loadKPI()">Apply Filter</button>
+        <button class="btn btn-primary btn-sm" style="height: 42px;" onclick="loadKPI()">Apply Filter</button>
       </div>
 
       <!-- KPI Cards -->

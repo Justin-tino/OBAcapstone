@@ -163,17 +163,30 @@ router.post('/users', requireSuperAdmin, async (req, res) => {
   }
 });
 
-// PUT /api/admin/users/:uid — update role/status
+// PUT /api/admin/users/:uid — update role/status/password
 router.put('/users/:uid', requireSuperAdmin, async (req, res) => {
   const { uid } = req.params;
-  const updates = req.body;
+  const { password, ...dbUpdates } = req.body;
+
   try {
+    // If a new password is provided, update it in Firebase Auth first
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+      }
+      if (auth) {
+        await auth.updateUser(uid, { password });
+      }
+    }
+
     if (!db) {
       const u = mockUsers.find(u => u.uid === uid);
-      if (u) Object.assign(u, updates);
+      if (u) Object.assign(u, dbUpdates);
       return res.json({ success: true });
     }
-    await db.ref(`users/${uid}`).update(updates);
+
+    // Do NOT store the plain-text password in the database
+    await db.ref(`users/${uid}`).update(dbUpdates);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

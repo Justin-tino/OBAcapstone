@@ -10,11 +10,10 @@
     body { background: var(--black); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 0; margin: 0; }
     .auth-wrap { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; width: 100%; background: var(--white); overflow: hidden; }
     .auth-left {
-      background: linear-gradient(165deg, #2d6a2e 0%, #3a8c3b 30%, #4a9e4b 60%, #3a8c3b 100%);
+      background: linear-gradient(165deg, rgba(15, 46, 20, 0.96) 0%, rgba(15, 46, 20, 0.8) 50%, rgba(15, 46, 20, 0.4) 100%), url('/images/psaubg.jpg') no-repeat center center / cover;
       padding: 48px 40px; display: flex; flex-direction: column; justify-content: space-between; color: var(--white);
       position: relative; overflow: hidden;
     }
-    .auth-left::before { content: ''; position: absolute; inset: 0; background: url('/images/psaubg.jpg') center/cover no-repeat; opacity: 0.15; }
     .auth-left > * { position: relative; z-index: 2; }
     .auth-left-top { display: flex; align-items: center; gap: 12px; }
     .auth-left-top img { width: 44px; height: 44px; object-fit: contain; filter: brightness(1.1); }
@@ -345,7 +344,55 @@
     window.selectedRole = null;
     window.selectedCategory = null;
 
+    function clearAuthFields() {
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      if (email) email.value = '';
+      if (password) password.value = '';
+
+      const errMsg = document.getElementById('errMsg');
+      if (errMsg) {
+        errMsg.textContent = '';
+        errMsg.style.display = 'none';
+      }
+
+      const s_name = document.getElementById('s_name');
+      const s_email = document.getElementById('s_email');
+      const s_password = document.getElementById('s_password');
+      const s_confirm = document.getElementById('s_confirm');
+      const s_position = document.getElementById('s_position');
+      const s_otp = document.getElementById('s_otp');
+
+      if (s_name) s_name.value = '';
+      if (s_email) s_email.value = '';
+      if (s_password) s_password.value = '';
+      if (s_confirm) s_confirm.value = '';
+      if (s_position) s_position.value = '';
+      if (s_otp) s_otp.value = '';
+
+      const signupErr = document.getElementById('signupErr');
+      const signupSuccess = document.getElementById('signupSuccess');
+      if (signupErr) {
+        signupErr.textContent = '';
+        signupErr.style.display = 'none';
+      }
+      if (signupSuccess) {
+        signupSuccess.textContent = '';
+        signupSuccess.style.display = 'none';
+      }
+
+      const step1 = document.getElementById('signupStep1');
+      const step2 = document.getElementById('signupStep2');
+      if (step1) step1.style.display = 'block';
+      if (step2) step2.style.display = 'none';
+
+      if (typeof otpInterval !== 'undefined' && otpInterval) {
+        clearInterval(otpInterval);
+      }
+    }
+
     window.selectRole = function(role) {
+      clearAuthFields();
       window.selectedRole = role;
       sessionStorage.setItem('selectedRole', role);
       sessionStorage.removeItem('selectedCategory');
@@ -359,6 +406,7 @@
     };
 
     window.selectCategory = function(category) {
+      clearAuthFields();
       window.selectedCategory = category;
       sessionStorage.setItem('selectedCategory', category);
       document.getElementById('categorySelectionCard').style.display = 'none';
@@ -366,11 +414,13 @@
     };
 
     window.backToRoles = function() {
+      clearAuthFields();
       document.getElementById('categorySelectionCard').style.display = 'none';
       document.getElementById('roleSelectionCard').style.display = 'block';
     };
 
     window.backFromAuthForm = function() {
+      clearAuthFields();
       document.getElementById('authFormCard').style.display = 'none';
       if (window.selectedRole === 'employee' || window.selectedRole === 'manager') {
         document.getElementById('categorySelectionCard').style.display = 'block';

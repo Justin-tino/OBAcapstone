@@ -466,8 +466,27 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ── Session check (prevents access to cached pages after logout) ──
+async function checkAuth() {
+  const publicPaths = ['/login', '/forgot-password', '/reset-password', '/request-access', '/', '/features'];
+  const path = window.location.pathname;
+  if (publicPaths.some(p => path === p || path.startsWith(p + '?'))) return;
+  try {
+    const res = await API.get('/api/me');
+    if (!res.authenticated) {
+      window.location.href = '/login';
+    }
+  } catch {
+    window.location.href = '/login';
+  }
+}
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) checkAuth();
+});
+
 // ── Init on load ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  checkAuth();
   initSidebar();
   setActiveNav();
   applyViewerRestrictions();

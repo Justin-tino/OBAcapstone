@@ -6,29 +6,104 @@
   <title>Settings — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <style>
-    .sidebar-logo-area { display: flex; flex-direction: column; align-items: center; padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .sidebar-logo-area .org-name { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; line-height: 1.4; }
-    .sidebar-nav .nav-item.active { background: linear-gradient(90deg, #3a8c3b, #2d6a2e); color: var(--white); border-left-color: var(--white); }
-    .topbar-green { background: linear-gradient(90deg, #2d6a2e, #3a8c3b); color: var(--white); }
-    .topbar-green .topbar-title { color: var(--white); }
-    .profile-btn { background: rgba(255,255,255,0.15); border: none; color: var(--white); padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: var(--font-main); }
-    .suspicious-row { background: #FFF5F5 !important; }
-    .suspicious-row td:first-child { border-left: 3px solid var(--danger); }
-    .activity-card { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); margin-bottom: 8px; background: var(--white); }
-    .activity-card:hover { box-shadow: var(--shadow-sm); }
-    .alert-log-item { padding: 12px 16px; border-bottom: 1px solid var(--gray-200); display: flex; gap: 12px; align-items: flex-start; }
+    .suspicious-row { background: var(--danger-light) !important; }
+    .suspicious-row td:first-child { border-left: 4px solid var(--danger); }
+    .activity-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .activity-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+    .alert-log-item {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
     .alert-log-item:last-child { border-bottom: none; }
-    .alert-icon-sm { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; }
-    .backup-card { max-width: 600px; margin: 0 auto; }
-    .backup-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .backup-stat { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 20px; text-align: center; }
-    .backup-stat .val { font-size: 1.5rem; font-weight: 800; }
-    .backup-stat .lbl { font-size: 0.78rem; color: var(--gray-600); margin-top: 4px; }
-    .alert-restore { background: var(--danger-light); border: 1px solid var(--danger); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; font-size: 0.85rem; color: var(--danger); }
-    .settings-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid var(--gray-200); }
-    .settings-tab { padding: 12px 24px; cursor: pointer; font-size: 0.88rem; font-weight: 600; color: var(--gray-500); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-    .settings-tab:hover { color: var(--gray-700); }
-    .settings-tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .alert-icon-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .backup-card { max-width: 640px; margin: 0 auto; }
+    .backup-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+    .backup-stat {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .backup-stat:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .backup-stat .val { font-size: 1.6rem; font-weight: 800; }
+    .backup-stat .lbl { font-size: 0.75rem; color: var(--gray-500); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .alert-restore {
+      background: var(--danger-light);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      margin-bottom: 20px;
+      font-size: 0.88rem;
+      color: #991b1b;
+      line-height: 1.5;
+    }
+    .settings-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      padding: 6px;
+      background: var(--gray-100);
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+    }
+    .settings-tab {
+      flex: 1;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--gray-600);
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      user-select: none;
+    }
+    .settings-tab:hover {
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--black);
+    }
+    .settings-tab.active {
+      background: var(--white);
+      color: var(--green);
+      box-shadow: var(--shadow-sm);
+    }
   </style>
 </head>
 <body>

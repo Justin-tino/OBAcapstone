@@ -72,4 +72,11 @@ function attachUser(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireSuperAdmin, requireManager, requireEmployee, requireViewer, requireBusinessAccess, attachUser };
+function noCache(req, res, next) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+}
+
+module.exports = { requireAuth, requireSuperAdmin, requireManager, requireEmployee, requireViewer, requireBusinessAccess, attachUser, noCache };

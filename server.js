@@ -5,7 +5,7 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 
-const { attachUser } = require('./middleware/auth.middleware');
+const { attachUser, noCache } = require('./middleware/auth.middleware');
 
 // Route imports
 const authRoutes = require('./routes/auth');
@@ -71,6 +71,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Attach user to all responses ──────────────────────────────────────────────
 app.use(attachUser);
+
+// ─── Prevent browser caching on all protected pages ───────────────────────────
+app.use(['/admin', '/manager', '/employee', '/viewer', '/business-select'], noCache);
 
 // ─── Public Page Routes ────────────────────────────────────────────────────────
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views/public/index.html')));

@@ -6,24 +6,37 @@
   <title>Inventory — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <style>
-    .sidebar-logo-area { display: flex; flex-direction: column; align-items: center; padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .sidebar-logo-area .org-name { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; line-height: 1.4; }
-    .sidebar-nav .nav-item.active { background: linear-gradient(90deg, #3a8c3b, #2d6a2e); color: var(--white); border-left-color: var(--white); }
-    .topbar-green { background: linear-gradient(90deg, #2d6a2e, #3a8c3b); color: var(--white); }
-    .topbar-green .topbar-title { color: var(--white); }
-    .profile-btn { background: rgba(255,255,255,0.15); border: none; color: var(--white); padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: var(--font-main); }
-    .inv-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .inv-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
     .inv-toolbar .search-box { flex: 1; max-width: 320px; }
-    .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .stock-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
     .stock-badge.in-stock { background: var(--green-light); color: var(--green); }
     .stock-badge.low-stock { background: var(--yellow-light); color: var(--yellow-dark); }
     .stock-badge.out { background: var(--danger-light); color: var(--danger); }
-    .biz-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; color: #fff; }
-    .biz-tag.RENTAL { background: #6B3FA0; }
-    .biz-tag.BUSINESS { background: #2d6a2e; }
-    .biz-tag.AGRI { background: #D4A915; color: #1A1A1A; }
-    .biz-tag.NON_AGRI { background: #1A1A1A; }
-    .biz-tag.MAIN { background: #0D6EFD; }
+    .biz-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .biz-tag.RENTAL { background: rgba(107, 63, 160, 0.15); color: #6b3fa0; border: 1px solid rgba(107, 63, 160, 0.3); }
+    .biz-tag.BUSINESS { background: var(--green-light); color: var(--green); border: 1px solid rgba(46,125,50, 0.3); }
+    .biz-tag.AGRI { background: var(--yellow-light); color: var(--yellow-dark); border: 1px solid rgba(245, 197, 24, 0.3); }
+    .biz-tag.NON_AGRI { background: var(--gray-100); color: var(--black-soft); border: 1px solid var(--gray-300); }
+    .biz-tag.MAIN { background: var(--info-light); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.3); }
     .kpi-grid { grid-template-columns: repeat(5, 1fr); }
     @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
     .is-viewer .btn-add-product { display: none !important; }
