@@ -1,13 +1,52 @@
 /**
  * routes/auth.js
  * Authentication routes: login, logout, signup with OTP, session management
- * Fully integrated with Firebase Auth + Firestore
+ * Integrated with Firebase Auth + Firestore
  */
 const express = require('express');
 const router = express.Router();
-const { auth, db } = require('../config/firebase');
+const { firestore, auth } = require('../config/firebase');
+const FDB = require('../config/db');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+const { sanitizeString, isValidEmail } = require('../middleware/auth.middleware');
+
+// Canonical role requested during signup based on position text.
+function mapPositionToRole(position, requestedRole) {
+  const allowed = ['accounting_officer', 'sales_staff'];
+  if (requestedRole && allowed.includes(requestedRole)) return requestedRole;
+  const p = (position || '').toLowerCase();
+  if (p.includes('account')) return 'accounting_officer';
+  if (p.includes('budget')) return 'accounting_officer';
+  if (p.includes('sale') || p.includes('cashier') || p.includes('staff')) return 'sales_staff';
+  return 'sales_staff';
+}
+
+// Rate limiters to prevent brute-force attacks
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many OTP requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Too many reset requests. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -44,21 +83,20 @@ router.get('/reset-password', (req, res) => {
 });
 
 // POST /login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password, idToken, selectedRole, selectedCategory } = req.body;
 
   try {
     // ─── Firebase mode (Admin SDK available) ───
-    if (auth && db && idToken) {
+    if (auth && firestore && idToken) {
       const decoded = await auth.verifyIdToken(idToken);
       const uid = decoded.uid;
 
-      // Fetch user profile from Realtime DB 'users' node
-      const userSnap = await db.ref(`users/${uid}`).once('value');
-      if (!userSnap.exists()) {
+      // Fetch user profile from Firestore 'users' collection
+      const userData = await FDB.getById('users', uid);
+      if (!userData) {
         return res.json({ success: false, message: 'Account not found in system. Please contact the admin or request access.' });
       }
-      const userData = userSnap.val();
       if (userData.status === 'pending') {
         return res.json({ success: false, message: 'Account requested, wait for admin approval.' });
       }
@@ -75,14 +113,40 @@ router.post('/login', async (req, res) => {
       // ─── Strict role enforcement ───
       if (selectedRole) {
         const roleMap = {
-          'admin': ['super_admin', 'admin'],
-          'manager': ['manager'],
-          'employee': ['employee'],
-          'viewer': ['viewer']
+          'admin': ['super_admin', 'admin', 'system_administrator'],
+          'system_administrator': ['super_admin', 'admin', 'system_administrator'],
+          'manager': ['manager', 'accounting_officer', 'business_manager'],
+          'accounting_officer': ['manager', 'accounting_officer', 'business_manager'],
+          // Legacy budget roles (if still present in DB) log in via the Sale staff path
+          'viewer': ['viewer', 'sales_staff', 'sale_staff', 'employee', 'budgeting_officer', 'budget_officer'],
+          'sales_staff': ['viewer', 'sales_staff', 'sale_staff', 'employee', 'budgeting_officer', 'budget_officer'],
+          'sale_staff': ['viewer', 'sales_staff', 'sale_staff', 'employee', 'budgeting_officer', 'budget_officer']
         };
-        const allowedRoles = roleMap[selectedRole] || [];
+        const allowedRoles = roleMap[selectedRole] || [selectedRole];
         if (!allowedRoles.includes(normalizedRole)) {
           return res.json({ success: false, message: `Your account is registered as "${normalizedRole}". Please go back and select the correct role.` });
+        }
+      }
+
+      // ─── Strict category enforcement ───
+      // Agriculture / Non-Agriculture / Main are labels only. A user may hold
+      // multiple businesses but only within ONE category. If they picked a
+      // category at login that none of their businesses belong to, block here.
+      if (selectedCategory) {
+        const access = userData.businesses || ['all'];
+        const isAll = access.includes('all') || ['super_admin', 'admin', 'system_administrator'].includes(normalizedRole);
+        if (!isAll) {
+          const covers = (cat) => access.some(a => {
+            if (a === cat) return true;
+            const s = String(a);
+            if (cat === 'NON_AGRI') return s.startsWith('NON_AGRI');
+            if (cat === 'AGRI') return s.startsWith('AGRI-') || s === 'AGRI';
+            if (cat === 'MAIN') return s.startsWith('MAIN-') || s === 'MAIN';
+            return false;
+          });
+          if (!covers(selectedCategory)) {
+            return res.json({ success: false, message: 'This account is not under this category.' });
+          }
         }
       }
 
@@ -101,57 +165,9 @@ router.post('/login', async (req, res) => {
       return res.json({ success: true, role: normalizedRole, redirect: getRoleRedirect(normalizedRole, userData.businesses, selectedCategory) });
     }
 
-    // ─── Firebase mode WITHOUT Admin SDK (decode JWT manually) ───
+    // ─── If Firebase Admin SDK is unavailable, login must fail safely ───
     if (!auth && idToken) {
-      try {
-        const payload = idToken.split('.')[1];
-        const decoded = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
-
-        // Try to look up user in Firestore if db is available
-        if (db) {
-          const userSnap = await db.ref(`users/${decoded.user_id}`).once('value');
-          if (userSnap.exists()) {
-            const userData = userSnap.val();
-            
-            if (userData.status === 'pending') return res.json({ success: false, message: 'Account requested, wait for admin approval.' });
-            if (userData.status === 'suspended') return res.json({ success: false, message: 'Your account has been suspended.' });
-            if (userData.status === 'inactive') return res.json({ success: false, message: 'Your account is inactive.' });
-
-            const normRole = userData.role === 'admin' ? 'super_admin' : (userData.role || 'viewer');
-
-            // ─── Strict role enforcement ───
-            if (selectedRole) {
-              const roleMap = { 'admin': ['super_admin', 'admin'], 'manager': ['manager'], 'employee': ['employee'], 'viewer': ['viewer'] };
-              const allowedRoles = roleMap[selectedRole] || [];
-              if (!allowedRoles.includes(normRole)) {
-                return res.json({ success: false, message: `Your account is registered as "${normRole}". Please go back and select the correct role.` });
-              }
-            }
-
-            req.session.user = {
-              uid: decoded.user_id,
-              email: decoded.email,
-              role: normRole,
-              name: userData.name || decoded.email,
-              businessAccess: userData.businesses || ['all'],
-              selectedCategory: selectedCategory || null,
-            };
-            return res.json({ success: true, role: normRole, redirect: getRoleRedirect(normRole, userData.businesses, selectedCategory) });
-          }
-        }
-
-        // Fallback: create session with basic info
-        req.session.user = {
-          uid: decoded.user_id,
-          email: decoded.email,
-          role: 'admin',
-          name: decoded.email,
-          businessAccess: 'all'
-        };
-        return res.json({ success: true, role: 'admin', redirect: '/admin/dashboard' });
-      } catch (e) {
-        return res.json({ success: false, message: 'Invalid authentication token.' });
-      }
+      return res.json({ success: false, message: 'Authentication service is currently unavailable. Please try again later.' });
     }
 
     // ─── Demo mode (no Firebase) ───
@@ -180,7 +196,7 @@ router.post('/login', async (req, res) => {
 // POST /logout
 router.post('/logout', (req, res) => {
   const user = req.session?.user;
-  if (user && db) {
+  if (user && firestore) {
     logAudit(user.uid, user.email, user.name, 'LOGOUT', 'auth', 'User logged out');
   }
   req.session.destroy(() => { res.redirect('/login'); });
@@ -189,7 +205,7 @@ router.post('/logout', (req, res) => {
 // GET /logout
 router.get('/logout', (req, res) => {
   const user = req.session?.user;
-  if (user && db) {
+  if (user && firestore) {
     logAudit(user.uid, user.email, user.name, 'LOGOUT', 'auth', 'User logged out');
   }
   req.session.destroy(() => { res.redirect('/login'); });
@@ -203,12 +219,15 @@ router.get('/request-access', (req, res) => {
 // ═══════════════════════════════════════════════════════════════════
 // SIGNUP FLOW: Step 1 — Send OTP to email for verification
 // ═══════════════════════════════════════════════════════════════════
-router.post('/api/signup/send-otp', async (req, res) => {
-  const { email, name } = req.body;
+router.post('/api/signup/send-otp', otpLimiter, async (req, res) => {
+  const { email: rawEmail, name: rawName } = req.body;
+  const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
+  const name = sanitizeString(rawName);
   if (!email || !name) return res.json({ success: false, message: 'Name and email are required.' });
+  if (!isValidEmail(email)) return res.json({ success: false, message: 'Please enter a valid email address.' });
 
   try {
-    if (!db) return res.json({ success: false, message: 'Database not configured.' });
+    if (!firestore) return res.json({ success: false, message: 'Database not configured.' });
 
     // Check if email already exists in Firebase Auth
     if (auth) {
@@ -226,7 +245,7 @@ router.post('/api/signup/send-otp', async (req, res) => {
 
     // Store OTP temporarily keyed by email
     const emailKey = email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
-    await db.ref(`signupOtps/${emailKey}`).set({ otp, expiresAt, name, email });
+    await FDB.setDoc('signupOtps', emailKey, { otp, expiresAt, name, email });
 
     // Send OTP email
     const mailOptions = {
@@ -260,32 +279,47 @@ router.post('/api/signup/send-otp', async (req, res) => {
 // SIGNUP FLOW: Step 2 — Verify OTP & Create Account (pending approval)
 // ═══════════════════════════════════════════════════════════════════
 router.post('/api/signup/verify-and-register', async (req, res) => {
-  const { email, name, password, otp, position, businessUnit } = req.body;
+  const { email: rawEmail, name: rawName, password, otp, position: rawPosition, businessUnit: rawBiz, requestedRole: rawRequested } = req.body;
+  const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
+  const name = sanitizeString(rawName);
+  const position = sanitizeString(rawPosition || '');
+  const businessUnit = sanitizeString(rawBiz || '');
+  const requestedRole = mapPositionToRole(position, rawRequested);
   if (!email || !name || !password || !otp) {
     return res.json({ success: false, message: 'All fields are required.' });
+  }
+  if (!isValidEmail(email)) {
+    return res.json({ success: false, message: 'Please enter a valid email address.' });
   }
   if (password.length < 6) {
     return res.json({ success: false, message: 'Password must be at least 6 characters.' });
   }
 
   try {
-    if (!db) return res.json({ success: false, message: 'Database not configured.' });
+    if (!firestore) return res.json({ success: false, message: 'Database not configured.' });
 
     // Verify OTP
     const emailKey = email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
-    const otpSnap = await db.ref(`signupOtps/${emailKey}`).once('value');
+    const otpData = await FDB.getById('signupOtps', emailKey);
 
-    if (!otpSnap.exists()) {
+    if (!otpData) {
       return res.json({ success: false, message: 'No OTP found. Please request a new one.' });
     }
 
-    const otpData = otpSnap.val();
     if (Date.now() > otpData.expiresAt) {
-      await db.ref(`signupOtps/${emailKey}`).remove();
+      await FDB.deleteDoc('signupOtps', emailKey);
       return res.json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
 
+    // Track OTP verification attempts to prevent brute-force
+    const attempts = (otpData.attempts || 0) + 1;
+    if (attempts >= 5) {
+      await FDB.deleteDoc('signupOtps', emailKey);
+      return res.json({ success: false, message: 'Too many failed attempts. Please request a new OTP.' });
+    }
+
     if (otpData.otp !== otp) {
+      await FDB.updateDoc('signupOtps', emailKey, { attempts });
       return res.json({ success: false, message: 'Invalid OTP. Please try again.' });
     }
 
@@ -308,37 +342,38 @@ router.post('/api/signup/verify-and-register', async (req, res) => {
       userRecord = { uid: 'user-' + Date.now() };
     }
 
-    // Save access request
-    await db.ref('accessRequests').push({
+    // Save access request (Accounting / Budgeting / Sales staff request approval)
+    await FDB.addDoc('accessRequests', {
       uid: userRecord.uid,
       name,
       email,
       position: position || '',
-      businessUnit: businessUnit || '',
+      businessUnit: businessUnit || 'AGRI',
+      requestedRole,
       status: 'pending',
       date: new Date().toLocaleDateString('en-PH'),
       createdAt: new Date().toISOString(),
     });
 
-    // Create user doc as pending
-    await db.ref(`users/${userRecord.uid}`).set({
+    // Create user doc as pending with the requested role
+    await FDB.setDoc('users', userRecord.uid, {
       name,
       email,
-      role: 'employee',
-      businesses: [businessUnit || 'RENTAL'],
+      role: requestedRole,
+      businesses: [businessUnit || 'AGRI'],
       status: 'pending',
       createdAt: new Date().toISOString(),
     });
 
     // Clean up OTP
-    await db.ref(`signupOtps/${emailKey}`).remove();
+    await FDB.deleteDoc('signupOtps', emailKey);
 
     await logAudit(userRecord.uid, email, name, 'SIGNUP', 'auth', `New account created by ${name} (${email}) — pending admin approval`);
 
     return res.json({ success: true, message: 'Account created successfully! Please wait for admin approval before you can login.' });
   } catch (err) {
     console.error('Signup error:', err);
-    res.json({ success: false, message: 'Failed to create account. ' + err.message });
+    res.json({ success: false, message: 'Failed to create account. Please try again.' });
   }
 });
 
@@ -348,12 +383,12 @@ router.post('/request-access', async (req, res) => {
 });
 
 // POST /api/forgot-password/send-link — Generates a magic reset link and sends email
-router.post('/api/forgot-password/send-link', async (req, res) => {
+router.post('/api/forgot-password/send-link', resetLimiter, async (req, res) => {
   const { email } = req.body;
   if (!email) return res.json({ success: false, message: 'Email is required.' });
 
   try {
-    if (!auth || !db) {
+    if (!auth || !firestore) {
       return res.json({ success: false, message: 'Database not initialized.' });
     }
 
@@ -367,7 +402,7 @@ router.post('/api/forgot-password/send-link', async (req, res) => {
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes from now
 
-    await db.ref(`passwordResets/${token}`).set({
+    await FDB.setDoc('passwordResets', token, {
       email,
       expiresAt
     });
@@ -414,20 +449,19 @@ router.post('/api/forgot-password/reset', async (req, res) => {
   }
 
   try {
-    const snap = await db.ref(`passwordResets/${token}`).once('value');
-    if (!snap.exists()) {
+    const resetData = await FDB.getById('passwordResets', token);
+    if (!resetData) {
       return res.json({ success: false, message: 'Invalid or expired reset link.' });
     }
 
-    const resetData = snap.val();
     if (Date.now() > resetData.expiresAt) {
-      await db.ref(`passwordResets/${token}`).remove();
+      await FDB.deleteDoc('passwordResets', token);
       return res.json({ success: false, message: 'This password reset link has expired (10 minutes limit).' });
     }
 
     const userRecord = await auth.getUserByEmail(resetData.email);
     await auth.updateUser(userRecord.uid, { password: newPassword });
-    await db.ref(`passwordResets/${token}`).remove();
+    await FDB.deleteDoc('passwordResets', token);
     await logAudit(userRecord.uid, resetData.email, userRecord.displayName || resetData.email, 'PASSWORD_RESET_LINK', 'auth', 'Password reset successfully via email link');
 
     return res.json({ success: true, message: 'Your password has been successfully updated.' });
@@ -446,18 +480,42 @@ router.get('/api/me', (req, res) => {
 });
 
 // ─── Helpers ───
+function accessToCategory(entry) {
+  if (!entry || entry === 'all') return null;
+  // Entity ids are CATEGORY-slug-xxx → category is prefix before first '-'
+  // Legacy access entries are pure categories (AGRI/NON_AGRI/MAIN)
+  if (entry === 'AGRI' || entry === 'NON_AGRI' || entry === 'MAIN') return entry;
+  const prefix = String(entry).split('-')[0];
+  if (prefix === 'AGRI' || prefix === 'NON_AGRI' || prefix === 'MAIN') return prefix;
+  // NON_AGRI contains underscore so split('-') keeps it intact — handle explicitly
+  if (String(entry).startsWith('NON_AGRI')) return 'NON_AGRI';
+  if (String(entry).startsWith('AGRI')) return 'AGRI';
+  if (String(entry).startsWith('MAIN')) return 'MAIN';
+  return entry;
+}
 function getRoleRedirect(role, businessAccess, selectedCategory) {
+  const raw = selectedCategory || (Array.isArray(businessAccess) && businessAccess.length > 0 && businessAccess[0] !== 'all' ? businessAccess[0] : null);
+  const cat = accessToCategory(raw);
+  const entityQs = raw && raw !== cat ? '&entity=' + encodeURIComponent(raw) : '';
   switch (role) {
     case 'super_admin':
-    case 'admin': // backward compat
+    case 'system_administrator':
+    case 'admin':
       return '/admin/dashboard';
     case 'manager':
+    case 'accounting_officer':
+    case 'business_manager':
+      if (cat) return '/manager/dashboard?biz=' + cat;
       return '/manager/dashboard';
+    // Legacy budget roles (if still present in DB) follow the sales flow
     case 'employee':
-      // Direct redirect to selected category dashboard (no business-select page)
-      if (selectedCategory) return '/employee/dashboard?biz=' + selectedCategory;
+    case 'budget_officer':
+    case 'budgeting_officer':
+    case 'viewer':
+    case 'sale_staff':
+    case 'sales_staff':
+      if (cat) return '/employee/dashboard?biz=' + cat + entityQs;
       return '/business-select';
-    case 'viewer': return '/admin/dashboard';
     default: return '/login';
   }
 }
@@ -468,14 +526,21 @@ function redirectByRole(res, role, businessAccess) {
 
 async function logAudit(uid, email, name, action, target, details) {
   try {
-    if (db) {
-      await db.ref('auditLogs').push({
+    if (firestore) {
+      await FDB.addDoc('auditLogs', {
+        // Unified schema (used by admin routes) + legacy fields for compatibility
+        action,
+        module: target || 'auth',
+        target: target || 'auth',
+        details: details || '',
+        logType: 'user_activity',
+        previousValue: null,
+        newValue: null,
+        businessId: null,
+        isSuspicious: false,
         userId: uid,
         userEmail: email,
         userName: name,
-        action,
-        target,
-        details,
         timestamp: new Date().toISOString(),
       });
     }

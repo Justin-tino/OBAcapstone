@@ -3,245 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reports — OBA System</title>
+  <title>Report Generator — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .report-line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
-    .report-line:last-child { border-bottom: none; }
-    .report-line.total { font-weight: 800; border-top: 2px solid var(--black); border-bottom: 2px solid var(--black); background: var(--gray-50); margin: 6px -20px; padding: 12px 20px; }
-    .report-line .lbl { font-size: 0.88rem; color: var(--gray-600); }
-    .report-line .val { font-size: 0.88rem; font-weight: 700; color: var(--black-soft); }
-    .report-line .val.green { color: var(--green); }
-    .report-line .val.danger { color: var(--danger); }
-    
-    /* Premium Admin Reports Layout */
-    .report-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 28px;
-      padding: 6px;
-      background: var(--gray-100);
-      border-radius: var(--radius);
-      border: 1px solid var(--gray-200);
-      overflow-x: auto;
-    }
-    
-    .report-tab {
-      flex: 1;
-      padding: 10px 18px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      color: var(--gray-600);
-      cursor: pointer;
-      border-radius: var(--radius-sm);
-      transition: var(--transition);
-      position: relative;
-      background: transparent;
-      border: none;
-      font-family: var(--font-main);
-      text-align: center;
-      white-space: nowrap;
-      user-select: none;
-    }
-    
-    .report-tab:hover {
-      background: rgba(255, 255, 255, 0.5);
-      color: var(--black);
-    }
-    
-    .report-tab.active {
-      background: var(--white);
-      color: var(--green);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    /* Simulated Premium A4 Report Document Sheet */
-    .report-sheet {
-      background: #fff;
-      border: 1px solid var(--gray-200);
-      border-radius: 12px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.03);
-      padding: 36px;
-      max-width: 800px;
-      margin: 10px auto 20px;
-      font-family: var(--font-main);
-      position: relative;
-    }
-
-    .report-sheet-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 2px solid var(--green);
-      padding-bottom: 16px;
-      margin-bottom: 20px;
-    }
-
-    .report-sheet-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .report-sheet-logo img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-    }
-
-    .report-sheet-title-group {
-      text-align: right;
-    }
-
-    .report-sheet-title-group h3 {
-      margin: 0;
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--gray-800);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .report-sheet-title-group .org-sub {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--green);
-      margin-top: 2px;
-    }
-
-    .report-sheet-title-group .report-type {
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-top: 6px;
-      color: var(--gray-700);
-    }
-
-    .report-sheet-meta {
-      display: flex;
-      justify-content: space-between;
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 20px;
-      font-size: 0.8rem;
-      color: var(--gray-600);
-    }
-
-    /* Premium Ledger Row styles */
-    .ledger-row-sub {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--gray-100);
-      font-size: 0.88rem;
-    }
-
-    .ledger-row-sub.indent {
-      padding-left: 24px;
-      color: var(--gray-600);
-    }
-
-    .ledger-row-sub.total {
-      font-weight: 700;
-      background: var(--gray-50);
-      border-top: 1.5px solid var(--gray-800);
-      border-bottom: 1.5px solid var(--gray-800);
-      margin-top: 4px;
-    }
-
-    .ledger-row-sub.grand-total {
-      font-size: 1.05rem;
-      font-weight: 800;
-      border-top: 2px solid var(--gray-900);
-      border-bottom: 4px double var(--gray-900); /* CPA double underline */
-      background: var(--green-light);
-      margin-top: 8px;
-      padding: 12px;
-    }
-
-    .report-sheet-signatures {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 40px;
-      padding-top: 16px;
-      border-top: 1px dashed var(--gray-300);
-    }
-
-    .sig-block {
-      text-align: center;
-      width: 45%;
-    }
-
-    .sig-line {
-      width: 100%;
-      height: 1px;
-      background: var(--gray-900);
-      margin-bottom: 6px;
-      margin-top: 30px;
-    }
-
-    .sig-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--gray-800);
-      text-transform: uppercase;
-    }
-
-    .sig-title {
-      font-size: 0.68rem;
-      color: var(--gray-500);
-    }
-
-    /* Custom print layout rules */
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .cat-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; }
+    .cat-card .stripe { height: 5px; }
+    .cat-card .body { padding: 16px; }
+    .cat-card .name { font-weight: 800; font-size: 0.95rem; margin-bottom: 2px; }
+    .cat-card .sub { font-size: 0.75rem; color: var(--gray-500); margin-bottom: 12px; }
+    .cat-metric { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px solid var(--gray-100); }
+    .cat-metric:last-child { border-bottom: none; }
+    .cat-metric .v { font-weight: 700; }
+    .detail-section { margin-bottom: 24px; }
+    .detail-title { display: flex; align-items: center; gap: 10px; margin: 20px 0 10px 0; }
+    .detail-title .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .gen-cat.active { background: var(--black) !important; color: #fff !important; border-color: var(--black) !important; }
+    .gen-trend { font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .gen-trend.up { color: var(--green); }
+    .gen-trend.down { color: var(--danger); }
+    .gen-trend.flat { color: var(--gray-400); }
     @media print {
-      body {
-        background: #fff !important;
-        color: #000 !important;
-      }
-      .no-print, .sidebar, .topbar, .filters-bar, .report-tabs, .modal-overlay, .topbar-actions {
-        display: none !important;
-      }
-      .app-layout {
-        display: block !important;
-      }
-      .main-content {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .report-sheet {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-      }
-      .page-content {
-        padding: 0 !important;
-      }
+      .no-print, .sidebar, .topbar { display: none !important; }
+      .app-layout { display: block !important; }
+      .main-content { margin: 0 !important; padding: 0 !important; }
+      .page-content { padding: 0 !important; }
     }
-
-    @media (max-width: 1024px) { 
-      .report-grid { grid-template-columns: 1fr; }
-      .report-sheet-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-      }
-      .report-sheet-title-group {
-        text-align: left;
-      }
-    }
-    .is-viewer .btn-send-alert { display: none !important; }
   </style>
 </head>
 <body>
 <div class="app-layout">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav">
@@ -250,480 +44,347 @@
       <a class="nav-item" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
       <a class="nav-item" href="/admin/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
       <a class="nav-item active" href="/admin/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-      <a class="nav-item" href="/admin/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
       <a class="nav-item" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Users</a>
       <a class="nav-item" href="/admin/settings"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</a>
       <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
-        <div class="sidebar-avatar">A</div>
-        <div><div class="sidebar-user-name">Admin1 (Admin)</div><div class="sidebar-user-role">Logged in as:</div></div>
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Logged in as:</div></div>
       </div>
     </div>
   </aside>
 
   <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
-        <span class="topbar-title">Financial Reports</span>
+    <div class="topbar no-print">
+      <div class="topbar-left">
+        <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+          <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+        </svg>
+        <span class="topbar-title">Report Generator</span>
       </div>
       <div class="topbar-actions">
         <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
           <span class="notif-count" id="notifCount" style="display:none">0</span>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
+        <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
     </div>
 
-    <div class="page-content">
-      <!-- Filters -->
-      <div class="filters-bar">
-        <div class="filter-item"><div class="filter-label">Business</div>
-          <select id="fBiz" class="filter-control" onchange="loadReports()">
-            <option value="RENTAL">Rental</option>
-            <option value="BUSINESS">Business</option>
-            <option value="AGRI">Agriculture</option>
-            <option value="NON_AGRI">Non-Agriculture</option>
-            <option value="MAIN">Main</option>
-          </select>
-        </div>
-        <div class="filter-item"><div class="filter-label">Period</div>
-          <select id="fPeriod" class="filter-control" onchange="loadReports()"><option value="month">This Month</option><option value="week">This Week</option><option value="year">This Year</option></select>
-        </div>
-        <div class="export-group" style="margin-top:18px; display:flex; gap:10px;">
-          <button class="btn btn-outline btn-sm" style="border-color:var(--yellow-dark);color:var(--yellow-dark)" onclick="openAlertModal()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Send Deadline Reminder
-          </button>
-          <button class="btn-export pdf" onclick="exportReportPDF()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Export PDF</button>
-          <button class="btn-export excel" onclick="exportReportCSV()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Export CSV</button>
-        </div>
-      </div>
+    <div class="page-content" id="printArea">
 
-      <!-- Report Tabs -->
-      <div class="report-tabs">
-        <div class="report-tab active" onclick="switchTab('summary',this)">Summary</div>
-        <div class="report-tab" onclick="switchTab('income',this)">Income Statement</div>
-        <div class="report-tab" onclick="switchTab('cashflow',this)">Cash Flow</div>
-        <div class="report-tab" onclick="switchTab('balance',this)">Balance Summary</div>
-        <div class="report-tab" onclick="switchTab('comparison',this)">Comparison</div>
-      </div>
+      <!-- ═══════════ REPORT GENERATOR ═══════════ -->
+      <div id="tabGenerator">
+        <h2 style="margin-bottom:4px;font-weight:800">Report Generator</h2>
+        <p style="color:var(--gray-500);margin-bottom:20px">Generate reports across any category and any combination of businesses — one, a custom selection, or all. Every report includes trend indicators comparing the selected period to the previous period.</p>
 
-      <!-- Summary Tab -->
-      <div id="tab-summary" class="tab-panel">
-        <div class="kpi-grid" style="grid-template-columns: repeat(4,1fr); margin-bottom:20px">
-          <div class="kpi-card yellow"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="rRevenue">—</div></div>
-          <div class="kpi-card danger"><div class="kpi-label">Total Expenses</div><div class="kpi-value" id="rExpenses" style="color:var(--danger)">—</div></div>
-          <div class="kpi-card green"><div class="kpi-label">Net Profit</div><div class="kpi-value" id="rProfit" style="color:var(--green)">—</div></div>
-          <div class="kpi-card black"><div class="kpi-label">ROI</div><div class="kpi-value" id="rROI">—</div></div>
+        <div class="card no-print" style="padding:20px;margin-bottom:20px">
+          <!-- Step 1: Categories -->
+          <div class="filter-label" style="font-weight:700">1 · Select Categories</div>
+          <div id="genCatChips" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px">
+            <button type="button" class="btn btn-outline btn-sm gen-cat active" data-cat="ALL" onclick="toggleGenCat('ALL',this)">All Categories</button>
+            <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="MAIN" onclick="toggleGenCat('MAIN',this)">Main</button>
+            <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="AGRI" onclick="toggleGenCat('AGRI',this)">Agriculture</button>
+            <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="NON_AGRI" onclick="toggleGenCat('NON_AGRI',this)">Non-Agriculture</button>
+          </div>
+
+          <!-- Step 2: Businesses -->
+          <div class="filter-label" style="font-weight:700">2 · Select Businesses</div>
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:8px 0 8px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
+              <input type="checkbox" id="genAllBiz" checked onchange="renderGenBizList()"> All businesses (entire selected categories)
+            </label>
+            <button type="button" class="btn btn-outline btn-sm" onclick="genSelectAllVisible(true)">Select All</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="genSelectAllVisible(false)">Clear</button>
+            <span id="genBizCount" style="font-size:0.78rem;color:var(--gray-500)"></span>
+          </div>
+          <div id="genBizList" style="display:none;max-height:220px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:10px;margin-bottom:6px"></div>
+
+          <!-- Step 3: Type + Period -->
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-top:18px">
+            <div>
+              <div class="filter-label">3 · Report Type</div>
+              <select id="genType" class="filter-control">
+                <option value="dailysales">Daily Sales Report</option>
+                <option value="weeklyrevenue">Weekly Revenue Summary</option>
+                <option value="monthlystatement">Monthly Financial Statement</option>
+                <option value="transactionhistory">Transaction History Report</option>
+                <option value="expensereport">Expense Report</option>
+                <option value="profitloss">Profit &amp; Loss Statement</option>
+              </select>
+            </div>
+            <div>
+              <div class="filter-label">Period</div>
+              <select id="genPeriod" class="filter-control" onchange="genToggleDates()">
+                <option value="day">Daily (Today)</option>
+                <option value="week">Weekly (Last 7 days)</option>
+                <option value="month" selected>Monthly</option>
+                <option value="year">Annually</option>
+                <option value="custom">Custom Date Range</option>
+              </select>
+            </div>
+            <div id="genDates" style="display:none;gap:10px">
+              <div><div class="filter-label">Start</div><input type="date" id="genStart" class="filter-control"></div>
+              <div><div class="filter-label">End</div><input type="date" id="genEnd" class="filter-control"></div>
+            </div>
+            <button class="btn btn-primary" onclick="runGenerator()">Generate Report</button>
+            <button class="btn btn-outline" onclick="printGenerator()">Print</button>
+          </div>
         </div>
-        <div class="report-grid">
-          <div class="card"><div class="card-header"><span class="card-title">Revenue vs Expenses</span></div><div style="position:relative;height:250px;width:100%"><canvas id="revExpChart"></canvas></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Expense Breakdown</span></div><div style="position:relative;height:250px;width:100%"><canvas id="expBreakChart"></canvas></div></div>
-        </div>
-      </div>
 
-      <!-- Income Statement Tab -->
-      <div id="tab-income" class="tab-panel" style="display:none">
-        <div class="card"><div class="card-header"><span class="card-title">Income Statement</span></div><div id="incomeBody"></div></div>
-      </div>
-
-      <!-- Cash Flow Tab -->
-      <div id="tab-cashflow" class="tab-panel" style="display:none">
-        <div class="card"><div class="card-header"><span class="card-title">Cash Flow Statement</span></div><div id="cashFlowBody"></div></div>
-      </div>
-
-      <!-- Balance Summary Tab -->
-      <div id="tab-balance" class="tab-panel" style="display:none">
-        <div class="card"><div class="card-header"><span class="card-title">Balance Summary</span></div><div id="balanceBody"></div></div>
-      </div>
-
-      <!-- Cross-Business Comparison Tab -->
-      <div id="tab-comparison" class="tab-panel" style="display:none">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Cross-Business Financial Comparison</span></div>
-          <div class="table-wrap"><table><thead><tr><th>Category</th><th>Revenue</th><th>Expenses</th><th>Profit</th><th>Margin</th></tr></thead><tbody id="compBody"></tbody></table></div>
-        </div>
-        <div class="card" style="margin-top:20px"><div class="card-header"><span class="card-title">Revenue Distribution</span></div><div style="position:relative;height:250px;width:100%"><canvas id="compChart"></canvas></div></div>
-      </div>
+        <div id="genOutput"></div>
+      </div><!-- /tabGenerator -->
     </div>
   </div>
 </div>
 
-<!-- Send Alert Modal -->
-<div class="modal-overlay" id="alertModal">
-  <div class="modal" style="max-width:500px">
-    <div class="modal-header">
-      <span class="modal-title">Send Deadline Reminder</span>
-      <button class="modal-close" onclick="closeModal('alertModal')">&times;</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Alert Type</label>
-      <select id="a_type" class="form-control" disabled>
-        <option value="system">Deadline Reminder</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Target Business Unit</label>
-      <select id="a_biz" class="form-control">
-        <option value="all">All Business Categories</option>
-        <option value="RENTAL">Rental</option>
-        <option value="BUSINESS">Business</option>
-        <option value="AGRI">Agriculture</option>
-        <option value="NON_AGRI">Non-Agriculture</option>
-        <option value="MAIN">Main</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Reminder Message *</label>
-      <textarea id="a_msg" class="form-control" placeholder="e.g. Please submit your monthly financial reports by Friday 5 PM."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Priority</label>
-      <select id="a_priority" class="form-control">
-        <option value="info">Info</option>
-        <option value="warning" selected>Warning</option>
-        <option value="critical">Critical</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('alertModal')">Cancel</button>
-      <button class="btn btn-primary btn-send-alert" onclick="sendAlert()">Send Alert</button>
-    </div>
-  </div>
-</div>
-
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
-let reportData = {};
-let charts = {};
+// ═══════════ Report Generator ═══════════
+const GEN_CATS = ['AGRI', 'NON_AGRI', 'MAIN'];
+const GEN_CAT_META = { AGRI: { name: 'Agriculture' }, NON_AGRI: { name: 'Non-Agriculture' }, MAIN: { name: 'Main' } };
+let genBusinesses = [];
+let genSelectedBiz = new Set();
 
-function switchTab(name, el) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-  document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).style.display = 'block';
-  el.classList.add('active');
-}
-
-async function loadReports() {
-  const biz = document.getElementById('fBiz').value;
-  const period = document.getElementById('fPeriod').value;
-  try {
-    const [summary, income, cashflow, balance, comp] = await Promise.all([
-      API.get(`/api/reports/${biz}/summary?period=${period}`),
-      API.get(`/api/reports/${biz}/income-statement?period=${period}`),
-      API.get(`/api/reports/${biz}/cash-flow?period=${period}`),
-      API.get(`/api/reports/${biz}/balance-summary`),
-      API.get('/api/reports/all/comparison'),
-    ]);
-    if (summary.success) renderSummary(summary.data);
-    if (income.success) renderIncome(income.data);
-    if (cashflow.success) renderCashFlow(cashflow.data);
-    if (balance.success) renderBalance(balance.data);
-    if (comp.success) renderComparison(comp.data);
-    reportData = { summary: summary.data, income: income.data, cashflow: cashflow.data, balance: balance.data, comp: comp.data };
-  } catch(e) { Toast.error('Error loading reports'); }
-}
-
-function renderSummary(d) {
-  document.getElementById('rRevenue').textContent = fmt.currency(d.revenue);
-  document.getElementById('rExpenses').textContent = fmt.currency(d.expenses);
-  document.getElementById('rProfit').textContent = fmt.currency(d.profit);
-  document.getElementById('rROI').textContent = fmt.percent(d.roi);
-  // Charts
-  if (charts.revExp) charts.revExp.destroy();
-  charts.revExp = new Chart(document.getElementById('revExpChart'), {
-    type: 'bar', data: { labels: ['Revenue','Expenses','Net Profit'], datasets: [{ data: [d.revenue, d.expenses, d.profit], backgroundColor: ['#D4A915','#E53E3E','#2d6a2e'], borderRadius: 6 }] },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => '₱'+(v/1000).toFixed(0)+'k' } } } }
-  });
-  if (charts.expBreak) charts.expBreak.destroy();
-  const eb = d.expenseBreakdown || { utilities: 18000, suppliers: 72000, salary: 45000, other: 7000 };
-  charts.expBreak = new Chart(document.getElementById('expBreakChart'), {
-    type: 'doughnut', data: { labels: ['Utilities','Suppliers','Salary','Other'], datasets: [{ data: [eb.utilities, eb.suppliers, eb.salary, eb.other], backgroundColor: ['#6B3FA0','#2d6a2e','#D4A915','#666'] }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-  });
-}
-
-function getReportHeader(title) {
-  const bizName = document.getElementById('fBiz').selectedOptions[0].text;
-  const period = document.getElementById('fPeriod').selectedOptions[0].text;
-  const now = new Date();
-  return `
-    <div class="report-sheet-header">
-      <div class="report-sheet-logo">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-        <div>
-          <h4 style="margin:0; font-size:0.9rem; font-weight:800; color:var(--gray-800);">Pampanga State Agricultural University</h4>
-          <span style="font-size:0.72rem; color:var(--gray-500); display:block; margin-top:2px;">Pacung, San Luis, Pampanga</span>
-        </div>
-      </div>
-      <div class="report-sheet-title-group">
-        <h3>Office of Business Affairs</h3>
-        <div class="org-sub">${bizName} Category</div>
-        <div class="report-type">${title}</div>
-      </div>
-    </div>
-    
-    <div class="report-sheet-meta">
-      <div><strong>Reporting Period:</strong> ${period}</div>
-      <div><strong>Audited By:</strong> Administrator</div>
-      <div><strong>Audit Date:</strong> ${now.toLocaleDateString('en-PH')} ${now.toLocaleTimeString('en-PH', {hour:'2-digit', minute:'2-digit'})}</div>
-    </div>
-  `;
-}
-
-function getReportSignatures() {
-  return `
-    <div class="report-sheet-signatures">
-      <div class="sig-block">
-        <div class="sig-line"></div>
-        <div class="sig-label">Prepared & Audited By</div>
-        <div class="sig-title">System Administrator</div>
-      </div>
-      <div class="sig-block">
-        <div class="sig-line"></div>
-        <div class="sig-label">Noted By</div>
-        <div class="sig-title">OBA Director / Representative</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderIncome(d) {
-  document.getElementById('incomeBody').innerHTML = `
-    <div class="report-sheet">
-      ${getReportHeader('Statement of Income')}
-      <div style="margin-top:10px;">
-        <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Revenue & Receipts</h4>
-        <div class="ledger-row-sub indent"><span class="lbl">Sales Revenue (Net)</span><span class="val">${fmt.currency(d.salesRevenue)}</span></div>
-        <div class="ledger-row-sub indent"><span class="lbl">Taxes Collected (12%)</span><span class="val">${fmt.currency(d.taxes)}</span></div>
-        <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Other Supporting Income</span><span class="val">${fmt.currency(d.otherIncome)}</span></div>
-        <div class="ledger-row-sub total"><span class="lbl">Total Gross Revenue</span><span class="val" style="color:var(--green)">${fmt.currency(d.totalRevenue)}</span></div>
-        
-        <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Operating Expenses</h4>
-        <div class="ledger-row-sub indent"><span class="lbl">Cost of Goods Sold (Supplies)</span><span class="val">${fmt.currency(d.costOfGoods)}</span></div>
-        <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">General & Operating Expenses</span><span class="val">${fmt.currency(d.operatingExpenses)}</span></div>
-        <div class="ledger-row-sub total"><span class="lbl">Total Expenditures</span><span class="val" style="color:var(--danger)">${fmt.currency(d.totalExpenses)}</span></div>
-        
-        <div class="ledger-row-sub grand-total" style="margin-top:30px;">
-          <span class="lbl">NET PROFIT / INCOME</span>
-          <span class="val" style="color:${d.netIncome>=0?'var(--green)':'var(--danger)'}">${fmt.currency(d.netIncome)}</span>
-        </div>
-      </div>
-      ${getReportSignatures()}
-    </div>
-  `;
-}
-
-function renderCashFlow(d) {
-  document.getElementById('cashFlowBody').innerHTML = `
-    <div class="report-sheet">
-      ${getReportHeader('Statement of Cash Flows')}
-      <div style="margin-top:10px;">
-        <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Cash Flow from Operating Activities</h4>
-        <div class="ledger-row-sub indent"><span class="lbl">Cash Receipts from Sales</span><span class="val" style="color:var(--green)">+ ${fmt.currency(d.operatingActivities.salesReceipts)}</span></div>
-        <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Cash Payments for General Expenses</span><span class="val" style="color:var(--danger)">- ${fmt.currency(d.operatingActivities.expensePayments)}</span></div>
-        <div class="ledger-row-sub total"><span class="lbl">Net Cash from Operating Activities</span><span class="val" style="color:var(--green)">${fmt.currency(d.operatingActivities.netOperating)}</span></div>
-        
-        <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Cash Flow from Investing Activities</h4>
-        <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Acquisition of Equipment / Fixed Assets</span><span class="val" style="color:var(--danger)">- ${fmt.currency(d.investingActivities.equipmentPurchase)}</span></div>
-        
-        <div class="ledger-row-sub total" style="margin-top:20px;"><span class="lbl">Opening Cash Balance</span><span class="val">${fmt.currency(d.openingBalance)}</span></div>
-        <div class="ledger-row-sub grand-total" style="margin-top:20px;">
-          <span class="lbl">NET CLOSING CASH BALANCE</span>
-          <span class="val" style="color:var(--green)">${fmt.currency(d.closingBalance)}</span>
-        </div>
-      </div>
-      ${getReportSignatures()}
-    </div>
-  `;
-}
-
-function renderBalance(d) {
-  document.getElementById('balanceBody').innerHTML = `
-    <div class="report-sheet">
-      ${getReportHeader('Balance Sheet Statement')}
-      <div style="margin-top:10px;">
-        <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Assets</h4>
-        <div class="ledger-row-sub indent"><span class="lbl">Cash and Cash Equivalents</span><span class="val">${fmt.currency(d.assets.cash)}</span></div>
-        <div class="ledger-row-sub indent"><span class="lbl">Inventory Asset Value</span><span class="val">${fmt.currency(d.assets.inventory)}</span></div>
-        <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Outstanding Receivables</span><span class="val">${fmt.currency(d.assets.receivables)}</span></div>
-        <div class="ledger-row-sub total"><span class="lbl">Total Assets</span><span class="val" style="color:var(--green)">${fmt.currency(d.assets.totalAssets)}</span></div>
-        
-        <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Liabilities</h4>
-        <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Outstanding Accounts Payable</span><span class="val" style="color:var(--danger)">${fmt.currency(d.liabilities.payables)}</span></div>
-        <div class="ledger-row-sub total"><span class="lbl">Total Liabilities</span><span class="val" style="color:var(--danger)">${fmt.currency(d.liabilities.totalLiabilities)}</span></div>
-        
-        <div class="ledger-row-sub grand-total" style="margin-top:30px;">
-          <span class="lbl">OWNER'S EQUITY (Net Assets Valuation)</span>
-          <span class="val" style="color:var(--green)">${fmt.currency(d.equity)}</span>
-        </div>
-      </div>
-      ${getReportSignatures()}
-    </div>
-  `;
-}
-
-function renderComparison(d) {
-  document.getElementById('compBody').innerHTML = d.comparison.map(c => `
-    <tr><td class="fw-bold">${c.category}</td><td>${fmt.currency(c.revenue)}</td><td>${fmt.currency(c.expenses)}</td>
-    <td class="text-green fw-bold">${fmt.currency(c.profit)}</td><td>${c.margin}</td></tr>`).join('') +
-    `<tr class="comparison-row" style="border-top:2px solid #000; font-weight: 800;"><td>TOTAL</td><td>${fmt.currency(d.totals.revenue)}</td><td>${fmt.currency(d.totals.expenses)}</td><td class="text-green">${fmt.currency(d.totals.profit)}</td><td>${d.totals.margin}</td></tr>`;
-  if (charts.comp) charts.comp.destroy();
-  charts.comp = new Chart(document.getElementById('compChart'), {
-    type: 'pie', data: { labels: d.comparison.map(c=>c.category), datasets: [{ data: d.comparison.map(c=>c.revenue), backgroundColor: ['#6B3FA0','#2d6a2e','#D4A915','#1A1A1A','#0D6EFD'] }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-  });
-}
-
-function exportReportPDF() {
-  const biz = document.getElementById('fBiz').selectedOptions[0].text;
-  const d = reportData.summary || {};
-  const now = new Date();
-  
-  const pdfTemplate = `
-    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-      <div style="border-bottom: 2px solid #2d6a2e; padding-bottom: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <div>
-          <h2 style="margin: 0; color: #2d6a2e; font-size: 1.4rem;">PAMPANGA STATE AGRICULTURAL UNIVERSITY</h2>
-          <h3 style="margin: 4px 0 0; color: #555; font-size: 1rem; font-weight: normal;">Office of Business Affairs</h3>
-        </div>
-        <div style="text-align: right;">
-          <h4 style="margin: 0; color: #777;">AUDITED REPORT</h4>
-          <span style="font-size: 0.8rem; color: #888;">Generated: ${now.toLocaleDateString()}</span>
-        </div>
-      </div>
-      
-      <div style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px 15px; border-radius: 6px; margin-bottom: 24px; font-size: 0.85rem;">
-        <strong>Target Unit:</strong> ${biz} Category &nbsp;&nbsp;|&nbsp;&nbsp; <strong>Period:</strong> Cumulative Annual Summary
-      </div>
-      
-      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        <thead>
-          <tr style="background-color: #2d6a2e; color: #ffffff; text-align: left;">
-            <th style="padding: 12px; font-size: 0.9rem;">Financial Metric</th>
-            <th style="padding: 12px; font-size: 0.9rem; text-align: right;">Recorded Value (PHP)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 12px; font-size: 0.9rem;">Sales Revenue (Net)</td>
-            <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #2d6a2e;">₱${(d.revenue||0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 12px; font-size: 0.9rem;">Taxes Collected (12%)</td>
-            <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #2d6a2e;">₱${(d.taxes||0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 12px; font-size: 0.9rem;">Total Gross Revenue</td>
-            <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #2d6a2e;">₱${((d.revenue||0) + (d.taxes||0)).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 12px; font-size: 0.9rem;">Total Registered Expenses & COGS</td>
-            <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #c53030;">₱${(d.expenses||0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          </tr>
-          <tr style="border-bottom: 2px solid #333; background-color: #f7fafc;">
-            <td style="padding: 12px; font-size: 1rem; font-weight: bold;">NET OPERATING INCOME / PROFIT</td>
-            <td style="padding: 12px; font-size: 1rem; font-weight: bold; text-align: right; color: #2d6a2e; border-bottom: 4px double #333;">₱${(d.profit||0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 12px; font-size: 0.9rem;">Annualized Return on Investment (ROI)</td>
-            <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold;">${(d.roi||0).toFixed(2)}%</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <div style="margin-top: 50px; border-top: 1px dashed #ccc; padding-top: 20px; display: flex; justify-content: space-between;">
-        <div style="width: 45%; text-align: center;">
-          <div style="border-bottom: 1px solid #333; margin-top: 30px;"></div>
-          <span style="font-size: 0.8rem; font-weight: bold; display: block; margin-top: 5px;">AUDITED BY</span>
-          <span style="font-size: 0.75rem; color: #777;">System Administrator</span>
-        </div>
-        <div style="width: 45%; text-align: center;">
-          <div style="border-bottom: 1px solid #333; margin-top: 30px;"></div>
-          <span style="font-size: 0.8rem; font-weight: bold; display: block; margin-top: 5px;">APPROVED BY</span>
-          <span style="font-size: 0.75rem; color: #777;">OBA Representative Director</span>
-        </div>
-      </div>
-    </div>
-  `;
-
-  exportToPDF('Financial Report - ' + biz, pdfTemplate);
-}
-
-function exportReportCSV() {
-  const comp = reportData.comp;
-  if (comp && comp.comparison) { exportToCSV(comp.comparison, 'OBA_Financial_Comparison'); }
-  else { Toast.warning('No data to export'); }
-}
-
-function openAlertModal() {
-  document.getElementById('a_msg').value = 'Reminder: Monthly financial reports and inventory summaries are due this week. Please ensure all records are updated and submitted on time.';
-  document.getElementById('a_biz').value = 'all';
-  document.getElementById('a_priority').value = 'warning';
-  openModal('alertModal');
-}
-
-async function sendAlert() {
-  const data = {
-    type: 'deadline',
-    title: 'Report Submission Deadline',
-    message: document.getElementById('a_msg').value.trim(),
-    businessId: document.getElementById('a_biz').value === 'all' ? null : document.getElementById('a_biz').value,
-    priority: document.getElementById('a_priority').value
-  };
-  
-  if (!data.message) {
-    Toast.warning('Message is required');
-    return;
-  }
-  
-  try {
-    const res = await API.post('/api/admin/notifications', data);
-    if (res.success) {
-      Toast.success('Deadline reminder broadcasted to employees!');
-      closeModal('alertModal');
-    } else {
-      Toast.error(res.message);
-    }
-  } catch(e) {
-    Toast.error('Failed to send alert');
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const p = new URLSearchParams(window.location.search);
-  if (p.get('biz')) document.getElementById('fBiz').value = p.get('biz');
-  loadReports();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadGenBusinesses();
   getCurrentUser().then(u => {
-    if(u){
-      document.querySelector('.sidebar-user-name').textContent = u.name;
+    if (u) {
+      document.getElementById('sidebarName').textContent = u.name;
       document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
-      document.querySelector('.sidebar-avatar').textContent = u.name.charAt(0);
-      // Viewer role enforcement
-      if (u.role === 'viewer') {
-        document.querySelectorAll('.sidebar-nav a').forEach(a => {
-          const href = a.getAttribute('href') || '';
-          if (href.includes('/notifications') || href.includes('/users') || href.includes('/settings')) {
-            a.style.display = 'none';
-          }
-        });
-        document.querySelectorAll('.notif-bell, .notif-dropdown').forEach(el => el.remove());
-        const topbar = document.querySelector('.topbar');
-        if (topbar) {
-          const badge = document.createElement('span');
-          badge.textContent = 'VIEW ONLY';
-          badge.style.cssText = 'background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.5px;margin-left:12px';
-          topbar.querySelector('.flex-c').appendChild(badge);
-        }
-      }
+      document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
     }
   });
 });
+
+function toggleGenCat(cat, btn) {
+  const chips = [...document.querySelectorAll('.gen-cat')];
+  if (cat === 'ALL') {
+    chips.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } else {
+    const allBtn = chips.find(b => b.dataset.cat === 'ALL');
+    allBtn.classList.remove('active');
+    btn.classList.toggle('active');
+    if (!chips.some(b => b.dataset.cat !== 'ALL' && b.classList.contains('active'))) allBtn.classList.add('active');
+  }
+  renderGenBizList();
+}
+
+function genSelectedCats() {
+  const active = [...document.querySelectorAll('.gen-cat.active')].map(b => b.dataset.cat);
+  if (active.includes('ALL') || !active.length) return GEN_CATS.slice();
+  return active.filter(c => GEN_CATS.includes(c));
+}
+
+async function loadGenBusinesses() {
+  if (!genBusinesses.length) {
+    try {
+      const res = await API.get('/api/admin/businesses');
+      genBusinesses = (res.success && Array.isArray(res.data)) ? res.data : [];
+    } catch (_) { genBusinesses = []; }
+  }
+  renderGenBizList();
+}
+
+function visibleGenBiz() {
+  const cats = genSelectedCats();
+  return genBusinesses.filter(b => cats.includes(b.categoryId));
+}
+
+function renderGenBizList() {
+  const allCb = document.getElementById('genAllBiz');
+  const list = document.getElementById('genBizList');
+  const vis = visibleGenBiz();
+  updateGenBizCount();
+  list.style.display = allCb.checked ? 'none' : '';
+  if (allCb.checked) return;
+  const visIds = new Set(vis.map(b => b.id));
+  genSelectedBiz = new Set([...genSelectedBiz].filter(id => visIds.has(id)));
+  list.innerHTML = vis.length ? vis.map(b => `
+    <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:0.85rem;cursor:pointer;border-bottom:1px solid var(--gray-100)">
+      <input type="checkbox" ${genSelectedBiz.has(b.id) ? 'checked' : ''} onchange="genToggleBiz('${b.id}',this.checked)">
+      <span style="font-weight:600">${b.name || b.id}</span>
+      <span class="badge badge-gray" style="font-size:0.65rem">${GEN_CAT_META[b.categoryId] ? GEN_CAT_META[b.categoryId].name : (b.categoryId || '')}</span>
+      ${b.location ? `<span style="color:var(--gray-400);font-size:0.72rem">${b.location}</span>` : ''}
+    </label>`).join('') : '<div style="color:var(--gray-400);font-size:0.8rem;padding:6px">No businesses registered under the selected category(ies) — the report will cover the entire categories.</div>';
+}
+
+function genToggleBiz(id, checked) { checked ? genSelectedBiz.add(id) : genSelectedBiz.delete(id); updateGenBizCount(); }
+
+function genSelectAllVisible(on) {
+  const vis = visibleGenBiz();
+  genSelectedBiz = on ? new Set(vis.map(b => b.id)) : new Set();
+  renderGenBizList();
+}
+
+function updateGenBizCount() {
+  const allCb = document.getElementById('genAllBiz');
+  const vis = visibleGenBiz();
+  document.getElementById('genBizCount').textContent = allCb.checked
+    ? 'Aggregating entire categories (' + genSelectedCats().length + ' selected)'
+    : genSelectedBiz.size + ' of ' + vis.length + ' business(es) selected';
+}
+
+function genToggleDates() {
+  document.getElementById('genDates').style.display = document.getElementById('genPeriod').value === 'custom' ? 'flex' : 'none';
+}
+function genTrendBadge(t, invert) {
+  if (!t) return '';
+  const isUp = t.direction === 'up';
+  const good = invert ? !isUp : isUp;
+  const cls = t.percent === 0 ? 'flat' : (good ? 'up' : 'down');
+  const arrow = t.percent === 0 ? '•' : (isUp ? '▲' : '▼');
+  return `<span class="gen-trend ${cls}">${arrow} ${Math.abs(t.percent).toFixed(1)}%</span>`;
+}
+
+async function runGenerator() {
+  const cats = genSelectedCats();
+  const allBiz = document.getElementById('genAllBiz').checked;
+  const bizParam = allBiz ? 'all' : [...genSelectedBiz].join(',');
+  const period = document.getElementById('genPeriod').value;
+  let url = `/api/reports/generate?type=${document.getElementById('genType').value}` +
+    `&categories=${cats.join(',')}&businesses=${encodeURIComponent(bizParam || 'all')}&period=${period}`;
+  if (period === 'custom') {
+    const s = document.getElementById('genStart').value, e = document.getElementById('genEnd').value;
+    if (!s || !e) { Toast.warning('Select both start and end dates for a custom range.'); return; }
+    url += `&startDate=${s}&endDate=${e}`;
+  }
+
+  const out = document.getElementById('genOutput');
+  out.innerHTML = '<div class="empty-state"><div class="spinner"></div><p style="margin-top:12px">Generating report…</p></div>';
+
+  try {
+    const res = await API.get(url);
+    if (!res.success) {
+      out.innerHTML = `<div class="empty-state"><h3>Unable to generate report</h3><p>${res.message || 'Please try again.'}</p></div>`;
+      return;
+    }
+    renderGenerator(res.data);
+  } catch (err) {
+    out.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${err.message || 'Failed to reach the report service.'}</p></div>`;
+  }
+}
+
+function genTable(header, rowsHtml) {
+  return `<div class="table-wrap"><table><thead><tr>${header.map(h => `<th${h.right ? ' style="text-align:right"' : ''}>${h.t}</th>`).join('')}</tr></thead><tbody>${rowsHtml || ''}</tbody></table></div>`;
+}
+
+function renderGenerator(d) {
+  const bizLabel = d.scope.businesses === 'all'
+    ? 'All businesses (entire categories)'
+    : ((d.scope.businesses || []).map(b => b.name).join(', ') || '—');
+  let html = `
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="card-title">${d.reportTitle}</span>
+      <span class="badge badge-gray">${d.period.label}</span>
+    </div>
+    <div style="padding:12px 20px 0;font-size:0.8rem;color:var(--gray-500)">
+      Scope: <strong>${(d.scope.categoryNames || []).join(' · ')}</strong> — ${bizLabel}
+      ${d.scope.restricted ? ' <span class="badge badge-gray" style="font-size:0.62rem">Limited to your assigned access</span>' : ''}
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));padding:16px 20px">`;
+  (d.kpis || []).forEach(k => {
+    const invert = /expense|tax|cogs/i.test(k.label);
+    html += `<div class="kpi-card ${/profit|margin/i.test(k.label) ? 'green' : (invert ? 'danger' : 'yellow')}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.currency ? fmt.currency(k.value) : k.value}</div>
+      <div style="margin-top:4px">${genTrendBadge(k.trend, invert)}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (d.lines && d.lines.length) {
+    html += `<div style="padding:0 20px 20px"><div class="card-title" style="margin-bottom:8px">Details</div>` +
+      genTable([{ t: 'Item' }, { t: 'Amount', right: true }, { t: 'vs Previous', right: true }],
+        d.lines.map(l => `<tr><td style="${l.negative ? 'color:var(--danger)' : (/(total|net income|net profit|gross profit)/i.test(l.label) ? 'font-weight:700' : '')}">${l.label}</td>
+          <td style="text-align:right;${l.negative ? 'color:var(--danger)' : ''}">${fmt.currency(l.amount)}</td>
+          <td style="text-align:right">${genTrendBadge(l.trend, l.negative)}</td></tr>`).join('')) + `</div>`;
+  }
+  html += `</div>`;
+
+  // Business breakdown (one / custom count / all)
+  if (d.businessBreakdown && d.businessBreakdown.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Breakdown by Business</span></div>` +
+      genTable([{ t: 'Business' }, { t: 'Category' }, { t: 'Revenue', right: true }, { t: 'Expenses', right: true }, { t: 'Net', right: true }, { t: 'Txns', right: true }, { t: 'vs Previous', right: true }],
+        d.businessBreakdown.map(b => `<tr>
+          <td style="font-weight:600">${b.name}</td><td>${b.category || '—'}</td>
+          <td style="text-align:right;font-weight:700">${fmt.currency(b.revenue)}</td>
+          <td style="text-align:right;color:var(--danger)">${fmt.currency(b.expenses)}</td>
+          <td style="text-align:right;color:${b.net >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(b.net)}</td>
+          <td style="text-align:right">${b.transactions}</td>
+          <td style="text-align:right">${genTrendBadge(b.trend)}</td></tr>`).join('')) + `</div>`;
+  }
+
+  // Category comparison
+  if (d.categoryBreakdown && d.categoryBreakdown.length > 1) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Breakdown by Category</span></div>` +
+      genTable([{ t: 'Category' }, { t: 'Revenue', right: true }, { t: 'vs Previous', right: true }],
+        d.categoryBreakdown.map(c => `<tr><td style="font-weight:600">${c.name}</td>
+          <td style="text-align:right;font-weight:700">${fmt.currency(c.revenue)}</td>
+          <td style="text-align:right">${genTrendBadge(c.trend)}</td></tr>`).join('')) + `</div>`;
+  }
+  renderGeneratorRest(d, html);
+}
+function renderGeneratorRest(d, html) {
+  // Weekly day-by-day
+  if (d.dailyBreakdown) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Revenue by Day</span></div>` +
+      genTable([{ t: 'Day' }, { t: 'Revenue', right: true }, { t: 'Transactions', right: true }],
+        d.dailyBreakdown.map(x => `<tr><td>${x.day}</td><td style="text-align:right">${fmt.currency(x.revenue)}</td><td style="text-align:right">${x.salesCount}</td></tr>`).join('')) + `</div>`;
+  }
+
+  // Expense categories + entries
+  if (d.expenseBreakdown && d.expenseBreakdown.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Expenses by Category</span></div>` +
+      genTable([{ t: 'Category' }, { t: 'Amount', right: true }, { t: 'vs Previous', right: true }],
+        d.expenseBreakdown.map(x => `<tr><td style="font-weight:600">${x.name}</td>
+          <td style="text-align:right;font-weight:700">${fmt.currency(x.amount)}</td>
+          <td style="text-align:right">${genTrendBadge(x.trend, true)}</td></tr>`).join('')) + `</div>`;
+  }
+  if (d.expensesList && d.expensesList.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Expense Entries</span></div>` +
+      genTable([{ t: 'Date' }, { t: 'Description' }, { t: 'Category' }, { t: 'Business' }, { t: 'Amount', right: true }],
+        d.expensesList.map(x => `<tr><td style="font-size:0.78rem">${(x.date || '').slice(0, 10)}</td><td>${x.description}</td>
+          <td><span class="badge badge-gray" style="font-size:0.65rem">${x.category}</span></td>
+          <td style="font-size:0.8rem">${x.business}</td>
+          <td style="text-align:right;font-weight:700;color:var(--danger)">${fmt.currency(x.amount)}</td></tr>`).join('')) + `</div>`;
+  }
+
+  // Transactions
+  if (d.transactions && d.transactions.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Transactions (${d.transactions.length})</span></div>` +
+      genTable([{ t: 'Date' }, { t: 'Txn ID' }, { t: 'Business' }, { t: 'Products' }, { t: 'Total', right: true }, { t: 'Payment' }, { t: 'Sold By' }],
+        d.transactions.map(t => `<tr>
+          <td style="font-size:0.78rem">${(t.date || '').slice(0, 10)} ${t.time || ''}</td>
+          <td><code style="font-size:0.72rem">${t.id || '—'}</code></td>
+          <td style="font-size:0.8rem">${t.business}</td>
+          <td style="font-size:0.78rem">${(t.items || []).map(i => `${i.name} ×${i.quantity || i.qty || 1}`).join('<br>')}</td>
+          <td style="text-align:right;font-weight:700">${fmt.currency(t.total)}</td>
+          <td><span class="badge badge-gray" style="font-size:0.65rem">${t.paymentMethod}</span></td>
+          <td style="font-size:0.75rem">${t.soldBy}</td></tr>`).join('')) + `</div>`;
+  } else if (d.reportType === 'transactionhistory') {
+    html += `<div class="empty-state"><h3>No transactions found</h3><p>No transactions were recorded for the selected scope and period.</p></div>`;
+  }
+
+  document.getElementById('genOutput').innerHTML = html;
+}
+
+function printGenerator() {
+  const out = document.getElementById('genOutput');
+  if (!out.innerHTML.trim()) { Toast.warning('Generate a report first.'); return; }
+  let pa = document.getElementById('genPrintArea');
+  if (!pa) { pa = document.createElement('div'); pa.id = 'genPrintArea'; document.body.appendChild(pa); }
+  pa.innerHTML = out.innerHTML;
+  printSection('genPrintArea');
+}
 </script>
 </body>
 </html>

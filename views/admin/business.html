@@ -52,7 +52,7 @@
   <div class="app-layout">
     <aside class="sidebar">
       <div class="sidebar-logo-area">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
         <div class="org-name">Office of Business Affairs</div>
       </div>
       <nav class="sidebar-nav">
@@ -88,7 +88,6 @@
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
               <polyline points="17 6 23 6 23 12" />
             </svg></span> Reports</a>
-        <a class="nav-item" href="/admin/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
         <a class="nav-item" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none"
               stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -116,246 +115,289 @@
     </aside>
 
     <div class="main-content">
-      <div class="topbar topbar-green">
-        <div class="flex-c gap-12">
-          
-          <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
-        <span class="topbar-title">Business Management</span>
+      <div class="topbar">
+        <div class="topbar-left">
+          <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+            <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+            <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+          </svg>
+          <span class="topbar-title">Business Management</span>
         </div>
         <div class="topbar-actions">
           <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-            <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-dot" id="notifDot"></span>
             <span class="notif-count" id="notifCount" style="display:none">0</span>
             <div class="notif-dropdown" id="notifDropdown"></div>
           </div>
-          <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" />
-            </svg> Profile</button>
+          <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
       </div>
       <div class="page-content">
-        <div style="margin-bottom:24px">
-          <h2 style="margin-bottom:8px">Business Categories Status</h2>
-          <p style="color:var(--gray-600)">Inspect the current performance and status of all business categories.</p>
-        </div>
-
         <style>
-          .status-grid {
+          .category-cards-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 16px;
-            border-top: 1px solid var(--gray-200);
-            padding-top: 16px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+          }
+          @media (max-width: 992px) {
+            .category-cards-grid {
+              grid-template-columns: 1fr;
+            }
           }
 
-          .status-item {
+          .category-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            padding: 24px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+          }
+          .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--gray-300);
+          }
+          .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+          }
+          .category-card.agri::before { background: #D4A915; }
+          .category-card.non-agri::before { background: #1A1A1A; }
+          .category-card.main-cat::before { background: #0D6EFD; }
+
+          .category-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+          }
+          .category-icon-box {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .cat-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: var(--gray-50);
+            border-radius: var(--radius-sm);
+            padding: 12px 8px;
+            margin: 16px 0;
+            border: 1px solid var(--gray-100);
+            text-align: center;
+          }
+          .cat-stat-grid .stat-item {
             display: flex;
             flex-direction: column;
           }
-
-          .status-label {
-            font-size: 0.75rem;
-            color: var(--gray-600);
+          .cat-stat-grid .stat-value {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--black);
+            line-height: 1.2;
+          }
+          .cat-stat-grid .stat-label {
+            font-size: 0.68rem;
+            color: var(--gray-500);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            font-weight: 600;
+            margin-top: 4px;
           }
 
-          .status-val {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--black);
-          }
-
-          .val-green {
-            color: var(--green);
-          }
-
-          .val-danger {
-            color: var(--danger);
+          .cat-tab-btn {
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: var(--transition);
           }
         </style>
 
-        <style>
-          .biz-cards-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 24px;
-          }
-          .biz-card-item {
-            width: calc(33.333% - 16px);
-            box-sizing: border-box;
-          }
-          @media (max-width: 1200px) {
-            .biz-card-item { width: calc(50% - 12px); }
-          }
-          @media (max-width: 768px) {
-            .biz-card-item { width: 100%; }
-          }
-        </style>
-        <div class="biz-cards-wrapper">
-          <!-- Rental -->
-          <div class="card biz-card-item" style="border-top: 4px solid #6B3FA0; transition: transform 0.2s">
-            <div style="padding: 24px">
-              <div style="display:flex; align-items:center; gap: 16px">
-                <div
-                  style="width:50px; height:50px; border-radius:12px; background:#EDE7F6; color:#6B3FA0; display:flex; align-items:center; justify-content:center">
-                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 style="margin:0; font-size:1.4rem">Rental</h3>
-                  <div style="color:var(--gray-600); font-size:0.9rem">Rental services and property management</div>
-                </div>
-              </div>
-              <div class="status-grid">
-                <div class="status-item"><span class="status-label">Total Revenue</span><span class="status-val"
-                    id="RENTAL-rev">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Total Expenses</span><span class="status-val"
-                    id="RENTAL-exp">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Net Profit</span><span class="status-val val-green"
-                    id="RENTAL-prof">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Low Stock Items</span><span class="status-val"
-                    id="RENTAL-low">Loading...</span></div>
-              </div>
+        <!-- Category Overview Section (Shown First) -->
+        <div id="categoryViewSection">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:12px">
+            <div>
+              <h2 style="font-size:1.35rem; font-weight:800; color:var(--black); margin-bottom:4px">Business Categories</h2>
+              <p style="font-size:0.86rem; color:var(--gray-600); margin:0">Select a category below to view and manage its registered businesses and workspaces.</p>
             </div>
+            <button class="btn btn-primary btn-sm btn-add-entity" id="addEntityBtn" onclick="openAddEntity()">+ Add Business</button>
           </div>
 
-          <!-- Business -->
-          <div class="card biz-card-item" style="border-top: 4px solid #2d6a2e; transition: transform 0.2s">
-            <div style="padding: 24px">
-              <div style="display:flex; align-items:center; gap: 16px">
-                <div
-                  style="width:50px; height:50px; border-radius:12px; background:#E8F5E9; color:#2d6a2e; display:flex; align-items:center; justify-content:center">
-                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                  </svg>
+          <div class="category-cards-grid">
+            <!-- Agriculture Card -->
+            <div class="category-card agri" onclick="selectCategory('AGRI')">
+              <div>
+                <div class="category-header">
+                  <div class="category-icon-box" style="background:#FFF8E1; color:#D4A915">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style="margin:0; font-size:1.25rem; font-weight:700">Agriculture</h3>
+                    <span class="badge" style="background:#FFF8E1; color:#D4A915; border:1px solid #D4A915; font-size:0.7rem; padding:1px 8px; margin-top:2px">AGRICULTURE</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 style="margin:0; font-size:1.4rem">Business</h3>
-                  <div style="color:var(--gray-600); font-size:0.9rem">Commercial and trading operations</div>
-                </div>
+                <div style="font-size:0.84rem; color:var(--gray-600); line-height:1.4">Agricultural produce, farming, crop operations, and agro-industrial products.</div>
               </div>
-              <div class="status-grid">
-                <div class="status-item"><span class="status-label">Total Revenue</span><span class="status-val"
-                    id="BUSINESS-rev">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Total Expenses</span><span class="status-val"
-                    id="BUSINESS-exp">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Net Profit</span><span class="status-val val-green"
-                    id="BUSINESS-prof">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Low Stock Items</span><span class="status-val"
-                    id="BUSINESS-low">Loading...</span></div>
+
+              <div>
+                <div class="cat-stat-grid">
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-count-AGRI">0</span>
+                    <span class="stat-label">Businesses</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-rev-AGRI">₱0.00</span>
+                    <span class="stat-label">Revenue</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-prod-AGRI">0</span>
+                    <span class="stat-label">Products</span>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; padding-top:4px">
+                  <span style="font-size:0.82rem; font-weight:600; color:var(--gray-600)">Workspaces</span>
+                  <span style="font-size:0.82rem; font-weight:700; color:#D4A915; display:inline-flex; align-items:center; gap:4px">
+                    View Businesses <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Agriculture -->
-          <div class="card biz-card-item" style="border-top: 4px solid #D4A915; transition: transform 0.2s">
-            <div style="padding: 24px">
-              <div style="display:flex; align-items:center; gap: 16px">
-                <div
-                  style="width:50px; height:50px; border-radius:12px; background:#FFF8E1; color:#D4A915; display:flex; align-items:center; justify-content:center">
-                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
+            <!-- Non-Agriculture Card -->
+            <div class="category-card non-agri" onclick="selectCategory('NON_AGRI')">
+              <div>
+                <div class="category-header">
+                  <div class="category-icon-box" style="background:#F5F5F5; color:#1A1A1A">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+                      <path d="M9 22v-4h6v4" />
+                      <path d="M8 6h.01" /><path d="M16 6h.01" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style="margin:0; font-size:1.25rem; font-weight:700">Non-Agriculture</h3>
+                    <span class="badge" style="background:#F5F5F5; color:#1A1A1A; border:1px solid #1A1A1A; font-size:0.7rem; padding:1px 8px; margin-top:2px">NON-AGRICULTURE</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 style="margin:0; font-size:1.4rem">Agriculture</h3>
-                  <div style="color:var(--gray-600); font-size:0.9rem">Agricultural produce and farming</div>
-                </div>
+                <div style="font-size:0.84rem; color:var(--gray-600); line-height:1.4">Commercial merchandise, processed goods, retail trade, and utility services.</div>
               </div>
-              <div class="status-grid">
-                <div class="status-item"><span class="status-label">Total Revenue</span><span class="status-val"
-                    id="AGRI-rev">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Total Expenses</span><span class="status-val"
-                    id="AGRI-exp">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Net Profit</span><span class="status-val val-green"
-                    id="AGRI-prof">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Low Stock Items</span><span class="status-val"
-                    id="AGRI-low">Loading...</span></div>
+
+              <div>
+                <div class="cat-stat-grid">
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-count-NON_AGRI">0</span>
+                    <span class="stat-label">Businesses</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-rev-NON_AGRI">₱0.00</span>
+                    <span class="stat-label">Revenue</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-prod-NON_AGRI">0</span>
+                    <span class="stat-label">Products</span>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; padding-top:4px">
+                  <span style="font-size:0.82rem; font-weight:600; color:var(--gray-600)">Workspaces</span>
+                  <span style="font-size:0.82rem; font-weight:700; color:#1A1A1A; display:inline-flex; align-items:center; gap:4px">
+                    View Businesses <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Non-Agriculture -->
-          <div class="card biz-card-item" style="border-top: 4px solid #1A1A1A; transition: transform 0.2s">
-            <div style="padding: 24px">
-              <div style="display:flex; align-items:center; gap: 16px">
-                <div
-                  style="width:50px; height:50px; border-radius:12px; background:#F5F5F5; color:#1A1A1A; display:flex; align-items:center; justify-content:center">
-                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-                    <path d="M9 22v-4h6v4" />
-                  </svg>
+            <!-- Main Card -->
+            <div class="category-card main-cat" onclick="selectCategory('MAIN')">
+              <div>
+                <div class="category-header">
+                  <div class="category-icon-box" style="background:#E3F2FD; color:#0D6EFD">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style="margin:0; font-size:1.25rem; font-weight:700">Main</h3>
+                    <span class="badge" style="background:#E3F2FD; color:#0D6EFD; border:1px solid #0D6EFD; font-size:0.7rem; padding:1px 8px; margin-top:2px">MAIN</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 style="margin:0; font-size:1.4rem">Non-Agriculture</h3>
-                  <div style="color:var(--gray-600); font-size:0.9rem">Non-agricultural products and services</div>
-                </div>
+                <div style="font-size:0.84rem; color:var(--gray-600); line-height:1.4">Central campus enterprises, university utilities, and main administration operations.</div>
               </div>
-              <div class="status-grid">
-                <div class="status-item"><span class="status-label">Total Revenue</span><span class="status-val"
-                    id="NON_AGRI-rev">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Total Expenses</span><span class="status-val"
-                    id="NON_AGRI-exp">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Net Profit</span><span class="status-val val-green"
-                    id="NON_AGRI-prof">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Low Stock Items</span><span class="status-val"
-                    id="NON_AGRI-low">Loading...</span></div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Main -->
-          <div class="card biz-card-item" style="border-top: 4px solid #0D6EFD; transition: transform 0.2s">
-            <div style="padding: 24px">
-              <div style="display:flex; align-items:center; gap: 16px">
-                <div
-                  style="width:50px; height:50px; border-radius:12px; background:#E3F2FD; color:#0D6EFD; display:flex; align-items:center; justify-content:center">
-                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                  </svg>
+              <div>
+                <div class="cat-stat-grid">
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-count-MAIN">0</span>
+                    <span class="stat-label">Businesses</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-rev-MAIN">₱0.00</span>
+                    <span class="stat-label">Revenue</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value" id="cat-prod-MAIN">0</span>
+                    <span class="stat-label">Products</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 style="margin:0; font-size:1.4rem">Main</h3>
-                  <div style="color:var(--gray-600); font-size:0.9rem">Main business operations and services</div>
+                <div style="display:flex; align-items:center; justify-content:space-between; padding-top:4px">
+                  <span style="font-size:0.82rem; font-weight:600; color:var(--gray-600)">Workspaces</span>
+                  <span style="font-size:0.82rem; font-weight:700; color:#0D6EFD; display:inline-flex; align-items:center; gap:4px">
+                    View Businesses <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                  </span>
                 </div>
-              </div>
-              <div class="status-grid">
-                <div class="status-item"><span class="status-label">Total Revenue</span><span class="status-val"
-                    id="MAIN-rev">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Total Expenses</span><span class="status-val"
-                    id="MAIN-exp">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Net Profit</span><span class="status-val val-green"
-                    id="MAIN-prof">Loading...</span></div>
-                <div class="status-item"><span class="status-label">Low Stock Items</span><span class="status-val"
-                    id="MAIN-low">Loading...</span></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Business Entities Table -->
-        <div class="card" style="margin-top: 32px;">
-          <div class="card-header">
-            <span class="card-title">Registered Business Entities</span>
-            <button class="btn btn-primary btn-sm btn-add-entity" id="addEntityBtn" onclick="openAddEntity()" style="display:none">+ Add Entity</button>
+        <!-- Category Businesses Drilldown View (Hidden until category chosen) -->
+        <div id="categoryBusinessesSection" style="display:none">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <button class="btn btn-outline btn-sm" onclick="showCategoriesView()" style="display:inline-flex; align-items:center; gap:8px">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+              All Categories
+            </button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-AGRI" onclick="selectCategory('AGRI')">Agriculture</button>
+              <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-NON_AGRI" onclick="selectCategory('NON_AGRI')">Non-Agriculture</button>
+              <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-MAIN" onclick="selectCategory('MAIN')">Main</button>
+              <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-all" onclick="selectCategory('all')">All Businesses</button>
+            </div>
           </div>
-          <div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:16px">Manage specific business units under the 4 main categories</div>
-          <div class="table-wrap" id="entitiesTable">
-            <div class="empty-state"><div class="spinner"></div></div>
+
+          <div class="card">
+            <div class="card-header" style="flex-wrap:wrap; gap:12px">
+              <div>
+                <h3 class="card-title" id="catBizHeaderTitle">Agriculture — Registered Businesses</h3>
+                <div style="font-size:0.82rem; color:var(--gray-600); margin-top:4px" id="catBizHeaderDesc">Workspaces registered under this category. Click any business name to manage its workspace.</div>
+              </div>
+              <button class="btn btn-primary btn-sm btn-add-entity" id="catAddBizBtn" onclick="openAddEntity(currentCategory)">+ Add Business</button>
+            </div>
+            <div class="table-wrap" id="entitiesTable">
+              <div class="empty-state"><div class="spinner"></div></div>
+            </div>
           </div>
         </div>
 
@@ -366,15 +408,7 @@
             <button class="btn btn-primary btn-sm" onclick="saveTaxes()">Save Tax Rates</button>
           </div>
           <div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:20px">Configure the tax percentage rate (e.g. VAT or Sales Tax) applied to transactions for each business category.</div>
-          <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 16px;">
-            <div class="form-group">
-              <label class="form-label" style="color:#6B3FA0;font-weight:700">Rental Tax Rate (%)</label>
-              <input type="number" id="tax_RENTAL" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 12">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="color:#2d6a2e;font-weight:700">Business Tax Rate (%)</label>
-              <input type="number" id="tax_BUSINESS" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 12">
-            </div>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
             <div class="form-group">
               <label class="form-label" style="color:#D4A915;font-weight:700">Agriculture Tax Rate (%)</label>
               <input type="number" id="tax_AGRI" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 0">
@@ -388,35 +422,23 @@
               <input type="number" id="tax_MAIN" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 12">
             </div>
           </div>
-
-        <!-- Product Performance -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px">
-          <div class="card">
-            <div class="card-header"><span class="card-title">Top Selling Products</span></div>
-            <div id="topProductsList" style="padding:16px"><div class="empty-state"><div class="spinner"></div></div></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">Under Performing Products</span></div>
-            <div id="lowProductsList" style="padding:16px"><div class="empty-state"><div class="spinner"></div></div></div>
-          </div>
         </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Add Entity Modal -->
+  <!-- Add Business Modal -->
   <div class="modal-overlay" id="addEntityModal">
     <div class="modal" style="max-width:500px">
       <div class="modal-header">
-        <span class="modal-title">Register Business Entity</span>
+        <span class="modal-title">Add New Business</span>
         <button class="modal-close" onclick="closeModal('addEntityModal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Entity Name *</label><input type="text" id="e_name" class="form-control" placeholder="e.g. Dormitory Rentals"></div>
-        <div class="form-group"><label class="form-label">Main Category *</label>
+        <div class="form-group"><label class="form-label">Business Name *</label><input type="text" id="e_name" class="form-control" placeholder="e.g. Business 1"></div>
+        <div class="form-group"><label class="form-label">Category *</label>
           <select id="e_category" class="form-control">
-            <option value="RENTAL">Rental</option>
-            <option value="BUSINESS">Business</option>
             <option value="AGRI">Agriculture</option>
             <option value="NON_AGRI">Non-Agriculture</option>
             <option value="MAIN">Main</option>
@@ -427,135 +449,326 @@
         <div class="form-group"><label class="form-label">Location</label><input type="text" id="e_location" class="form-control" placeholder="Building/Area"></div>
         <div class="form-group"><label class="form-label">Assigned Manager</label><input type="text" id="e_manager" class="form-control" placeholder="Manager Name"></div>
       </div>
-      <div class="form-group"><label class="form-label">Description</label><textarea id="e_desc" class="form-control" placeholder="Brief description of the business unit..."></textarea></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea id="e_desc" class="form-control" placeholder="Brief description of the business..."></textarea></div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeModal('addEntityModal')">Cancel</button>
-        <button class="btn btn-primary btn-save-entity" onclick="saveEntity()">Save Entity</button>
+        <button class="btn btn-primary btn-save-entity" id="createBizBtn" onclick="saveEntity()">Create Business</button>
       </div>
     </div>
   </div>
 
-  <script src="/js/app.js"></script>
+  <!-- Edit Business Modal -->
+  <div class="modal-overlay" id="editEntityModal">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-header">
+        <span class="modal-title">Edit Business</span>
+        <button class="modal-close" onclick="closeModal('editEntityModal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <input type="hidden" id="edit_e_id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Business Name *</label><input type="text" id="edit_e_name" class="form-control" placeholder="e.g. Business 1"></div>
+        <div class="form-group"><label class="form-label">Category *</label>
+          <select id="edit_e_category" class="form-control">
+            <option value="AGRI">Agriculture</option>
+            <option value="NON_AGRI">Non-Agriculture</option>
+            <option value="MAIN">Main</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Location</label><input type="text" id="edit_e_location" class="form-control" placeholder="Building/Area"></div>
+        <div class="form-group"><label class="form-label">Assigned Manager</label><input type="text" id="edit_e_manager" class="form-control" placeholder="Manager Name"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea id="edit_e_desc" class="form-control" placeholder="Brief description of the business..."></textarea></div>
+      <div class="modal-footer" style="justify-content:space-between">
+        <button class="btn btn-outline" id="deactivateBizBtn" onclick="deactivateFromEdit()" style="color:var(--danger);border-color:var(--danger)">Deactivate</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="closeModal('editEntityModal')">Cancel</button>
+          <button class="btn btn-primary btn-save-entity" id="saveEditBizBtn" onclick="saveEditEntity()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js?v=2"></script>
   <script>
-    async function loadStatus(biz) {
-      try {
-        const [sRes, eRes, iRes] = await Promise.all([
-          API.get('/api/sales?biz=' + biz),
-          API.get('/api/expenses?biz=' + biz),
-          API.get('/api/inventory?biz=' + biz)
-        ]);
-        const sales = sRes.success ? sRes.data : [];
-        const expenses = eRes.success ? eRes.data : [];
-        const inventory = iRes.success ? iRes.data : [];
+    let entities = [];
+    let entityStats = {};
+    let currentCategory = null; // null = show categories overview first; 'AGRI'|'NON_AGRI'|'MAIN'|'all' = category drilldown
 
-        const salesRev = sales.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
-        const otherIncome = expenses.filter(e => e.type === 'income').reduce((a, e) => a + (parseFloat(e.amount) || 0), 0);
-        const totalRev = salesRev + otherIncome;
-        const totalExp = expenses.filter(e => e.type === 'expense').reduce((a, e) => a + (parseFloat(e.amount) || 0), 0);
-        const profit = totalRev - totalExp;
-
-        const lowStock = inventory.filter(i => parseInt(i.quantity || i.stock || 0) <= parseInt(i.reorderLevel || 10)).length;
-
-        document.getElementById(biz + '-rev').textContent = fmt.currency(totalRev);
-        document.getElementById(biz + '-exp').textContent = fmt.currency(totalExp);
-        document.getElementById(biz + '-prof').textContent = fmt.currency(profit);
-        document.getElementById(biz + '-prof').className = 'status-val ' + (profit >= 0 ? 'val-green' : 'val-danger');
-        document.getElementById(biz + '-low').textContent = lowStock > 0 ? `${lowStock} items` : '0 items';
-        if (lowStock > 0) document.getElementById(biz + '-low').classList.add('val-danger');
-
-      } catch (e) {
-        document.getElementById(biz + '-rev').textContent = 'Error';
-        document.getElementById(biz + '-exp').textContent = 'Error';
-        document.getElementById(biz + '-prof').textContent = 'Error';
-        document.getElementById(biz + '-low').textContent = 'Error';
+    const CATEGORIES_DATA = {
+      AGRI: {
+        id: 'AGRI',
+        name: 'Agriculture',
+        badge: 'AGRICULTURE',
+        desc: 'Agricultural produce, farming, crop operations, and agro-industrial products.',
+        color: '#D4A915',
+        bg: '#FFF8E1'
+      },
+      NON_AGRI: {
+        id: 'NON_AGRI',
+        name: 'Non-Agriculture',
+        badge: 'NON-AGRICULTURE',
+        desc: 'Commercial merchandise, processed goods, retail trade, and utility services.',
+        color: '#1A1A1A',
+        bg: '#F5F5F5'
+      },
+      MAIN: {
+        id: 'MAIN',
+        name: 'Main',
+        badge: 'MAIN',
+        desc: 'Central campus enterprises, university utilities, and main administration operations.',
+        color: '#0D6EFD',
+        bg: '#E3F2FD'
       }
+    };
+
+    function renderCategoryCards() {
+      ['AGRI', 'NON_AGRI', 'MAIN'].forEach(catId => {
+        const catEntities = entities.filter(e => e.categoryId === catId);
+        const countEl = document.getElementById('cat-count-' + catId);
+        if (countEl) countEl.textContent = catEntities.length;
+
+        let totalRev = 0;
+        let totalProd = 0;
+        catEntities.forEach(e => {
+          if (entityStats[e.id]) {
+            totalRev += (entityStats[e.id].revenue || 0);
+            totalProd += (entityStats[e.id].products || 0);
+          }
+        });
+
+        const revEl = document.getElementById('cat-rev-' + catId);
+        if (revEl) revEl.textContent = fmt.currency(totalRev);
+
+        const prodEl = document.getElementById('cat-prod-' + catId);
+        if (prodEl) prodEl.textContent = totalProd;
+      });
     }
 
-    let entities = [];
+    function showCategoriesView() {
+      currentCategory = null;
+      document.getElementById('categoryViewSection').style.display = 'block';
+      document.getElementById('categoryBusinessesSection').style.display = 'none';
+      renderCategoryCards();
+    }
+
+    function selectCategory(catId) {
+      currentCategory = catId;
+      document.getElementById('categoryViewSection').style.display = 'none';
+      document.getElementById('categoryBusinessesSection').style.display = 'block';
+
+      // Update Tab buttons
+      ['AGRI', 'NON_AGRI', 'MAIN', 'all'].forEach(id => {
+        const btn = document.getElementById('tab-' + id);
+        if (!btn) return;
+        if (id === catId) {
+          btn.classList.add('active');
+          if (id === 'AGRI') {
+            btn.style.background = '#D4A915';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#D4A915';
+          } else if (id === 'NON_AGRI') {
+            btn.style.background = '#1A1A1A';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#1A1A1A';
+          } else if (id === 'MAIN') {
+            btn.style.background = '#0D6EFD';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#0D6EFD';
+          } else {
+            btn.style.background = 'var(--black)';
+            btn.style.color = '#fff';
+            btn.style.borderColor = 'var(--black)';
+          }
+        } else {
+          btn.classList.remove('active');
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }
+      });
+
+      // Update Card Header & Subtitle
+      const titleEl = document.getElementById('catBizHeaderTitle');
+      const descEl = document.getElementById('catBizHeaderDesc');
+      if (catId === 'all') {
+        if (titleEl) titleEl.textContent = 'All Registered Businesses';
+        if (descEl) descEl.textContent = 'Workspaces across all categories. Click any business name to manage its inventory, sales, reports, and users.';
+      } else {
+        const meta = CATEGORIES_DATA[catId];
+        const catName = meta ? meta.name : catId;
+        if (titleEl) titleEl.textContent = catName + ' — Registered Businesses';
+        if (descEl) descEl.textContent = 'Workspaces registered under ' + catName + '. Click any business name to manage its inventory, sales, reports, and users.';
+      }
+
+      renderEntities();
+    }
+
     async function loadEntities() {
       try {
         const res = await API.get('/api/admin/businesses');
         if(res.success) {
-          entities = res.data;
-          renderEntities();
+          entities = (res.data || []).filter(e => (e.status || 'active') === 'active');
+          renderCategoryCards();
+          if (currentCategory) {
+            renderEntities();
+          }
+          await loadEntityStats();
         }
       } catch(e) { console.error(e); }
     }
 
+    async function loadEntityStats() {
+      await Promise.all(entities.map(async (e) => {
+        try {
+          const q = '?biz=' + e.categoryId + '&entity=' + encodeURIComponent(e.id);
+          const [sRes, eRes, iRes] = await Promise.all([
+            API.get('/api/sales' + q),
+            API.get('/api/expenses' + q),
+            API.get('/api/inventory' + q)
+          ]);
+          const sales = sRes.success ? sRes.data : [];
+          const expenses = eRes.success ? eRes.data : [];
+          const inventory = iRes.success ? iRes.data : [];
+          const salesRev = sales.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
+          const otherIncome = expenses.filter(x => x.type === 'income').reduce((a, x) => a + (parseFloat(x.amount) || 0), 0);
+          const totalRev = salesRev + otherIncome;
+          const totalExp = expenses.filter(x => x.type === 'expense').reduce((a, x) => a + (parseFloat(x.amount) || 0), 0);
+          entityStats[e.id] = { revenue: totalRev, profit: totalRev - totalExp, products: inventory.length };
+          const revEl = document.getElementById('rev-' + e.id);
+          if (revEl) revEl.textContent = fmt.currency(totalRev);
+        } catch (_) {}
+      }));
+      renderCategoryCards();
+    }
+
+    function openBusiness(eId) {
+      const e = entities.find(x => x.id === eId);
+      if (!e) return;
+      // Workspace = role dashboard scoped by ?biz=<category>&entity=<id>
+      getCurrentUser().then(u => {
+        const user = (u && (u.user || u)) || {};
+        const role = user.role || '';
+        const base = (role === 'super_admin' || role === 'admin' || role === 'viewer') ? '/admin/dashboard' : '/employee/dashboard';
+        window.location.href = base + '?biz=' + e.categoryId + '&entity=' + encodeURIComponent(e.id);
+      });
+    }
+
     function renderEntities() {
       const el = document.getElementById('entitiesTable');
-      if(!entities.length) {
-        el.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No entities found</h3><p>Click "+ Add Entity" to register one.</p></div>';
+      if (!el) return;
+
+      const filtered = (currentCategory && currentCategory !== 'all')
+        ? entities.filter(e => e.categoryId === currentCategory)
+        : entities;
+
+      const cats = {AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main'};
+      const colors = {AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD'};
+
+      if (!filtered.length) {
+        const catName = cats[currentCategory] || (currentCategory === 'all' ? 'any category' : 'this category');
+        el.innerHTML = `
+          <div class="empty-state" style="padding:40px 16px; text-align:center">
+            <div style="width:54px; height:54px; border-radius:50%; background:var(--gray-100); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--gray-400)">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/></svg>
+            </div>
+            <h3 style="margin-bottom:6px">No businesses found in ${catName}</h3>
+            <p style="color:var(--gray-500); max-width:420px; margin:0 auto 16px; font-size:0.88rem">Click "+ Add Business" to create a workspace for this category.</p>
+            ${window._canEditBiz === false ? '' : `<button class="btn btn-primary btn-sm btn-add-entity" onclick="openAddEntity('${currentCategory && currentCategory !== 'all' ? currentCategory : 'AGRI'}')">+ Add Business in ${catName}</button>`}
+          </div>`;
         return;
       }
-      const cats = {RENTAL:'Rental', BUSINESS:'Business', AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main'};
-      const colors = {RENTAL:'#6B3FA0', BUSINESS:'#2d6a2e', AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD'};
-      el.innerHTML = `<table><thead><tr><th>Entity Name</th><th>Main Category</th><th>Location</th><th>Manager</th><th>Status</th></tr></thead><tbody>
-        ${entities.map(e => `<tr>
-          <td class="fw-bold">${e.name}</td>
+
+      el.innerHTML = `<table><thead><tr><th>Business Name</th><th>Category</th><th>Location</th><th>Manager</th><th>Revenue</th><th>Status</th><th>Action</th></tr></thead><tbody>
+        ${filtered.map(e => {
+          const revVal = entityStats[e.id]?.revenue !== undefined ? fmt.currency(entityStats[e.id].revenue) : '—';
+          return `<tr>
+          <td class="fw-bold"><a href="javascript:void(0)" onclick="openBusiness('${e.id}')" title="Open workspace" style="color:inherit;text-decoration:underline dotted">${e.name}</a></td>
           <td><span class="badge" style="background:var(--gray-100);color:${colors[e.categoryId]||'var(--black)'};border:1px solid ${colors[e.categoryId]||'#ccc'}">${cats[e.categoryId]||e.categoryId}</span></td>
           <td>${e.location||'—'}</td>
           <td>${e.manager||'—'}</td>
+          <td id="rev-${e.id}">${revVal}</td>
           <td>${statusBadge(e.status||'active')}</td>
-        </tr>`).join('')}
+          <td style="white-space:nowrap">
+            ${window._canEditBiz === false ? '<span style="color:var(--gray-400);font-size:0.8rem">View only</span>' : `<button class="btn btn-primary btn-sm btn-save-entity" onclick="openEditEntity('${e.id}')">Edit</button>`}
+          </td>
+        </tr>`;
+        }).join('')}
       </tbody></table>`;
     }
 
-    // ── Product Performance (Top & Under Performing) ──
-    async function loadProductPerformance() {
+    function openEditEntity(id) {
+      const e = entities.find(x => x.id === id);
+      if (!e) return;
+      document.getElementById('edit_e_id').value = e.id;
+      document.getElementById('edit_e_name').value = e.name || '';
+      document.getElementById('edit_e_location').value = e.location || '';
+      document.getElementById('edit_e_manager').value = e.manager || '';
+      document.getElementById('edit_e_desc').value = e.description || '';
+      const catSelect = document.getElementById('edit_e_category');
+      catSelect.value = e.categoryId || 'AGRI';
+      // Managers stay locked to their own category
+      catSelect.disabled = !!window._managerBiz;
+      if (window._managerBiz) catSelect.value = window._managerBiz;
+      openModal('editEntityModal');
+    }
+
+    let _savingEditBiz = false;
+    async function saveEditEntity() {
+      if (_savingEditBiz) return;
+      const id = document.getElementById('edit_e_id').value;
+      if (!id) return;
+      const name = document.getElementById('edit_e_name').value.trim();
+      if (!name) return Toast.warning('Business name is required');
+      const data = {
+        name,
+        categoryId: document.getElementById('edit_e_category').value,
+        type: document.getElementById('edit_e_category').value,
+        location: document.getElementById('edit_e_location').value.trim(),
+        manager: document.getElementById('edit_e_manager').value.trim(),
+        description: document.getElementById('edit_e_desc').value.trim()
+      };
+      const btn = document.getElementById('saveEditBizBtn');
+      _savingEditBiz = true;
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none'; }
       try {
-        const results = await Promise.all(
-          ['RENTAL','BUSINESS','AGRI','NON_AGRI','MAIN'].map(async biz => {
-            const res = await API.get('/api/sales?biz=' + biz);
-            return { biz, data: res.success ? (res.data || []) : [] };
-          })
-        );
-
-        const productMap = {};
-        results.forEach(({ biz, data }) => {
-          data.forEach(sale => {
-            (sale.items || []).forEach(item => {
-              const key = item.name || 'Unknown';
-              if (!productMap[key]) productMap[key] = { name: key, qty: 0, revenue: 0, biz: biz };
-              productMap[key].qty += parseInt(item.quantity || item.qty || 1);
-              productMap[key].revenue += parseFloat(item.subtotal || item.unitPrice || 0) * (parseInt(item.quantity || item.qty || 1));
-            });
-          });
-        });
-
-        const products = Object.values(productMap);
-
-        // Top 5 by Revenue
-        const top5 = products.sort((a,b) => b.revenue - a.revenue).slice(0,5);
-        const rankColors = ['gold','silver','bronze','default','default'];
-        const topEl = document.getElementById('topProductsList');
-        if (!top5.length) {
-          topEl.innerHTML = '<div class="empty-state" style="padding:20px"><h3>No sales yet</h3><p>Start recording sales to see top products</p></div>';
+        const res = await API.put('/api/admin/businesses/' + encodeURIComponent(id), data);
+        if (res.success) {
+          Toast.success('Business updated');
+          closeModal('editEntityModal');
+          loadEntities();
         } else {
-          topEl.innerHTML = top5.map((p,i) => `
-            <div class="top-product-item">
-              <div class="top-product-rank ${rankColors[i]}">${i+1}</div>
-              <div style="flex:1"><div style="font-weight:600;font-size:0.9rem">${p.name}</div><small style="color:var(--gray-400)">${p.qty} sold</small></div>
-              <div style="font-weight:700;font-size:0.88rem">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
-            </div>`).join('');
+          Toast.error(res.message || 'Failed to update');
         }
-
-        // Bottom 5 by Revenue (lowest selling)
-        const bottom5 = products.sort((a,b) => a.revenue - b.revenue).slice(0,5);
-        const lowEl = document.getElementById('lowProductsList');
-        if (!bottom5.length) {
-          lowEl.innerHTML = '<div class="empty-state" style="padding:20px"><h3>No sales yet</h3><p>Start recording sales to see product performance</p></div>';
-        } else {
-          lowEl.innerHTML = bottom5.map((p,i) => `
-            <div class="top-product-item">
-              <div class="top-product-rank default" style="background:var(--danger-light);color:var(--danger)">${i+1}</div>
-              <div style="flex:1"><div style="font-weight:600;font-size:0.9rem">${p.name}</div><small style="color:var(--gray-400)">${p.qty} sold — ${p.revenue > 0 ? '&#8369;'+p.revenue.toLocaleString('en',{minimumFractionDigits:2}) : 'No revenue'}</small></div>
-              <div style="font-weight:700;font-size:0.82rem;color:var(--danger)">${p.revenue === 0 ? '0 sold' : 'Low'}</div>
-            </div>`).join('');
-        }
-      } catch(e) {
-        console.error('Product performance error:', e);
+      } catch (e) {
+        let msg = 'Error updating business';
+        try {
+          const m = (e.message || '').match(/\{.*\}/);
+          if (m) { const j = JSON.parse(m[0]); if (j.message) msg = j.message; }
+        } catch(_) {}
+        Toast.error(msg);
+      } finally {
+        _savingEditBiz = false;
+        if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; btn.style.opacity = ''; btn.style.pointerEvents = ''; }
       }
+    }
+
+    async function deactivateBusiness(id, name) {
+      if (!confirm('Deactivate "' + name + '"? Its inventory/sales history is kept but hidden.')) return;
+      try {
+        const res = await API.del('/api/admin/businesses/' + encodeURIComponent(id));
+        if (res.success) { Toast.success('Business deactivated'); loadEntities(); }
+        else Toast.error(res.message || 'Failed');
+      } catch (e) { Toast.error('Error deactivating'); }
+    }
+
+    async function deactivateFromEdit() {
+      const id = document.getElementById('edit_e_id').value;
+      const name = document.getElementById('edit_e_name').value || '';
+      if (!id) return;
+      await deactivateBusiness(id, name);
+      closeModal('editEntityModal');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -565,26 +778,27 @@
           document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(user.role);
           document.querySelector('.sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
 
-          // Manager: show add entity button, auto-set category
+          const canAdd = ['super_admin','admin','system_administrator','manager','accounting_officer'].includes(user.role);
+          window._canEditBiz = canAdd;
+          document.getElementById('addEntityBtn').style.display = canAdd ? '' : 'none';
+          document.querySelectorAll('.page-content .btn-add-entity').forEach(b => { b.style.display = canAdd ? '' : 'none'; });
+
+          // Manager locked to own category (category is label only)
           if (user.role === 'manager') {
-            document.getElementById('addEntityBtn').style.display = '';
-            // Auto-set category to manager's assigned business
             const bizAccess = user.businessAccess || [];
             if (bizAccess.length > 0 && bizAccess[0] !== 'all') {
               window._managerBiz = bizAccess[0];
             }
           }
 
-          // Super admin only: view only, no add entity, show tax settings
-          if (user.role === 'super_admin') {
-            document.getElementById('addEntityBtn').style.display = 'none';
+          // Super admin: show tax settings (per-category tax still applies as label)
+          if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'system_administrator') {
             document.getElementById('taxSettingsCard').style.display = 'block';
             loadTaxes();
           }
 
           // Viewer: hide management actions, show view-only badge
           if (user.role === 'viewer') {
-            document.getElementById('addEntityBtn').style.display = 'none';
             document.querySelectorAll('.sidebar-nav a').forEach(a => {
               const href = a.getAttribute('href') || '';
               if (href.includes('/notifications') || href.includes('/users') || href.includes('/settings')) a.style.display = 'none';
@@ -600,12 +814,10 @@
           }
         }
       });
-      ['RENTAL', 'BUSINESS', 'AGRI', 'NON_AGRI', 'MAIN'].forEach(biz => loadStatus(biz));
       loadEntities();
-      loadProductPerformance();
     });
 
-    function openAddEntity() {
+    function openAddEntity(presetCat) {
       document.getElementById('e_name').value = '';
       document.getElementById('e_location').value = '';
       document.getElementById('e_manager').value = '';
@@ -616,13 +828,15 @@
         catSelect.value = window._managerBiz;
         catSelect.disabled = true;
       } else {
-        catSelect.value = 'RENTAL';
+        catSelect.value = (presetCat && presetCat !== 'all' && ['AGRI', 'NON_AGRI', 'MAIN'].includes(presetCat)) ? presetCat : 'AGRI';
         catSelect.disabled = false;
       }
       openModal('addEntityModal');
     }
 
+    let _savingBiz = false;
     async function saveEntity() {
+      if (_savingBiz) return; // prevent double/multiple clicks
       const data = {
         name: document.getElementById('e_name').value.trim(),
         categoryId: document.getElementById('e_category').value,
@@ -630,25 +844,37 @@
         manager: document.getElementById('e_manager').value.trim(),
         description: document.getElementById('e_desc').value.trim()
       };
-      if(!data.name) return Toast.warning('Entity name is required');
+      if(!data.name) return Toast.warning('Business name is required');
+      const btn = document.getElementById('createBizBtn');
+      _savingBiz = true;
+      if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none'; }
       try {
         const res = await API.post('/api/admin/businesses', data);
         if(res.success) {
-          Toast.success('Business Entity registered successfully');
+          Toast.success('Business "' + res.data.name + '" created. Click Open to manage its workspace.');
           closeModal('addEntityModal');
           loadEntities();
         } else {
-          Toast.error(res.message);
+          Toast.error(res.message || 'Error creating business');
         }
-      } catch(e) { Toast.error('Error saving entity'); }
+      } catch(e) {
+        // API.post throws `HTTP 400: {"success":false,"message":"..."}` — extract real message
+        let msg = 'Error creating business';
+        try {
+          const m = (e.message || '').match(/\{.*\}/);
+          if (m) { const j = JSON.parse(m[0]); if (j.message) msg = j.message; }
+        } catch(_) {}
+        Toast.error(msg);
+      } finally {
+        _savingBiz = false;
+        if (btn) { btn.disabled = false; btn.textContent = 'Create Business'; btn.style.opacity = ''; btn.style.pointerEvents = ''; }
+      }
     }
 
     async function loadTaxes() {
       try {
         const res = await API.get('/api/admin/taxes');
         if (res.success && res.data) {
-          document.getElementById('tax_RENTAL').value = res.data.RENTAL !== undefined ? res.data.RENTAL : 12;
-          document.getElementById('tax_BUSINESS').value = res.data.BUSINESS !== undefined ? res.data.BUSINESS : 12;
           document.getElementById('tax_AGRI').value = res.data.AGRI !== undefined ? res.data.AGRI : 0;
           document.getElementById('tax_NON_AGRI').value = res.data.NON_AGRI !== undefined ? res.data.NON_AGRI : 12;
           document.getElementById('tax_MAIN').value = res.data.MAIN !== undefined ? res.data.MAIN : 12;
@@ -658,8 +884,6 @@
 
     async function saveTaxes() {
       const taxes = {
-        RENTAL: parseFloat(document.getElementById('tax_RENTAL').value) || 0,
-        BUSINESS: parseFloat(document.getElementById('tax_BUSINESS').value) || 0,
         AGRI: parseFloat(document.getElementById('tax_AGRI').value) || 0,
         NON_AGRI: parseFloat(document.getElementById('tax_NON_AGRI').value) || 0,
         MAIN: parseFloat(document.getElementById('tax_MAIN').value) || 0

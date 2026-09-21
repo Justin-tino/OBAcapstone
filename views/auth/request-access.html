@@ -53,10 +53,9 @@
         <div class="form-group">
           <label class="form-label">Role Requested</label>
           <select id="roleReq" class="form-control">
-            <option value="employee">Employee (Staff)</option>
-            <option value="manager">Manager</option>
-            <option value="admin">Admin (Per Business)</option>
-            <option value="superadmin">Super Admin</option>
+  <option value="viewer">Sale staff</option>
+  <option value="manager">Accounting Officer</option>
+  <option value="admin">System Administrator</option>
           </select>
         </div>
         <div class="form-group">
@@ -64,8 +63,6 @@
           <select id="businessUnit" class="form-control">
             <option value="">Select Business Unit</option>
             <option value="all">All Business Units</option>
-            <option value="RENTAL">Rental</option>
-            <option value="BUSINESS">Business</option>
             <option value="AGRI">Agriculture</option>
             <option value="NON_AGRI">Non-Agriculture</option>
             <option value="MAIN">Main</option>
@@ -92,7 +89,7 @@
     </div>
   </div>
 
-  <script src="/js/app.js"></script>
+  <script src="/js/app.js?v=2"></script>
   <script>
     async function submitRequest() {
       const name = document.getElementById('name').value.trim();

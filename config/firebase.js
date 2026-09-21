@@ -3,7 +3,8 @@ const admin = require('firebase-admin');
 
 // Firebase Admin SDK initialization
 // Replace .env values with your actual Firebase service account credentials
-let db = null;
+let db = null; // Realtime Database (legacy — kept for reference, no longer primary)
+let firestore = null; // Firestore (primary — Unified Firestore Database per CAPSTONE spec §5.1)
 let auth = null;
 
 try {
@@ -20,15 +21,18 @@ try {
       }),
       databaseURL: process.env.FIREBASE_DATABASE_URL
     });
-    db = admin.database();
+    // Primary store: Firestore (flat collections, see config/db.js + firestore.rules)
+    firestore = admin.firestore();
+    // Legacy RTDB handle (kept so old code paths fail soft during migration)
+    try { db = admin.database(); } catch (_) { db = null; }
     auth = admin.auth();
-    console.log('✅ Firebase Admin SDK connected successfully');
+    console.log('Firebase Admin SDK connected successfully (Firestore primary)');
   } else {
-    console.log('⚠️  Firebase credentials not configured. Running in demo/mock mode.');
-    console.log('   → Fill in your .env file with actual Firebase credentials to connect.');
+    console.log('Firebase credentials not configured. Running in demo/mock mode.');
+    console.log('Fill in your .env file with actual Firebase credentials to connect.');
   }
 } catch (err) {
-  console.error('❌ Firebase initialization error:', err.message);
+  console.error('Firebase initialization error:', err.message);
 }
 
 // Firebase Client SDK config (for frontend use)
@@ -42,4 +46,4 @@ const firebaseClientConfig = {
   appId: process.env.FIREBASE_APP_ID || 'PLACEHOLDER',
 };
 
-module.exports = { db, auth, admin, firebaseClientConfig };
+module.exports = { db, firestore, auth, admin, firebaseClientConfig };

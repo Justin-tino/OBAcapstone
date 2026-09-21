@@ -74,6 +74,18 @@ const fmt = {
   }
 };
 
+// ── HTML Escaping Utility ──────────────────────────────────────────
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+window.escapeHtml = escapeHtml;
+
 // ── API Helper ─────────────────────────────────────────────────────
 const API = {
   async get(url, params = {}) {
@@ -131,6 +143,57 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ── Submit Lock (prevents duplicate submissions from rapid clicking) ──
+// Every action button in the app uses an inline async onclick handler. While
+// that handler's promise is still in flight, any further clicks on the same
+// button are swallowed, so spam-clicking can no longer fire duplicate
+// requests (restock, login, sales, etc.).
+(function () {
+  // Visual feedback while a button's handler is in flight.
+  const style = document.createElement('style');
+  style.textContent = 'button.btn-busy{opacity:.55;cursor:progress}';
+  document.head.appendChild(style);
+
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('button[onclick]');
+    if (!btn) return;
+
+    const code = btn.getAttribute('onclick');
+    if (!code) return;
+
+    // A handler for this button is still running — swallow the extra click.
+    if (btn.__submitLocked) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return;
+    }
+
+    btn.__submitLocked = true;
+    btn.classList.add('btn-busy');
+
+    // Run the inline handler ourselves (preserving `this` and `event`),
+    // then keep the button locked until any returned promise settles.
+    let result;
+    try {
+      result = new Function('event', code).call(btn, e);
+    } catch (err) {
+      console.error('Button handler error:', err);
+    }
+
+    // The handler already ran — block the browser from firing the inline
+    // onclick again as well.
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    Promise.resolve(result)
+      .catch(err => console.error('Button handler error:', err))
+      .finally(() => {
+        btn.__submitLocked = false;
+        btn.classList.remove('btn-busy');
+      });
+  }, true);
+})();
+
 // ── Tabs ────────────────────────────────────────────────────────────
 function initTabs(containerSelector) {
   const container = document.querySelector(containerSelector);
@@ -152,11 +215,13 @@ function initTabs(containerSelector) {
 
 // ── Sidebar Toggle (mobile) ────────────────────────────────────────
 function initSidebar() {
-  const hamburger = document.getElementById('hamburger');
-  const sidebar = document.querySelector('.sidebar');
-  if (hamburger && sidebar) {
-    hamburger.addEventListener('click', () => sidebar.classList.toggle('open'));
-  }
+  // Automatically remove notification buttons from the sidebar in all accounts
+  document.querySelectorAll('.sidebar .nav-item, .sidebar-nav .nav-item').forEach(item => {
+    const href = item.getAttribute('href') || item.getAttribute('data-page') || '';
+    if (href.includes('/notifications')) {
+      item.remove();
+    }
+  });
   // Set active nav item from current path
   const path = window.location.pathname;
   document.querySelectorAll('.nav-item[data-href]').forEach(item => {
@@ -191,24 +256,32 @@ function stockBadge(status) {
 // ── Role Badge ────────────────────────────────────────────────────
 function roleBadge(role) {
   const map = {
-    super_admin: '<span class="badge badge-black">Super Admin</span>',
-    admin: '<span class="badge badge-black">Super Admin</span>',
-    manager: '<span class="badge" style="background:var(--info-light);color:var(--info);border:1px solid var(--info)">Manager</span>',
-    employee: '<span class="badge badge-green">Employee</span>',
-    viewer: '<span class="badge badge-gray">Viewer</span>',
+    super_admin: '<span class="badge badge-black">System Administrator</span>',
+    system_administrator: '<span class="badge badge-black">System Administrator</span>',
+    admin: '<span class="badge badge-black">System Administrator</span>',
+    manager: '<span class="badge" style="background:#E3F2FD;color:#0D6EFD;border:1px solid #90CAF9">Accounting Officer</span>',
+    accounting_officer: '<span class="badge" style="background:#E3F2FD;color:#0D6EFD;border:1px solid #90CAF9">Accounting Officer</span>',
+    employee: '<span class="badge badge-yellow">Sale staff</span>',
+    viewer: '<span class="badge badge-yellow">Sale staff</span>',
+    sales_staff: '<span class="badge badge-yellow">Sale staff</span>',
+    sale_staff: '<span class="badge badge-yellow">Sale staff</span>',
   };
   return map[role] || `<span class="badge">${role}</span>`;
 }
 
 function formatRole(role) {
   const names = {
-    super_admin: 'Super Admin',
-    admin: 'Super Admin',
-    manager: 'Manager',
-    employee: 'Employee',
-    viewer: 'Viewer',
+    super_admin: 'System Administrator',
+    system_administrator: 'System Administrator',
+    admin: 'System Administrator',
+    manager: 'Accounting Officer',
+    accounting_officer: 'Accounting Officer',
+    employee: 'Sale staff',
+    viewer: 'Sale staff',
+    sales_staff: 'Sale staff',
+    sale_staff: 'Sale staff',
   };
-  return names[role] || role.charAt(0).toUpperCase() + role.slice(1);
+  return names[role] || (role ? role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'User');
 }
 
 // ── Auto-compute sales totals ──────────────────────────────────────
@@ -259,20 +332,20 @@ function confirm(message, onConfirm, onCancel) {
   overlay.querySelector('#confirmNo').onclick = () => { overlay.remove(); onCancel && onCancel(); };
 }
 
-// ── Inject Manage Employees nav for managers ─────────────────────
+// ── Inject Accounting Officer nav (Dashboard, Sales, Inventory, Generate Reports, View Employee, Performing Rank) ──
 async function applyManagerNav() {
   try {
     const u = await getCurrentUser();
-    if (u && u.role === 'manager') {
+    if (u && (u.role === 'manager' || u.role === 'accounting_officer')) {
       const nav = document.querySelector('.sidebar-nav');
       if (!nav) return;
       nav.innerHTML = `
         <a class="nav-item" href="/manager/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-        <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
         <a class="nav-item" href="/manager/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-        <a class="nav-item" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-        <a class="nav-item" href="/manager/employees"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Employees</a>
-        <a class="nav-item" href="/manager/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
+        <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+        <a class="nav-item" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Generate Reports</a>
+        <a class="nav-item" href="/manager/employees"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> View Employee</a>
+        <a class="nav-item" href="/manager/performing-rank"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span> Performing Rank</a>
         <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
       `;
       // Set active class based on current page name
@@ -309,13 +382,52 @@ async function getCurrentUser() {
 // ── Get bizId from URL param ───────────────────────────────────────
 function getBizId() {
   const p = new URLSearchParams(window.location.search);
-  return p.get('biz') || 'RENTAL';
+  return p.get('biz') || 'AGRI';
 }
+
+// ── Business workspace context (per-business isolation) ─────────────
+// URL: ?biz=AGRI&entity=AGRI-slug-xxx  (biz = category label, entity = workspace id)
+function getWorkspace() {
+  const p = new URLSearchParams(window.location.search);
+  const biz = p.get('biz') || 'AGRI';
+  const entity = p.get('entity') || '';
+  return { biz, entity };
+}
+function workspaceQuery(biz, entity) {
+  let q = '?biz=' + encodeURIComponent(biz || 'AGRI');
+  if (entity) q += '&entity=' + encodeURIComponent(entity);
+  return q;
+}
+// Keep ?biz=&entity= when navigating sidebar links
+function preserveWorkspaceNav() {
+  const { biz, entity } = getWorkspace();
+  if (!entity) return;
+  document.querySelectorAll('a[href*="?biz="]').forEach(a => {
+    try {
+      const url = new URL(a.getAttribute('href'), window.location.origin);
+      if (url.searchParams.get('biz') && !url.searchParams.get('entity')) {
+        url.searchParams.set('entity', entity);
+        a.setAttribute('href', url.pathname + url.search);
+      }
+    } catch (_) {}
+  });
+}
+async function loadWorkspaceName() {
+  const { entity } = getWorkspace();
+  if (!entity) return null;
+  try {
+    const res = await API.get('/api/admin/businesses');
+    if (res.success) {
+      const b = (res.data || []).find(x => x.id === entity);
+      return b ? b.name : null;
+    }
+  } catch (_) {}
+  return null;
+}
+document.addEventListener('DOMContentLoaded', () => { preserveWorkspaceNav(); });
 
 // ── Business Categories ────────────────────────────────────────────
 const BUSINESS_CATEGORIES = [
-  { id: 'RENTAL', name: 'Rental', color: '#6B3FA0' },
-  { id: 'BUSINESS', name: 'Business', color: '#2d6a2e' },
   { id: 'AGRI', name: 'Agriculture', color: '#D4A915' },
   { id: 'NON_AGRI', name: 'Non-Agriculture', color: '#1A1A1A' },
   { id: 'MAIN', name: 'Main', color: '#0D6EFD' },
@@ -339,9 +451,26 @@ function statusBadge(status) {
 
 // ── Notifications ─────────────────────────────────────────────────
 let _notifications = [];
+let _userCache = null;
+
+// Roles that use the scoped employee/sales-staff feed instead of the
+// admin notification feed (admin feed is for super admin / manager+).
+const STAFF_NOTIF_ROLES = ['employee', 'sales_staff', 'sale_staff', 'viewer', 'budgeting_officer', 'budget_officer'];
+
+async function isStaffUser() {
+  if (!_userCache) _userCache = await getCurrentUser();
+  return !!(_userCache && STAFF_NOTIF_ROLES.includes(_userCache.role));
+}
+
 async function loadNotifications() {
   try {
-    const res = await API.get('/api/admin/notifications');
+    // Employees / sales staff get their own category-scoped notification feed;
+    // admins and managers keep the full system feed.
+    const staff = await isStaffUser();
+    const url = staff
+      ? '/api/employee/notifications?biz=' + encodeURIComponent(getBizId())
+      : '/api/admin/notifications';
+    const res = await API.get(url);
     if (res.success) {
       _notifications = res.data;
       updateNotifBell();
@@ -356,20 +485,55 @@ function updateNotifBell() {
     countEl.textContent = unread;
     countEl.style.display = unread > 0 ? 'flex' : 'none';
   }
+  const dotEl = document.getElementById('notifDot');
+  if (dotEl) {
+    dotEl.style.display = unread > 0 ? 'block' : 'none';
+  }
 }
 
-function renderNotifDropdown() {
+// ── Device Greeting & Dynamic Header ────────────────────────────────
+function updateHeaderGreeting(defaultRoleLabel) {
+  const now = new Date();
+  const h = now.getHours();
+  let greeting = 'GOOD MORNING,';
+  if (h >= 12 && h < 18) {
+    greeting = 'GOOD AFTERNOON,';
+  } else if (h >= 18 || h < 4) {
+    greeting = 'GOOD EVENING,';
+  }
+
+  const gEl = document.getElementById('welcomeGreeting');
+  if (gEl) gEl.textContent = greeting;
+
+  const rEl = document.getElementById('welcomeRole');
+  if (rEl && defaultRoleLabel) {
+    rEl.textContent = defaultRoleLabel;
+  }
+
+  const dEl = document.getElementById('welcomeDate');
+  if (dEl) {
+    dEl.textContent = now.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+}
+window.updateHeaderGreeting = updateHeaderGreeting;
+
+async function renderNotifDropdown() {
   const el = document.getElementById('notifDropdown');
   if (!el) return;
   const items = _notifications.slice(0, 8);
   el.innerHTML = `
     <div class="notif-dropdown-header">
       <span>Notifications</span>
-      <a href="/admin/notifications" style="font-size:0.78rem;color:var(--green);font-weight:600">View All</a>
+      <a href="javascript:void(0)" onclick="openAllNotificationsModal()" style="font-size:0.78rem;color:var(--green);font-weight:600">View All</a>
     </div>
     ${items.length === 0 ? '<div style="padding:20px;text-align:center;color:var(--gray-400)">No notifications</div>' : ''}
     ${items.map(n => `
-      <div class="notif-item ${n.isRead ? '' : 'unread'}">
+      <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="openNotificationModal('${n.id}')">
         <div class="notif-icon ${n.priority === 'critical' ? 'critical' : n.priority === 'warning' ? 'warning' : 'info'}">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             ${n.type === 'low_stock' ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' : ''}
@@ -379,8 +543,8 @@ function renderNotifDropdown() {
           </svg>
         </div>
         <div style="flex:1">
-          <div class="notif-title">${n.title}</div>
-          <div class="notif-msg">${n.message}</div>
+          <div class="notif-title">${escapeHtml(n.title)}</div>
+          <div class="notif-msg">${escapeHtml(n.message)}</div>
           <div class="notif-time">${timeAgo(n.createdAt)}</div>
         </div>
       </div>
@@ -388,9 +552,125 @@ function renderNotifDropdown() {
   `;
 }
 
-function toggleNotifDropdown() {
+async function openNotificationModal(id) {
+  const dd = document.getElementById('notifDropdown');
+  if (dd) dd.classList.remove('show');
+
+  const notif = _notifications.find(n => n.id === id);
+  if (!notif) return;
+
+  // Mark as read in memory and UI
+  notif.isRead = true;
+  updateNotifBell();
+  if (dd && dd.classList.contains('show')) renderNotifDropdown();
+
+  // Persist mark-as-read to API
+  try {
+    const staff = await isStaffUser();
+    const endpoint = staff ? `/api/employee/notifications/${id}/read` : `/api/admin/notifications/${id}/read`;
+    API.put(endpoint).catch(() => {});
+  } catch(e) {}
+
+  const priority = notif.priority || 'info';
+  const badgeClass = priority === 'critical' ? 'notif-badge-critical' : priority === 'warning' ? 'notif-badge-warning' : 'notif-badge-info';
+  const formattedDate = notif.createdAt ? new Date(notif.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent';
+
+  let actionBtn = '';
+  if (notif.type === 'low_stock') {
+    const staff = await isStaffUser();
+    const invUrl = staff ? '/employee/inventory' : '/manager/inventory';
+    actionBtn = `<button class="btn btn-primary" onclick="closeNotificationModal(); window.location.href='${invUrl}'">Check Stock</button>`;
+  } else if (notif.type === 'submission' || notif.type === 'sale') {
+    const staff = await isStaffUser();
+    const salesUrl = staff ? '/employee/sales' : '/manager/sales';
+    actionBtn = `<button class="btn btn-primary" onclick="closeNotificationModal(); window.location.href='${salesUrl}'">View Sales</button>`;
+  }
+
+  closeNotificationModal();
+
+  const modalHtml = `
+    <div class="notif-modal-overlay" id="notifDetailModal" onclick="if(event.target === this) closeNotificationModal()">
+      <div class="notif-modal-card">
+        <div class="notif-modal-header">
+          <span class="notif-modal-title">Notification</span>
+          <button class="notif-modal-close" onclick="closeNotificationModal()">&times;</button>
+        </div>
+        <div class="notif-modal-body">
+          <div class="notif-modal-meta">
+            <span class="notif-badge-pill ${badgeClass}">${priority}</span>
+            <span style="font-size:0.75rem;color:#64748b;font-weight:700">${escapeHtml(notif.type || 'alert').replace(/_/g,' ').toUpperCase()}</span>
+            <span class="notif-modal-time">${formattedDate}</span>
+          </div>
+          <div class="notif-modal-subject">${escapeHtml(notif.title)}</div>
+          <div class="notif-modal-message">${escapeHtml(notif.message)}</div>
+        </div>
+        <div class="notif-modal-footer">
+          <button class="btn btn-secondary" onclick="closeNotificationModal()">Dismiss</button>
+          ${actionBtn}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeNotificationModal() {
+  const m = document.getElementById('notifDetailModal');
+  if (m) m.remove();
+}
+
+function openAllNotificationsModal() {
+  const dd = document.getElementById('notifDropdown');
+  if (dd) dd.classList.remove('show');
+
+  closeAllNotificationsModal();
+
+  const items = _notifications;
+  const unreadCount = items.filter(n => !n.isRead).length;
+
+  const modalHtml = `
+    <div class="notif-modal-overlay" id="allNotifsModal" onclick="if(event.target === this) closeAllNotificationsModal()">
+      <div class="notif-modal-card" style="max-width: 600px; max-height: 80vh;">
+        <div class="notif-modal-header">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="notif-modal-title">Notifications</span>
+            <span style="background:var(--green);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:12px">${items.length}</span>
+          </div>
+          <button class="notif-modal-close" onclick="closeAllNotificationsModal()">&times;</button>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding:12px 16px;max-height:55vh" id="allNotifsList">
+          ${items.length === 0 ? '<div style="padding:40px 20px;text-align:center;color:var(--gray-400)">No notifications</div>' : ''}
+          ${items.map(n => `
+            <div class="notif-item ${n.isRead ? '' : 'unread'}" style="padding:12px;border-radius:10px;margin-bottom:8px;border:1px solid ${n.isRead ? '#f1f5f9' : '#e2e8f0'};background:${n.isRead ? '#ffffff' : '#f8fafc'}" onclick="closeAllNotificationsModal(); openNotificationModal('${n.id}')">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <span class="notif-badge-pill notif-badge-${n.priority || 'info'}" style="font-size:0.65rem">${n.priority || 'info'}</span>
+                <span style="font-size:0.72rem;color:#94a3b8">${timeAgo(n.createdAt)}</span>
+              </div>
+              <div style="font-weight:700;font-size:0.9rem;color:#1e293b;margin-bottom:2px">${escapeHtml(n.title)}</div>
+              <div style="font-size:0.8rem;color:#64748b;line-height:1.4">${escapeHtml(n.message)}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="notif-modal-footer" style="justify-content:space-between">
+          <span style="font-size:0.8rem;color:#64748b">${unreadCount} unread</span>
+          <button class="btn btn-secondary" onclick="closeAllNotificationsModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeAllNotificationsModal() {
+  const m = document.getElementById('allNotifsModal');
+  if (m) m.remove();
+}
+
+function toggleNotifDropdown(event) {
+  const evt = event || window.event;
   const dd = document.getElementById('notifDropdown');
   if (dd) {
+    if (evt && evt.target && dd.contains(evt.target)) return;
     dd.classList.toggle('show');
     if (dd.classList.contains('show')) renderNotifDropdown();
   }

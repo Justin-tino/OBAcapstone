@@ -1,0 +1,78 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "users": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "sales": {
+      "$category": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".indexOn": ["date", "createdAt"]
+      }
+    },
+    "inventory": {
+      "$category": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".indexOn": ["name"]
+      }
+    },
+    "expenses": {
+      "$category": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".indexOn": ["date", "createdAt"]
+      }
+    },
+    "inventoryMovements": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["createdAt", "businessCategory", "productId", "type"]
+    },
+    "auditLogs": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"]
+    },
+    "notifications": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["createdAt"]
+    },
+    "businesses": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "backupsHistory": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"]
+    },
+    "backupsData": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "accessRequests": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["createdAt"]
+    },
+    "contactRequests": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "settings": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "budgetLimits": {
+      "$biz": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}

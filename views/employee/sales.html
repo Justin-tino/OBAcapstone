@@ -57,10 +57,17 @@
   <div class="app-layout">
     <aside class="sidebar no-print" id="sidebar">
       <div class="sidebar-logo-area">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
         <div class="org-name">Office of Business Affairs</div>
       </div>
-      <nav class="sidebar-nav" id="empNav"></nav>
+      <nav class="sidebar-nav" id="empNav">
+        <a class="nav-item" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+        <a class="nav-item" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+        <a class="nav-item" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+        <a class="nav-item" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+        <a class="nav-item" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+        <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+      </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">
           <div class="sidebar-avatar" id="sidebarAvatar">E</div>
@@ -81,7 +88,7 @@
       </div>
 
       <div class="page-content">
-        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+        <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;">
           <div class="kpi-card yellow">
             <div class="kpi-label">Today's Sales</div>
             <div class="kpi-value" id="kpiToday">&#8369;0</div>
@@ -98,6 +105,10 @@
             <div class="kpi-label">Transactions</div>
             <div class="kpi-value" id="kpiTxn" style="color:var(--danger)">0</div>
           </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Avg Sale Value</div>
+            <div class="kpi-value" id="kpiAvg">&#8369;0</div>
+          </div>
         </div>
 
         <div class="card">
@@ -105,10 +116,6 @@
             <div class="search-box">
               <input id="fSearch" class="form-control" placeholder="Search sales..." oninput="renderTable()">
             </div>
-            <div class="flex-c gap-8">
-              <input type="date" id="fDateFrom" class="form-control" style="max-width:150px">
-              <input type="date" id="fDateTo" class="form-control" style="max-width:150px">
-              <button class="btn btn-outline" onclick="renderTable()">Filter</button>
               <button class="btn btn-green" onclick="openQuickQRScanner()"><svg width="14" height="14" fill="none"
                   stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path
@@ -119,6 +126,29 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg> Record Sale</button>
+  <div class="flex-c gap-8" style="flex-wrap:wrap;">
+  <input type="date" id="fDateFrom" class="form-control" style="max-width:150px" onchange="renderTable()">
+  <input type="date" id="fDateTo" class="form-control" style="max-width:150px" onchange="renderTable()">
+  <select id="fPreset" class="form-control" style="max-width:120px" onchange="applyEmpPreset(this.value)">
+  <option value="">All time</option>
+  <option value="today">Today</option>
+  <option value="week">This week</option>
+  <option value="month">This month</option>
+  </select>
+  <select id="fPayment" class="form-control" style="max-width:120px" onchange="renderTable()">
+  <option value="">All Payments</option>
+  <option value="cash">Cash</option>
+  <option value="gcash">GCash</option>
+  <option value="credit">Credit</option>
+  <option value="check">Check</option>
+  </select>
+  <select id="fStaff" class="form-control" style="max-width:140px" onchange="renderTable()">
+  <option value="">All Staff</option>
+  </select>
+  <input type="text" id="fCategory" class="form-control" style="max-width:130px" placeholder="Product/Category" oninput="renderTable()">
+  <button class="btn btn-outline btn-sm" onclick="clearEmpFilters()">Clear</button>
+  <button class="btn btn-outline btn-sm" onclick="exportEmpCSV()">Export CSV</button>
+  <button class="btn btn-outline btn-sm" onclick="printEmpReport()">Print Report</button>
             </div>
           </div>
           <div id="salesTable">
@@ -155,7 +185,7 @@
 
       <div id="saleItems">
         <div class="sale-item form-row" data-idx="0">
-          <div class="form-group" style="flex:2">
+  <div class="form-group">
             <label class="form-label">Item / Product *</label>
             <select class="form-control si-product" onchange="onProductSelect(this)"></select>
           </div>
@@ -163,6 +193,7 @@
               value="1" min="1" oninput="calcSaleTotal()"></div>
           <div class="form-group"><label class="form-label">Price (&#8369;)</label><input type="number"
               class="form-control si-price" placeholder="0.00" step="0.01" oninput="calcSaleTotal()" readonly></div>
+  <div class="form-group"><label class="form-label" style="opacity:0">&nbsp;</label><button type="button" class="btn btn-outline btn-sm" onclick="removeSaleRow(this)" style="color:var(--danger); border-color:var(--danger-light); background:var(--danger-light); width:100%; height:42px;"> Remove</button></div>
         </div>
       </div>
 
@@ -188,6 +219,10 @@
             <option value="other">Other</option>
           </select>
         </div>
+        <div class="form-group"><label class="form-label">Customer</label><input id="s_customer" class="form-control" placeholder="Walk-in" value="Walk-in"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Amount Paid (₱)</label><input id="s_paid" type="number" class="form-control" step="0.01" min="0" placeholder="0.00"></div>
         <div class="form-group"><label class="form-label">Total</label>
           <div id="saleTotal" style="font-size:1.3rem;font-weight:800;color:var(--green);padding-top:6px">&#8369;0.00
           </div>
@@ -202,21 +237,58 @@
     </div>
   </div>
 
-  <script src="/js/app.js"></script>
+  <script src="/js/app.js?v=2"></script>
   <script>
-    const BIZ_META = {
-      RENTAL: { name: 'Rental', color: '#6B3FA0' },
-      BUSINESS: { name: 'Business', color: '#2d6a2e' },
-      AGRI: { name: 'Agriculture', color: '#D4A915' },
+    const BIZ_META = {      AGRI: { name: 'Agriculture', color: '#D4A915' },
       NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A' },
       MAIN: { name: 'Main', color: '#0D6EFD' },
     };
     const params = new URLSearchParams(window.location.search);
-    const BIZ = params.get('biz') || 'RENTAL';
-    const meta = BIZ_META[BIZ] || BIZ_META.RENTAL;
+    const BIZ = params.get('biz') || 'AGRI';
+    const meta = BIZ_META[BIZ] || BIZ_META.AGRI;
     let sales = [];
     let inventory = [];
     let html5QrScanner = null;
+
+    // ── QR matching helpers (shared with the POS page behaviour) ─────
+    // Extracts the encoded payload from a QR image URL (?data=<payload>)
+    function extractQrData(qrValue) {
+      if (!qrValue || typeof qrValue !== 'string') return '';
+      const m = qrValue.match(/[?&]data=([^&]+)/);
+      return m ? decodeURIComponent(m[1]) : qrValue;
+    }
+
+    // Normalizes a scanned value: trims whitespace; if the QR holds a URL,
+    // pulls the product identifier from ?data= or the last path segment.
+    function normalizeScanText(raw) {
+      let text = String(raw || '').trim();
+      if (!text) return '';
+      if (/^https?:\/\//i.test(text)) {
+        try {
+          const url = new URL(text);
+          const data = url.searchParams.get('data');
+          if (data) return data.trim();
+          const seg = url.pathname.split('/').filter(Boolean).pop();
+          if (seg) return decodeURIComponent(seg).trim();
+        } catch (e) { /* fall through with raw text */ }
+      }
+      return text;
+    }
+
+    // Finds a product by its unique QR payload (product ID), barcode or
+    // stored QR value — exact match first, then case-insensitive fallback.
+    function findProductByCode(raw) {
+      const text = normalizeScanText(raw);
+      if (!text) return null;
+      const lower = text.toLowerCase();
+      return inventory.find(p =>
+        p.id === text ||
+        (p.barcode && p.barcode === text) ||
+        p.qrCode === text ||
+        p.id.toLowerCase() === lower ||
+        extractQrData(p.qrCode).toLowerCase() === lower
+      ) || null;
+    }
     let taxRates = {};
 
     async function loadTaxRates() {
@@ -233,22 +305,36 @@
       } catch (e) { }
     }
 
-    function buildNav() {
-      document.getElementById('empNav').innerHTML = `
-    <a class="nav-item" href="/employee/dashboard?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/employee/inventory?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
-    <a class="nav-item active" href="/employee/sales?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item" href="/employee/expenses?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Expenses / Income</a>
-    <a class="nav-item" href="/employee/reports?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
-  `;
+    // Employee nav is rendered statically in the HTML (prevents sidebar flicker);
+    // buildNav(user) below only syncs the workspace query params.
+  function buildNav(user) {
+  const q = '?biz=' + encodeURIComponent(BIZ);
+  document.querySelectorAll('#empNav a[data-page]').forEach(a => {
+    a.href = a.getAttribute('data-page') + q;
+  });
     }
 
     async function loadData() {
       try {
         const res = await API.get('/api/sales?biz=' + BIZ);
-        if (res.success) { sales = res.data || []; renderTable(); updateKPIs(); }
+  if (res.success) {
+  sales = res.data || [];
+  populateStaffDropdown();
+  renderTable();
+  updateKPIs();
+  }
       } catch (e) { console.error(e); }
+  }
+
+  function populateStaffDropdown() {
+  const staffSel = document.getElementById('fStaff');
+  if (!staffSel) return;
+  const currentVal = staffSel.value;
+  const staffSet = new Set();
+  sales.forEach(s => { if (s.recordedByName) staffSet.add(s.recordedByName); });
+  staffSel.innerHTML = '<option value="">All Staff</option>' +
+  Array.from(staffSet).map(name => `<option value="${name}">${name}</option>`).join('');
+  staffSel.value = currentVal;
     }
 
     function getNetRevenue(s) {
@@ -267,43 +353,132 @@
       document.getElementById('kpiWeek').innerHTML = '&#8369;' + weekSales.toLocaleString('en', { minimumFractionDigits: 2 });
       document.getElementById('kpiMonth').innerHTML = '&#8369;' + monthSales.toLocaleString('en', { minimumFractionDigits: 2 });
       document.getElementById('kpiTxn').textContent = sales.length;
+      // Module 2.1: average sale value = total sales / number of transactions
+      const allTotal = sales.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
+      const avgSale = sales.length ? allTotal / sales.length : 0;
+      document.getElementById('kpiAvg').innerHTML = '&#8369;' + avgSale.toLocaleString('en', { minimumFractionDigits: 2 });
+    }
+
+    function empDateOnly(s) {
+      return (s.date || '').slice(0, 10);
     }
 
     function renderTable() {
       const search = document.getElementById('fSearch').value.toLowerCase();
       const dateFrom = document.getElementById('fDateFrom') ? document.getElementById('fDateFrom').value : '';
       const dateTo = document.getElementById('fDateTo') ? document.getElementById('fDateTo').value : '';
+  const pay = document.getElementById('fPayment') ? document.getElementById('fPayment').value : '';
+  const staff = document.getElementById('fStaff') ? document.getElementById('fStaff').value : '';
+  const cat = (document.getElementById('fCategory') ? document.getElementById('fCategory').value : '').toLowerCase().trim();
 
       let list = sales;
       if (search) list = list.filter(s => JSON.stringify(s).toLowerCase().includes(search));
-      if (dateFrom) list = list.filter(s => (s.date || '') >= dateFrom);
-      if (dateTo) list = list.filter(s => (s.date || '') <= dateTo + 'T23:59:59.999Z');
+      if (dateFrom) list = list.filter(s => empDateOnly(s) >= dateFrom);
+      if (dateTo) list = list.filter(s => empDateOnly(s) <= dateTo);
+  if (pay) list = list.filter(s => (s.paymentMethod || '').toLowerCase() === pay);
+  if (staff) list = list.filter(s => s.recordedByName === staff);
+  if (cat) list = list.filter(s => Array.isArray(s.items) && s.items.some(i => ((i.category || '') + ' ' + (i.name || '')).toLowerCase().includes(cat)));
 
+      window._empFiltered = list;
+      const total = list.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
       const el = document.getElementById('salesTable');
       if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No sales recorded</h3><p>Click "Record Sale" to add a transaction</p></div>'; return; }
-      el.innerHTML = `<table><thead><tr><th>Date</th><th>Items</th><th>Payment</th><th>Gross</th><th>Tax</th><th>Net Revenue</th><th>Actions</th></tr></thead><tbody>
+  el.innerHTML = `<div style="margin-bottom:8px;font-size:0.85rem"><strong>${empReportTitle()}</strong> — ${list.length} transaction(s), Total: &#8369;${total.toLocaleString('en', { minimumFractionDigits: 2 })}</div>
+  <table><thead><tr><th>Date</th><th>Txn ID</th><th>Items</th><th>Payment</th><th>Gross</th><th>Tax</th><th>Net Revenue</th><th>Recorded By</th><th>Receipt</th></tr></thead><tbody>
     ${list.map(s => `<tr>
-      <td style="font-size:0.82rem">${s.date || '—'}</td>
-      <td>${(s.items || []).map(i => i.name).join(', ') || '—'}</td>
+      <td style="font-size:0.82rem">${empDateOnly(s)}<br><small>${s.time || ''}</small></td>
+      <td><code style="font-size:0.72rem">${s.transactionId || s.id || '—'}</code></td>
+      <td>${(s.items || []).map(i => i.name + '×' + (i.quantity || i.qty || 1)).join(', ') || '—'}</td>
       <td><span class="badge badge-gray">${s.paymentMethod || 'cash'}</span></td>
       <td style="font-size:0.82rem">&#8369;${parseFloat(s.total || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
       <td style="font-size:0.82rem;color:var(--danger)">-&#8369;${parseFloat(s.taxAmount || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
       <td class="fw-bold" style="color:var(--green)">&#8369;${parseFloat((s.total||0) - (s.taxAmount||0)).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
+      <td style="font-size:0.82rem">${s.recordedByName || '—'}</td>
       <td class="table-actions"><button class="btn btn-outline btn-sm" onclick="printReceipt('${s.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></td>
     </tr>`).join('')}
   </tbody></table>`;
+  }
+
+  function empReportTitle() {
+    const pay = document.getElementById('fPayment')?.value || '';
+    const cat = document.getElementById('fCategory')?.value.trim() || '';
+    const staff = document.getElementById('fStaff')?.value || '';
+    let t = pay ? pay.toUpperCase() + ' Sales' : 'Sales';
+    if (cat) t += ' | ' + cat;
+    if (staff) t += ' | ' + staff;
+    return t + ' Report';
+  }
+
+  function applyEmpPreset(v) {
+    const s = document.getElementById('fDateFrom');
+    const e = document.getElementById('fDateTo');
+    const today = new Date().toISOString().slice(0, 10);
+    if (v === 'today') { s.value = today; e.value = today; }
+    else if (v === 'week') { s.value = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10); e.value = today; }
+    else if (v === 'month') { s.value = today.slice(0, 7) + '-01'; e.value = today; }
+    else { s.value = ''; e.value = ''; }
+    renderTable();
+  }
+
+  function printEmpReport() {
+    const list = window._empFiltered || [];
+    if (!list.length) { Toast.warning('No data to print.'); return; }
+    const total = list.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
+    const rows = list.map(s => `<tr><td>${empDateOnly(s)} ${s.time || ''}</td><td>${s.transactionId || s.id}</td><td>${(s.items || []).map(i => i.name + 'x' + (i.quantity || i.qty)).join(', ')}</td><td>${s.paymentMethod}</td><td style="text-align:right">₱${parseFloat(s.total || 0).toFixed(2)}</td><td>${s.recordedByName || ''}</td></tr>`).join('');
+    exportToPDF(empReportTitle() + ' — ' + BIZ, `<p>${list.length} transaction(s) • Total ₱${total.toFixed(2)} • ${document.getElementById('fDateFrom').value || 'Start'} to ${document.getElementById('fDateTo').value || 'Today'}</p><table><thead><tr><th>Date</th><th>Txn</th><th>Items</th><th>Pay</th><th>Total</th><th>Staff</th></tr></thead><tbody>${rows}</tbody></table>`);
+  }
+
+  function exportEmpCSV() {
+    const list = window._empFiltered || [];
+    if (!list.length) { Toast.warning('No data to export.'); return; }
+    exportToCSV(list.map(s => ({
+      txn: s.transactionId || s.id, date: empDateOnly(s), time: s.time || '', customer: s.customerName || 'Walk-in',
+      items: (s.items || []).map(i => `${i.name}x${i.quantity || i.qty}`).join('; '),
+      total: s.total, paid: s.amountPaid ?? '', change: s.change ?? '', balance: s.balanceDue ?? '',
+      payment: s.paymentMethod, staff: s.recordedByName || ''
+    })), `sales-${BIZ}-${new Date().toISOString().slice(0, 10)}`);
+  }
+
+  function clearEmpFilters() {
+  ['fSearch','fDateFrom','fDateTo','fPayment','fStaff','fCategory','fPreset'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.value = '';
+  });
+  renderTable();
     }
 
     let saleRowCount = 1;
+    function productOptions() {
+      return '<option value="">-- Select Product --</option>' + inventory.map(p => `<option value="${p.id}" data-price="${p.sellingPrice || 0}" data-qty="${p.quantity || p.stock || 0}" data-cat="${(p.category || '').replace(/"/g, '&quot;')}">${p.name} (Stock: ${p.quantity || p.stock || 0})</option>`).join('');
+    }
     function addSaleRow() {
       const idx = saleRowCount++;
-      const options = '<option value="">-- Select Product --</option>' + inventory.map(p => `<option value="${p.id}" data-price="${p.sellingPrice || 0}" data-qty="${p.quantity || p.stock || 0}">${p.name} (Stock: ${p.quantity || p.stock || 0})</option>`).join('');
-      const html = `<div class="sale-item form-row" data-idx="${idx}">
-    <div class="form-group" style="flex:2"><select class="form-control si-product" onchange="onProductSelect(this)">${options}</select></div>
+      const options = productOptions();
+  const html = `<div class="sale-item form-row" data-idx="${idx}" style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--gray-200);">
+  <div class="form-group"><select class="form-control si-product" onchange="onProductSelect(this)">${options}</select></div>
     <div class="form-group"><input type="number" class="form-control si-qty" value="1" min="1" oninput="calcSaleTotal()"></div>
     <div class="form-group"><input type="number" class="form-control si-price" placeholder="0.00" step="0.01" oninput="calcSaleTotal()" readonly></div>
+  <div class="form-group"><button type="button" class="btn btn-outline btn-sm" onclick="removeSaleRow(this)" style="color:var(--danger); border-color:var(--danger-light); background:var(--danger-light); width:100%; height:42px;"> Remove</button></div>
   </div>`;
       document.getElementById('saleItems').insertAdjacentHTML('beforeend', html);
+  }
+
+  function removeSaleRow(btn) {
+  const row = btn.closest('.sale-item');
+  const allRows = document.querySelectorAll('.sale-item');
+  if (allRows.length > 1) {
+  if (row) row.remove();
+  } else {
+  if (row) {
+  const select = row.querySelector('.si-product');
+  const qty = row.querySelector('.si-qty');
+  const price = row.querySelector('.si-price');
+  if (select) select.value = '';
+  if (qty) qty.value = 1;
+  if (price) price.value = '';
+  }
+  }
+  calcSaleTotal();
     }
 
     function onProductSelect(selectEl) {
@@ -343,20 +518,24 @@
 
     function openRecordSale() {
       saleRowCount = 1;
-      const options = '<option value="">-- Select Product --</option>' + inventory.map(p => `<option value="${p.id}" data-price="${p.sellingPrice || 0}" data-qty="${p.quantity || p.stock || 0}">${p.name} (Stock: ${p.quantity || p.stock || 0})</option>`).join('');
+      const options = productOptions();
       document.getElementById('saleItems').innerHTML = `<div class="sale-item form-row" data-idx="0">
-    <div class="form-group" style="flex:2"><label class="form-label">Item / Product * <small style="color:var(--gray-400);font-weight:400">(Barcode Scanner Ready)</small></label>
+  <div class="form-group"><label class="form-label">Item / Product * <small style="color:var(--gray-400);font-weight:400">(Barcode Scanner Ready)</small></label>
     <select class="form-control si-product" onchange="onProductSelect(this)">${options}</select></div>
     <div class="form-group"><label class="form-label">Qty</label><input type="number" class="form-control si-qty" value="1" min="1" oninput="calcSaleTotal()"></div>
     <div class="form-group"><label class="form-label">Price (&#8369;)</label><input type="number" class="form-control si-price" placeholder="0.00" step="0.01" oninput="calcSaleTotal()" readonly></div>
+  <div class="form-group"><label class="form-label" style="opacity:0">&nbsp;</label><button type="button" class="btn btn-outline btn-sm" onclick="removeSaleRow(this)" style="color:var(--danger); border-color:var(--danger-light); background:var(--danger-light); width:100%; height:42px;"> Remove</button></div>
   </div>`;
       document.getElementById('saleTotal').innerHTML = '&#8369;0.00';
       document.getElementById('s_payment').value = 'cash';
+      document.getElementById('s_customer').value = 'Walk-in';
+      if (document.getElementById('s_paid')) document.getElementById('s_paid').value = '';
       document.getElementById('s_notes').value = '';
       openModal('saleModal');
     }
 
     let scannerSelectedCameraId = null;
+    let saleScanCooldown = false;
 
     async function startQRScanner() {
       document.getElementById('qrScannerArea').style.display = 'block';
@@ -368,8 +547,12 @@
 
       html5QrScanner = new Html5Qrcode("reader");
       const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-        const productId = decodedText.trim();
-        const product = inventory.find(p => p.id === productId);
+        // Debounce: the camera stays open and re-reads the same code at fps
+        if (saleScanCooldown) return;
+        saleScanCooldown = true;
+        setTimeout(() => { saleScanCooldown = false; }, 2000);
+
+        const product = findProductByCode(decodedText);
 
         if (product) {
           Toast.success(`Scanned: ${product.name}`);
@@ -514,20 +697,31 @@
         if (opt && opt.value) {
           const id = opt.value;
           const name = opt.text.split(' (')[0];
+          const category = opt.getAttribute('data-cat') || '';
           const qty = parseFloat(row.querySelector('.si-qty').value) || 0;
           const maxQty = parseFloat(opt.getAttribute('data-qty')) || 0;
           const price = parseFloat(row.querySelector('.si-price').value) || 0;
           if (qty > maxQty) { hasError = true; Toast.warning(`Insufficient stock for ${name}`); }
-          if (qty > 0) { items.push({ id, name, quantity: qty, unitPrice: price, subtotal: qty * price }); total += qty * price; }
+          if (qty > 0) { items.push({ id, name, category, quantity: qty, unitPrice: price, subtotal: qty * price }); total += qty * price; }
         }
       });
       if (hasError) return;
       if (!items.length) { Toast.warning('Add at least one item'); return; }
 
       const { subtotal, taxAmount, total: computedTotal, rate } = calcSaleTotal();
+      const paymentMethod = document.getElementById('s_payment').value;
+      const customerName = (document.getElementById('s_customer')?.value || 'Walk-in').trim() || 'Walk-in';
+      const paidRaw = document.getElementById('s_paid')?.value;
+      const amountPaid = paidRaw === '' || paidRaw == null ? null : parseFloat(paidRaw);
+      if (paymentMethod !== 'credit' && amountPaid !== null && !isNaN(amountPaid) && amountPaid < computedTotal - 0.005) {
+        Toast.warning('Amount paid is less than total. Use Credit for balances.');
+        return;
+      }
       const data = {
         items, subtotal, taxAmount, taxRate: rate, total: computedTotal,
-        paymentMethod: document.getElementById('s_payment').value,
+        paymentMethod,
+        amountPaid,
+        customerName,
         notes: document.getElementById('s_notes').value,
         businessCategory: BIZ,
         date: new Date().toISOString(),
@@ -553,15 +747,19 @@
       
       const taxHtml = (s.taxAmount > 0) ? `<tr><td colspan="2">Net Subtotal</td><td style="text-align:right">P${parseFloat(s.subtotal).toFixed(2)}</td></tr>
       <tr><td colspan="2">Tax Collected (${s.taxRate||0}%)</td><td style="text-align:right">P${parseFloat(s.taxAmount).toFixed(2)}</td></tr>` : '';
+      const billingHtml = `<tr><td colspan="2">Paid (${(s.paymentMethod || 'cash').toUpperCase()})</td><td style="text-align:right">P${parseFloat(s.amountPaid ?? s.total ?? 0).toFixed(2)}</td></tr>
+      <tr><td colspan="2">Change</td><td style="text-align:right">P${parseFloat(s.change || 0).toFixed(2)}</td></tr>` +
+      (s.balanceDue ? `<tr><td colspan="2"><strong>Balance Due</strong></td><td style="text-align:right"><strong>P${parseFloat(s.balanceDue).toFixed(2)}</strong></td></tr>` : '');
 
       const w = window.open('', '_blank', 'width=400,height=600');
-      w.document.write(`<html><head><title>Receipt</title><style>body{font-family:'Courier New',monospace;padding:20px;font-size:12px;} .center{text-align:center;} hr{border:none;border-top:1px dashed #000;} table{width:100%;border-collapse:collapse;} td{padding:2px 4px;}</style></head><body>
-    <div class="center"><strong>PSAU - Office of Business Affairs</strong><br>${meta.name} Category<br>Receipt</div><hr>
-    <p>Date: ${new Date(s.date).toLocaleString()}<br>Payment: ${s.paymentMethod || 'cash'}</p><hr>
+      w.document.write(`<html><head><title>Receipt ${s.transactionId || ''}</title><style>body{font-family:'Courier New',monospace;padding:20px;font-size:12px;} .center{text-align:center;} hr{border:none;border-top:1px dashed #000;} table{width:100%;border-collapse:collapse;} td{padding:2px 4px;}</style></head><body>
+    <div class="center"><strong>PSAU - Office of Business Affairs</strong><br>${meta.name} Category<br>Official Billing Receipt<br>Txn: ${s.transactionId || s.id}</div><hr>
+    <p>Date: ${s.date ? new Date(s.date).toLocaleString() : '—'} ${s.time || ''}<br>Customer: ${s.customerName || 'Walk-in'}<br>Payment: ${s.paymentMethod || 'cash'}<br>Staff: ${s.recordedByName || ''}</p><hr>
     <table>${(s.items || []).map(i => '<tr><td>' + i.name + '</td><td>x' + (i.quantity||i.qty) + '</td><td style="text-align:right">P' + parseFloat(i.subtotal || (i.unitPrice*(i.quantity||i.qty)) || 0).toFixed(2) + '</td></tr>').join('')}
     <tr><td colspan="3"><hr></td></tr>
     ${taxHtml}
-    <tr><td colspan="2"><strong>TOTAL</strong></td><td style="text-align:right"><strong>P${parseFloat(s.total || 0).toFixed(2)}</strong></td></tr></table>
+    <tr><td colspan="2"><strong>TOTAL</strong></td><td style="text-align:right"><strong>P${parseFloat(s.total || 0).toFixed(2)}</strong></td></tr>
+    ${billingHtml}</table>
     <hr><div class="center">Thank you!<br>OBA System</div>
   </body></html>`);
       w.document.close(); w.focus(); setTimeout(() => { w.print(); }, 200);
@@ -573,6 +771,14 @@
       document.title = meta.name + ' Sales - OBA System';
       loadTaxRates().then(() => loadInventory()).then(() => loadData());
       getCurrentUser().then(u => { if (u) { document.getElementById('sidebarName').textContent = u.name; document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role); document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase(); } });
+      // ── Module 2.1: real-time overview — poll Firestore-backed API so the
+      // KPIs and table reflect new transactions without a manual page reload.
+      // Skips while a modal (Record Sale / QR scanner) is open or tab is hidden.
+      setInterval(() => {
+        if (document.hidden) return;
+        if (document.querySelector('.modal-overlay.active')) return;
+        loadData();
+      }, 30000);
     });
 
     // Quick QR Scanner Logic
@@ -667,8 +873,7 @@
       quickScanCooldown = true;
       setTimeout(() => { quickScanCooldown = false; }, 2500); // 2.5s cooldown
 
-      const productId = decodedText.trim();
-      const product = inventory.find(p => p.id === productId);
+      const product = findProductByCode(decodedText);
       const resultDiv = document.getElementById('quickScanResult');
 
       if (!product) {
@@ -711,7 +916,7 @@
       try {
         const res = await API.post('/api/sales', data);
         if (res.success) {
-          resultDiv.innerHTML = `<span style="color:var(--green)">✓ Recorded: 1x ${product.name} (₱${product.sellingPrice})</span>`;
+  resultDiv.innerHTML = `<span style="color:var(--green)"> Recorded: 1x ${product.name} (₱${product.sellingPrice})</span>`;
           playAudioBeep(1200, 0.12);
           Toast.success(`Recorded: 1x ${product.name}`);
           loadData();
@@ -725,6 +930,24 @@
         playAudioBeep(220, 0.25);
       }
     }
+
+  document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('topbarTitle').textContent = meta.name + ' - Sales';
+  document.title = meta.name + ' Sales - OBA System';
+  getCurrentUser().then(u => {
+  if (u) {
+  buildNav(u);
+  document.getElementById('sidebarName').textContent = u.name;
+  document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
+  document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
+  } else {
+  buildNav(null);
+  }
+  loadTaxRates();
+  loadInventory();
+  loadData();
+  });
+  });
   </script>
 
   <!-- Quick QR Modal -->

@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Unified Firestore Database (CAPSTONE §5.1).
+    // All access goes through the Express backend with Admin SDK (bypasses
+    // these rules). Direct client access is denied by default; authenticated
+    // reads are allowed only where the frontend needs them (none currently —
+    // frontend uses session APIs + Firebase Auth for login only).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

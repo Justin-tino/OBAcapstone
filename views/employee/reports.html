@@ -3,590 +3,1687 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reports — OBA System</title>
+  <title>Dynamic Financial Reports — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    .report-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .report-card {
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: 12px;
-      padding: 24px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-    }
-
-    .report-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: var(--gray-200);
-      transition: background-color 0.3s ease;
-    }
-
-    .report-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-      border-color: var(--green);
-    }
-
-    .report-card:hover::before {
-      background: var(--green);
-    }
-
-    .report-card .rc-icon-wrapper {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--green-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .report-card:hover .rc-icon-wrapper {
-      transform: scale(1.1);
-      background: var(--green);
-    }
-
-    .report-card:hover .rc-icon-wrapper svg {
-      stroke: var(--white);
-    }
-
-    .report-card .rc-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      color: var(--gray-800);
-    }
-
-    .report-card .rc-desc {
-      font-size: 0.8rem;
-      color: var(--gray-500);
-      line-height: 1.4;
-    }
-
-    /* Simulated Premium A4 Report Document Sheet */
-    .report-sheet {
-      background: #fff;
-      border: 1px solid var(--gray-200);
-      border-radius: 12px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.03);
-      padding: 40px;
-      max-width: 800px;
-      margin: 0 auto 30px;
-      font-family: var(--font-main);
-      position: relative;
-    }
-
-    .report-sheet-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 2px solid var(--green);
-      padding-bottom: 20px;
-      margin-bottom: 24px;
-    }
-
-    .report-sheet-logo {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .report-sheet-logo img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-    }
-
-    .report-sheet-title-group {
-      text-align: right;
-    }
-
-    .report-sheet-title-group h3 {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--gray-800);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .report-sheet-title-group .org-sub {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--green);
-      margin-top: 2px;
-    }
-
-    .report-sheet-title-group .report-type {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-top: 8px;
-      color: var(--gray-700);
-    }
-
-    .report-sheet-meta {
-      display: flex;
-      justify-content: space-between;
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 24px;
-      font-size: 0.82rem;
-      color: var(--gray-600);
-    }
-
-    /* Premium Ledger Table UI */
-    .ledger-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .ledger-table th {
-      background: var(--gray-900);
-      color: var(--white);
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 10px 14px;
-      text-align: left;
-    }
-
-    .ledger-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--gray-100);
-      font-size: 0.88rem;
-      color: var(--gray-800);
-    }
-
-    .ledger-row-sub {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--gray-100);
-      font-size: 0.88rem;
-    }
-
-    .ledger-row-sub.indent {
-      padding-left: 28px;
-      color: var(--gray-600);
-    }
-
-    .ledger-row-sub.total {
-      font-weight: 700;
-      background: var(--gray-50);
-      border-top: 1.5px solid var(--gray-800);
-      border-bottom: 1.5px solid var(--gray-800);
-      margin-top: 4px;
-    }
-
-    .ledger-row-sub.grand-total {
-      font-size: 1.05rem;
-      font-weight: 800;
-      border-top: 2px solid var(--gray-900);
-      border-bottom: 4px double var(--gray-900); /* CPA double underline */
-      background: var(--green-light);
-      margin-top: 8px;
-      padding: 14px;
-    }
-
-    .report-sheet-signatures {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 60px;
-      padding-top: 20px;
-      border-top: 1px dashed var(--gray-300);
-    }
-
-    .sig-block {
-      text-align: center;
-      width: 45%;
-    }
-
-    .sig-line {
-      width: 100%;
-      height: 1px;
-      background: var(--gray-900);
-      margin-bottom: 8px;
-      margin-top: 40px;
-    }
-
-    .sig-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--gray-800);
-      text-transform: uppercase;
-    }
-
-    .sig-title {
-      font-size: 0.7rem;
-      color: var(--gray-500);
-      margin-top: 2px;
-    }
-
-    /* Print styling rules */
-    @media print {
-      body {
-        background: #fff !important;
-        color: #000 !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .app-layout {
-        display: block !important;
-      }
-      .main-content {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .report-sheet {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-      }
-      .page-content {
-        padding: 0 !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .report-cards {
-        grid-template-columns: 1fr;
-      }
-      .report-sheet {
-        padding: 20px 16px;
-      }
-      .report-sheet-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-      }
-      .report-sheet-title-group {
-        text-align: left;
-      }
-    }
+  /* ── Module 4: Advanced Financial Reporting — Dynamic Report Generator ── */
+  .report-filter-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-top: 3px solid var(--green);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px -4px rgba(0,0,0,0.06);
+  }
+  .filter-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  }
+  .filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  flex: 1 1 auto;
+  }
+  .filter-controls > div {
+  min-width: 170px;
+  }
+  .filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  align-self: flex-end;
+  }
+  /* ── Topbar date-range pill + Print Report (mockup) ── */
+  .rg-topbar-row { display:flex; justify-content:space-between; align-items:center; gap:16px; width:100%; flex-wrap:wrap; }
+  .rg-topbar-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .rg-datepill { display:inline-flex; align-items:center; gap:8px; background:#ffffff; border:1px solid var(--gray-200); border-radius:10px; padding:8px 14px; font-size:0.8rem; font-weight:600; color:var(--gray-700); box-shadow:0 1px 2px rgba(0,0,0,0.04); white-space:nowrap; }
+  .rg-datepill svg { color: var(--green); }
+  .rg-print-btn { background:#ffffff !important; color:var(--green) !important; border:none !important; font-weight:700; display:inline-flex; align-items:center; gap:6px; }
+  /* ── Custom Report Type dropdown (icon menu, mockup) ── */
+  .rg-dd { position:relative; min-width:220px; }
+  .rg-dd-btn { display:flex; align-items:center; gap:10px; width:100%; text-align:left; cursor:pointer; background:#fff; color:var(--gray-700); font-size:0.85rem; }
+  .rg-dd-btn .rg-dd-caret { margin-left:auto; transition:transform .2s ease; color:var(--gray-500); flex:0 0 auto; }
+  .rg-dd.open .rg-dd-btn .rg-dd-caret { transform:rotate(180deg); }
+  .rg-dd-menu { display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:60; background:#fff; border:1px solid var(--gray-200); border-radius:12px; box-shadow:0 12px 28px rgba(0,0,0,0.12); padding:6px; min-width:250px; }
+  .rg-dd.open .rg-dd-menu { display:block; }
+  .rg-dd-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; font-size:0.83rem; color:var(--gray-700); cursor:pointer; white-space:nowrap; }
+  .rg-dd-item:hover { background:#eaf3ec; color:var(--green); }
+  .rg-dd-item.selected { background:#eaf3ec; color:var(--green); font-weight:700; }
+  .rg-dd-icon { display:inline-flex; width:18px; height:18px; align-items:center; justify-content:center; color:var(--gray-500); flex:0 0 auto; }
+  .rg-dd-item:hover .rg-dd-icon, .rg-dd-item.selected .rg-dd-icon { color:var(--green); }
+  #rgTypeIcon svg { width:16px; height:16px; }
+  .rg-dd-menu { max-height:430px; overflow-y:auto; min-width:320px; }
+  .rg-dd-body { display:flex; flex-direction:column; min-width:0; }
+  .rg-dd-body .rg-dd-label { white-space:nowrap; }
+  .rg-dd-desc { font-size:0.68rem; color:var(--gray-400); line-height:1.35; margin-top:1px; white-space:normal; }
+  .rg-dd-item:hover .rg-dd-desc, .rg-dd-item.selected .rg-dd-desc { color:var(--gray-500); }
+  /* ── Field labels & actions (professional polish) ── */
+  .rg-label { display:block; font-size:0.66rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:var(--gray-500); margin-bottom:6px; }
+  .rg-field { min-width:170px; }
+  .rg-gen-btn { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 22px; font-weight:700; box-shadow:0 4px 10px -2px rgba(45,106,46,0.35); }
+  /* Trend indicators (up/down vs previous period) */
+  .trend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 4px;
+  }
+  .trend-up {
+  background: #e6f4ea;
+  color: #137333;
+  }
+  .trend-down {
+  background: #fce8e6;
+  color: #c5221f;
+  }
+  .trend-neutral {
+  background: var(--gray-100);
+  color: var(--gray-600);
+  }
+  /* ── Module 4.1: Professional report sheet (mockup layout) ── */
+  .rs2-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:1px solid var(--gray-200); padding-bottom:16px; margin-bottom:18px; flex-wrap:wrap; }
+  .rs2-brand { display:flex; align-items:center; gap:10px; }
+  .rs2-brand svg { flex:0 0 auto; }
+  .rs2-wordmark { font-size:1.9rem; font-weight:800; color:#2F7D32; letter-spacing:1px; line-height:1; }
+  .rs2-title h2 { margin:0; font-size:1.25rem; font-weight:800; color:var(--gray-800); }
+  .rs2-title .rs2-date { font-size:0.85rem; color:var(--gray-500); margin-top:2px; }
+  .rs2-org { text-align:right; font-size:0.68rem; color:var(--gray-500); line-height:1.55; }
+  .rs2-org strong { display:block; font-size:0.75rem; color:var(--gray-700); font-weight:800; }
+  .rs2-kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:20px; }
+  .rs2-kpi { border:1px solid var(--gray-200); border-radius:10px; padding:14px 16px; background:var(--white); }
+  .rs2-kpi-label { font-size:0.75rem; font-weight:700; color:var(--gray-600); margin-bottom:6px; }
+  .rs2-kpi-value { font-size:1.4rem; font-weight:800; color:var(--gray-800); line-height:1.1; }
+  .rs2-kpi-trend { display:inline-flex; align-items:center; gap:4px; font-size:0.78rem; font-weight:800; margin-top:6px; }
+  .rs2-kpi-trend.up { color:#137333; }
+  .rs2-kpi-trend.down { color:#c5221f; }
+  .rs2-kpi-trend.flat { color:var(--gray-500); }
+  .rs2-kpi-caption { font-size:0.68rem; color:var(--gray-400); margin-top:2px; }
+  .rs2-section-title { font-size:0.95rem; font-weight:800; color:var(--gray-800); margin:0 0 12px 0; }
+  .rs2-panel { border:1px solid var(--gray-200); border-radius:12px; padding:16px; margin-bottom:20px; background:var(--white); }
+  .rs2-legend { display:flex; gap:14px; font-size:0.7rem; color:var(--gray-600); font-weight:700; align-items:center; }
+  .rs2-legend .dot { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle; }
+  .rs2-cols { display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:20px; }
+  @media (max-width: 900px) { .rs2-kpis, .rs2-cols { grid-template-columns:1fr; } }
+  .rs2-cat-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+  .rs2-cat-table th { text-align:left; padding:8px 10px; color:var(--gray-500); font-size:0.72rem; font-weight:700; border-bottom:1px solid var(--gray-200); }
+  .rs2-cat-table td { padding:9px 10px; border-bottom:1px solid var(--gray-100); }
+  .rs2-cat-table tr.total td { border-top:2px solid var(--gray-300); border-bottom:none; font-weight:800; }
+  .cat-trend-up { color:#137333; font-weight:700; }
+  .cat-trend-down { color:#c5221f; font-weight:700; }
+  .rs2-trendband { display:flex; align-items:center; gap:14px; background:#e7f3ea; border:1px solid #cfe6d6; border-radius:12px; padding:14px 18px; margin:18px 0 10px 0; }
+  .rs2-trendband.down { background:#fdecea; border-color:#f5c9c4; }
+  .rs2-trendband .band-icon { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#137333; color:#fff; flex:0 0 auto; }
+  .rs2-trendband.down .band-icon { background:#c5221f; }
+  .rs2-trendband .band-title { font-weight:800; font-size:0.85rem; color:var(--gray-800); }
+  .rs2-trendband .band-sub { font-size:0.78rem; color:var(--gray-600); }
+  .rs2-genfooter { display:flex; justify-content:flex-end; font-size:0.7rem; color:var(--gray-500); margin-top:8px; text-align:right; line-height:1.5; }
+  .rg-empty { background:var(--white); border:1px solid var(--gray-200); border-radius:12px; padding:40px 48px; margin-bottom:20px; }
+  .rg-empty-icon { position:relative; width:96px; height:96px; margin-bottom:18px; }
+  .rg-empty-badge { position:absolute; right:-8px; bottom:-4px; width:40px; height:40px; border-radius:50%; background:#3B7A57; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.14); }
+  .rg-empty h3 { margin:0 0 14px 0; font-weight:800; color:var(--gray-800); }
+  .rg-check { display:flex; gap:10px; font-size:0.86rem; color:var(--gray-600); margin-bottom:12px; max-width:760px; }
+  .rg-check svg { flex:0 0 auto; margin-top:2px; }
+  /* Printable Report Sheet (OBA branding) */
+  .report-sheet {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06);
+  padding: 36px;
+  max-width: 850px;
+  margin: 0 auto 30px;
+  font-family: var(--font-main);
+  position: relative;
+  }
+  .report-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2.5px solid var(--green);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  }
+  .report-sheet-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  }
+  .report-sheet-title-group {
+  text-align: right;
+  }
+  .report-sheet-title-group h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gray-800);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  }
+  .report-sheet-title-group .org-sub {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-top: 2px;
+  }
+  .report-sheet-title-group .report-type {
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-top: 6px;
+  color: var(--gray-700);
+  }
+  /* Auto-generated header fields */
+  .report-sheet-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  }
+  .ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  }
+  .ledger-table th {
+  background: var(--gray-900);
+  color: var(--white);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  text-align: left;
+  }
+  .ledger-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 0.85rem;
+  color: var(--gray-800);
+  }
+  .ledger-row-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 0.88rem;
+  }
+  .ledger-row-sub.indent {
+  padding-left: 28px;
+  color: var(--gray-600);
+  }
+  .ledger-row-sub.total {
+  font-weight: 700;
+  background: var(--gray-50);
+  border-top: 1.5px solid var(--gray-800);
+  border-bottom: 1.5px solid var(--gray-800);
+  margin-top: 4px;
+  }
+  .ledger-row-sub.grand-total {
+  font-size: 1.05rem;
+  font-weight: 800;
+  border-top: 2px solid var(--gray-900);
+  border-bottom: 4px double var(--gray-900);
+  background: var(--green-light);
+  margin-top: 8px;
+  padding: 14px;
+  }
+  .report-sheet-signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--gray-300);
+  }
+  .sig-block {
+  text-align: center;
+  width: 30%;
+  }
+  .sig-line {
+  width: 100%;
+  height: 1px;
+  background: var(--gray-900);
+  margin-bottom: 8px;
+  margin-top: 36px;
+  }
+  .sig-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  text-transform: uppercase;
+  }
+  .sig-title {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  margin-top: 2px;
+  }
+  @media print {
+  body {
+  background: #fff !important;
+  color: #000 !important;
+  }
+  .no-print, .sidebar, .topbar, .report-filter-panel {
+  display: none !important;
+  }
+  .app-layout {
+  display: block !important;
+  }
+  .main-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  }
+  .report-sheet {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  }
+  .page-content {
+  padding: 0 !important;
+  }
+  }
   </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar no-print" id="sidebar">
-    <div class="sidebar-logo-area"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg><div class="org-name">Office of Business Affairs</div></div>
-    <nav class="sidebar-nav" id="empNav"></nav>
-    <div class="sidebar-footer"><div class="sidebar-user"><div class="sidebar-avatar" id="sidebarAvatar">E</div><div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Logged in as:</div></div></div></div>
-  </aside>
-  <div class="main-content">
-    <div class="topbar topbar-green no-print">
-      <div class="flex-c gap-12">
-        
-        <span class="topbar-title" id="topbarTitle">Reports</span>
+    <div class="sidebar-logo-area">
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
+      <div class="org-name">Office of Business Affairs</div>
+    </div>
+    <nav class="sidebar-nav" id="empNav">
+      <a class="nav-item" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+      <a class="nav-item" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+      <a class="nav-item" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+      <a class="nav-item active" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+      <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">E</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+          <div class="sidebar-user-role">Logged in as:</div>
+        </div>
       </div>
     </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar topbar-green no-print">
+      <div class="rg-topbar-row">
+        <span class="topbar-title">Dynamic Financial Reports</span>
+        <div class="rg-topbar-actions">
+          <div class="rg-datepill" title="Selected reporting period">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="topbarDateRange">—</span>
+          </div>
+          <button class="btn btn-sm rg-print-btn" onclick="window.print()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Report</button>
+        </div>
+      </div>
+    </div>
+
     <div class="page-content">
-      <h2 class="no-print" style="margin-bottom:6px; font-weight: 800; color: var(--gray-800);" id="reportHeading">Generate Reports</h2>
-      <p class="no-print" style="color:var(--gray-500);margin-bottom:24px">Select a report category below to view and generate official printed reports.</p>
+  <h2 class="no-print" style="margin-bottom:4px; font-weight: 800; color: var(--gray-800);">Generate Report</h2>
+  <p class="no-print" style="color:var(--gray-500);margin-bottom:20px">Automatically compiles and formats your financial data into professional reports.</p>
 
-      <div class="report-cards no-print">
-        <div class="report-card" onclick="genReport('income')">
-          <div class="rc-icon-wrapper">
-            <svg width="24" height="24" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+  <!-- Filter Panel -->
+  <div class="report-filter-panel no-print">
+    <div class="filter-grid">
+      <div class="filter-controls">
+        <div class="rg-dd" id="rgTypeDropdown">
+          <label class="rg-label">Report Type</label>
+          <button type="button" class="form-control rg-dd-btn" onclick="toggleTypeDropdown(event)">
+            <span class="rg-dd-icon" id="rgTypeIcon"></span>
+            <span id="rgTypeLabel">Select a report type</span>
+            <svg class="rg-dd-caret" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="rg-dd-menu" id="rgTypeMenu">
+            <div class="rg-dd-item" data-value="overall" onclick="pickReportType('overall')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Overall Report</span><span class="rg-dd-desc">Complete summary — totals from all report types combined</span></span></div>
+            <div class="rg-dd-item" data-value="dailysales" onclick="pickReportType('dailysales')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Daily Sales Reports</span><span class="rg-dd-desc">Itemized daily receipts, tax &amp; daily trends</span></span></div>
+            <div class="rg-dd-item" data-value="weeklyrevenue" onclick="pickReportType('weeklyrevenue')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Weekly Revenue Summaries</span><span class="rg-dd-desc">7-day revenue breakdown &amp; comparison</span></span></div>
+            <div class="rg-dd-item" data-value="monthlystatement" onclick="pickReportType('monthlystatement')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Monthly Financial Statements</span><span class="rg-dd-desc">Comprehensive monthly financial ledger</span></span></div>
+            <div class="rg-dd-item" data-value="transactions" onclick="pickReportType('transactions')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Transaction History Reports</span><span class="rg-dd-desc">Detailed register of every sales transaction</span></span></div>
+            <div class="rg-dd-item" data-value="expensereport" onclick="pickReportType('expensereport')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Expense Reports</span><span class="rg-dd-desc">Categorized operating expenses &amp; COGS</span></span></div>
+            <div class="rg-dd-item" data-value="profitloss" onclick="pickReportType('profitloss')"><span class="rg-dd-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span><span class="rg-dd-body"><span class="rg-dd-label">Profit &amp; Loss Statements</span><span class="rg-dd-desc">Gross margin, expenses &amp; net operating profit</span></span></div>
           </div>
-          <div class="rc-title">Income Statement</div><div class="rc-desc">Revenue and income summary</div>
         </div>
-        <div class="report-card" onclick="genReport('balance')">
-          <div class="rc-icon-wrapper">
-            <svg width="24" height="24" fill="none" stroke="var(--yellow-dark)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <div class="rc-title">Balance Summary</div><div class="rc-desc">Assets vs liabilities overview</div>
+        <select id="fReportType" style="display:none">
+          <option value="">Select a report type</option>
+          <option value="overall">Overall Report</option>
+          <option value="dailysales">Daily Sales Reports</option>
+          <option value="weeklyrevenue">Weekly Revenue Summaries</option>
+          <option value="monthlystatement">Monthly Financial Statements</option>
+          <option value="transactions">Transaction History Reports</option>
+          <option value="expensereport">Expense Reports</option>
+          <option value="profitloss">Profit &amp; Loss Statements</option>
+        </select>
+        <div class="rg-field">
+          <label class="rg-label">Period</label>
+          <select id="fPeriod" class="form-control" onchange="toggleCustomDates()">
+            <option value="day">Daily (Today)</option>
+            <option value="week">Weekly</option>
+            <option value="month" selected>Monthly</option>
+            <option value="year">Annually (Yearly)</option>
+            <option value="custom">Custom Date Range</option>
+          </select>
         </div>
-        <div class="report-card" onclick="genReport('cashflow')">
-          <div class="rc-icon-wrapper">
-            <svg width="24" height="24" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          </div>
-          <div class="rc-title">Cash Flow Report</div><div class="rc-desc">Income vs expenses over time</div>
+        <div id="bizUnitFilter" class="rg-field">
+          <label class="rg-label">Category</label>
+          <select id="fBiz" class="form-control" onchange="runSelectedReport()">
+            <option value="all">All Business Categories</option>
+            <option value="AGRI">Agriculture Category</option>
+            <option value="NON_AGRI">Non-Agriculture Category</option>
+            <option value="MAIN">Main Category</option>
+          </select>
         </div>
-        <div class="report-card" onclick="genReport('sales')">
-          <div class="rc-icon-wrapper">
-            <svg width="24" height="24" fill="none" stroke="#6B3FA0" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <div id="customDateWrap" style="display:none; gap: 10px;">
+          <div class="rg-field">
+            <label class="rg-label">Start Date</label>
+            <input type="date" id="fStart" class="form-control" onchange="runSelectedReport()">
           </div>
-          <div class="rc-title">Sales Summary</div><div class="rc-desc">Daily / weekly / monthly sales</div>
-        </div>
-        <div class="report-card" onclick="genReport('inventory')">
-          <div class="rc-icon-wrapper">
-            <svg width="24" height="24" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <div class="rg-field">
+            <label class="rg-label">End Date</label>
+            <input type="date" id="fEnd" class="form-control" onchange="runSelectedReport()">
           </div>
-          <div class="rc-title">Inventory Report</div><div class="rc-desc">Stock levels and valuation</div>
-        </div>
-        <div class="report-card" onclick="genReport('profitloss')">
-          <div class="rc-icon-wrapper">
-            <svg width="24" height="24" fill="none" stroke="var(--black)" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          </div>
-          <div class="rc-title">Profit &amp; Loss</div><div class="rc-desc">Net profit/loss statement</div>
         </div>
       </div>
-
-      <!-- Report Sheet Output -->
-      <div id="reportOutput" style="display:none">
-        <div class="no-print" style="max-width: 800px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="font-weight: 700; color: var(--gray-700); margin: 0;">Document Preview</h3>
-          <button class="btn btn-green btn-sm" onclick="window.print()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Report</button>
-        </div>
-        <div class="report-sheet" id="reportSheetContainer">
-          <!-- Loaded dynamically -->
-        </div>
+      <div class="filter-actions">
+        <button class="btn btn-green btn-sm rg-gen-btn" onclick="generateReport()"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Generate Report</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="rg-empty no-print" id="rgEmptyState">
+    <div class="rg-empty-icon">
+      <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#C8D6C8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+      <span class="rg-empty-badge"><svg width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+    </div>
+    <h3>Generate Professional Reports</h3>
+    <div class="rg-check"><svg width="16" height="16" fill="none" stroke="#137333" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Choose a report type — Overall, Daily Sales, Weekly Revenue, Monthly Financial Statements, Transaction History, Expense Reports, or Profit &amp; Loss Statements — and it is generated instantly.</span></div>
+    <div class="rg-check"><svg width="16" height="16" fill="none" stroke="#137333" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>All reports include trend indicators (up/down) comparing the selected period to the previous period.</span></div>
+    <div class="rg-check"><svg width="16" height="16" fill="none" stroke="#137333" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Reports are fully printable with professional layout, OBA branding, and auto-generated header fields.</span></div>
+  </div>
+
+  <!-- Report Sheet Output -->
+  <div id="reportOutput" style="display:none">
+    <div class="report-sheet" id="reportSheetContainer">
+      <div class="empty-state"><div class="spinner"></div><p style="margin-top:12px">Compiling financial data and trend metrics...</p></div>
+    </div>
+  </div>
+
     </div>
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
-const BIZ_META={RENTAL:{name:'Rental',color:'#6B3FA0'},BUSINESS:{name:'Business',color:'#2d6a2e'},AGRI:{name:'Agriculture',color:'#D4A915'},NON_AGRI:{name:'Non-Agriculture',color:'#1A1A1A'},MAIN:{name:'Main',color:'#0D6EFD'}};
-const params=new URLSearchParams(window.location.search);
-const BIZ=params.get('biz')||'RENTAL';
-const meta=BIZ_META[BIZ]||BIZ_META.RENTAL;
-
-let employeeName = "Loading...";
-
-function buildNav(){
-  document.getElementById('empNav').innerHTML=`
-    <a class="nav-item" href="/employee/dashboard?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/employee/inventory?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
-    <a class="nav-item" href="/employee/sales?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item" href="/employee/expenses?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Expenses / Income</a>
-    <a class="nav-item active" href="/employee/reports?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>`;
+// ── Module 4.1: Dynamic Report Generator (Sales Staff) ─────────────
+// Sidebar nav is rendered statically in the HTML (prevents flicker);
+// we only sync the workspace query params onto the links.
+function wsQueryReports() {
+  const p = new URLSearchParams(window.location.search);
+  const biz = p.get('biz') || 'AGRI';
+  const entity = p.get('entity') || '';
+  let q = '?biz=' + encodeURIComponent(biz);
+  if (entity) q += '&entity=' + encodeURIComponent(entity);
+  return q;
+}
+function syncNav() {
+  const q = wsQueryReports();
+  document.querySelectorAll('#empNav a[data-page]').forEach(a => {
+    a.href = a.getAttribute('data-page') + q;
+  });
 }
 
-async function genReport(type){
-  const titles={income:'Income Statement',balance:'Balance Summary',cashflow:'Cash Flow Report',sales:'Sales Summary',inventory:'Inventory Report',profitloss:'Profit & Loss Statement'};
-  document.getElementById('reportOutput').style.display='block';
-  const now=new Date();
-  
-  const sheetHeader = `
-    <div class="report-sheet-header">
-      <div class="report-sheet-logo">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-        <div>
-          <h4 style="margin:0; font-size:0.9rem; font-weight:800; color:var(--gray-800);">Pampanga State Agricultural University</h4>
-          <span style="font-size:0.72rem; color:var(--gray-500); display:block; margin-top:2px;">Pacung, San Luis, Pampanga</span>
-        </div>
-      </div>
-      <div class="report-sheet-title-group">
-        <h3>Office of Business Affairs</h3>
-        <div class="org-sub">${meta.name} Category</div>
-        <div class="report-type">${titles[type]}</div>
-      </div>
-    </div>
-    
-    <div class="report-sheet-meta">
-      <div><strong>Date Range:</strong> Cumulative Annual Report</div>
-      <div><strong>Generated By:</strong> ${employeeName}</div>
-      <div><strong>Date:</strong> ${now.toLocaleDateString('en-PH')} ${now.toLocaleTimeString('en-PH', {hour:'2-digit', minute:'2-digit'})}</div>
-    </div>
-  `;
+const BIZ_META = {
+  AGRI: { name: 'Agriculture Category', color: '#D4A915' },
+  NON_AGRI: { name: 'Non-Agriculture Category', color: '#1A1A1A' },
+  MAIN: { name: 'Main Category', color: '#0D6EFD' },
+  all: { name: 'All Categories (Unified OBA)', color: '#2d6a2e' }
+};
 
-  const sheetSignatures = `
-    <div class="report-sheet-signatures">
-      <div class="sig-block">
-        <div class="sig-line"></div>
-        <div class="sig-label">Prepared By</div>
-        <div class="sig-title">${employeeName} (Category Employee)</div>
-      </div>
-      <div class="sig-block">
-        <div class="sig-line"></div>
-        <div class="sig-label">Reviewed By</div>
-        <div class="sig-title">OBA Director / Representative</div>
-      </div>
-    </div>
-  `;
-  
-  document.getElementById('reportSheetContainer').innerHTML=sheetHeader+`<div class="empty-state"><div class="spinner"></div><p style="margin-top:12px">Generating financial ledger sheets...</p></div>` + sheetSignatures;
-  document.getElementById('reportOutput').scrollIntoView({behavior:'smooth'});
+const REPORT_META = {
+  overall: { title: 'Overall Report', desc: 'Complete financial summary — totals from daily sales, revenue, expenses, transactions & profit/loss combined.' },
+  dailysales: { title: 'Daily Sales Report', desc: 'Itemized daily receipts, tax collected & daily trends compared to the previous day.' },
+  weeklyrevenue: { title: 'Weekly Revenue Summary', desc: '7-day revenue breakdown with expenditure & profit comparison to the previous week.' },
+  monthlystatement: { title: 'Monthly Financial Statement', desc: 'Comprehensive monthly ledger of revenue, expenditures & net financial position.' },
+  transactions: { title: 'Transaction History Report', desc: 'Detailed register of every sales transaction recorded for the selected period.' },
+  expensereport: { title: 'Expense Report', desc: 'Categorized operating expenses & cost of goods sold for the selected period.' },
+  profitloss: { title: 'Profit & Loss Statement', desc: 'Gross margin, operating expenses & net operating profit versus the previous period.' }
+};
 
-  try {
-    let body = '';
-    if (type === 'income' || type === 'profitloss') {
-      const res = await API.get(`/api/reports/${BIZ}/income-statement?period=year`);
-      if (res.success) {
-        const d = res.data;
-        body = `
-          <div style="margin-top:10px;">
-            <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Revenue & Receipts</h4>
-            <div class="ledger-row-sub indent"><span class="lbl">Sales Revenue (Net)</span><span class="val">${fmt.currency(d.salesRevenue)}</span></div>
-            <div class="ledger-row-sub indent"><span class="lbl">Taxes Collected (12%)</span><span class="val">${fmt.currency(d.taxes)}</span></div>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Other Supporting Income</span><span class="val">${fmt.currency(d.otherIncome)}</span></div>
-            <div class="ledger-row-sub total"><span class="lbl">Total Gross Revenue</span><span class="val" style="color:var(--green)">${fmt.currency(d.totalRevenue)}</span></div>
-            
-            <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Operating Expenses</h4>
-            <div class="ledger-row-sub indent"><span class="lbl">Cost of Goods Sold (Supplies)</span><span class="val">${fmt.currency(d.costOfGoods)}</span></div>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">General & Operating Expenses</span><span class="val">${fmt.currency(d.operatingExpenses)}</span></div>
-            <div class="ledger-row-sub total"><span class="lbl">Total Expenditures</span><span class="val" style="color:var(--danger)">${fmt.currency(d.totalExpenses)}</span></div>
-            
-            <div class="ledger-row-sub grand-total" style="margin-top:30px;">
-              <span class="lbl">NET PROFIT / INCOME</span>
-              <span class="val" style="color:${d.netIncome>=0?'var(--green)':'var(--danger)'}">${fmt.currency(d.netIncome)}</span>
-            </div>
-          </div>
-        `;
+const params = new URLSearchParams(window.location.search);
+let currentBiz = params.get('biz') || 'AGRI';
+let currentType = 'dailysales';
+let currentUser = null;
+let currentReportData = null;
+let currentPeriodLabel = '';
+let reportGenerated = false;
+
+// ── Period helpers ─────────────────────────────────────────────────
+function periodLabel() {
+  const period = document.getElementById('fPeriod').value;
+  const now = new Date();
+  if (period === 'custom') {
+    const s = document.getElementById('fStart').value;
+    const e = document.getElementById('fEnd').value;
+    return 'Custom: ' + (s ? fmt.date(s) : '—') + ' to ' + (e ? fmt.date(e) : '—');
+  }
+  if (period === 'day') return 'Today — ' + fmt.date(now);
+  if (period === 'week') {
+    const s = new Date(now); s.setDate(s.getDate() - 7);
+    return 'Last 7 Days — ' + fmt.date(s) + ' to ' + fmt.date(now);
+  }
+  if (period === 'year') return 'Fiscal Year ' + now.getFullYear();
+  return new Date(now.getFullYear(), now.getMonth(), 1)
+    .toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+}
+
+// Query string for the PREVIOUS comparable period (used to compute trend
+// indicators for staff reports the API does not cover with built-in trends).
+function prevPeriodQuery() {
+  const period = document.getElementById('fPeriod').value;
+  const now = new Date();
+  const iso = d => {
+    const tz = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return tz.toISOString().split('T')[0];
+  };
+  let ps, pe;
+  if (period === 'custom') {
+    const s = new Date(document.getElementById('fStart').value || now);
+    const e = new Date(document.getElementById('fEnd').value || now);
+    const dur = Math.max(86400000, e - s);
+    pe = new Date(s.getTime() - 86400000);
+    ps = new Date(pe.getTime() - dur);
+  } else if (period === 'day') {
+    ps = new Date(now); ps.setDate(ps.getDate() - 1); pe = new Date(ps);
+  } else if (period === 'week') {
+    pe = new Date(now); pe.setDate(pe.getDate() - 8);
+    ps = new Date(pe); ps.setDate(ps.getDate() - 7);
+  } else if (period === 'year') {
+    ps = new Date(now.getFullYear() - 1, 0, 1);
+    pe = new Date(now.getFullYear() - 1, 11, 31);
+  } else {
+    ps = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    pe = new Date(now.getFullYear(), now.getMonth(), 0);
+  }
+  return 'period=custom&startDate=' + iso(ps) + '&endDate=' + iso(pe);
+}
+
+// Same formula as routes/reports.js calculateTrend()
+function calculateTrend(currentVal, prevVal) {
+  currentVal = parseFloat(currentVal) || 0;
+  prevVal = parseFloat(prevVal) || 0;
+  let percent = 0;
+  if (prevVal > 0) percent = ((currentVal - prevVal) / prevVal) * 100;
+  else if (currentVal > 0) percent = 100;
+  const direction = percent >= 0 ? 'up' : 'down';
+  const rounded = Math.round(percent * 10) / 10;
+  return { current: currentVal, previous: prevVal, percent: rounded, direction, formatted: (rounded >= 0 ? '+' : '') + rounded + '%' };
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────
+function toggleCustomDates(skipRun) {
+  const period = document.getElementById('fPeriod').value;
+  const wrap = document.getElementById('customDateWrap');
+  if (period === 'custom') {
+    wrap.style.display = 'flex';
+  } else {
+    wrap.style.display = 'none';
+    if (!skipRun) runSelectedReport();
+  }
+  updateTopbarDateRange();
+}
+
+function selectReportType(type) {
+  currentType = type;
+}
+
+// ── Custom Report Type dropdown (icon menu, mockup) ────────────────
+function toggleTypeDropdown(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('rgTypeDropdown');
+  if (dd) dd.classList.toggle('open');
+}
+function closeTypeDropdown() {
+  const dd = document.getElementById('rgTypeDropdown');
+  if (dd) dd.classList.remove('open');
+}
+function pickReportType(type) {
+  const sel = document.getElementById('fReportType');
+  if (sel) sel.value = type;
+  // Instant feedback: generate the report as soon as a type is picked.
+  generateReport();
+  const item = document.querySelector('#rgTypeMenu .rg-dd-item[data-value="' + type + '"]');
+  if (item) {
+    const labelEl = document.getElementById('rgTypeLabel');
+    const iconEl = document.getElementById('rgTypeIcon');
+    const labelSpan = item.querySelector('.rg-dd-label');
+    const svg = item.querySelector('svg');
+    if (labelEl && labelSpan) labelEl.textContent = labelSpan.textContent;
+    if (iconEl) iconEl.innerHTML = svg ? svg.outerHTML : '';
+  }
+  document.querySelectorAll('#rgTypeMenu .rg-dd-item').forEach(i => i.classList.toggle('selected', i.dataset.value === type));
+  closeTypeDropdown();
+}
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('rgTypeDropdown');
+  if (dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
+
+function generateReport() {
+  const type = document.getElementById('fReportType').value;
+  if (!type) {
+    Toast.warning('Please select a report type first.');
+    return;
+  }
+  selectReportType(type);
+  reportGenerated = true;
+  updateTopbarDateRange();
+  const emptyEl = document.getElementById('rgEmptyState');
+  if (emptyEl) emptyEl.style.display = 'none';
+  const outEl = document.getElementById('reportOutput');
+  if (outEl) outEl.style.display = 'block';
+  runSelectedReport();
+}
+
+function renderTrendPill(trend) {
+  if (!trend) return '';
+  const isUp = trend.direction === 'up';
+  const cls = isUp ? 'trend-up' : (trend.percent === 0 ? 'trend-neutral' : 'trend-down');
+  const icon = isUp ? '▲' : (trend.percent === 0 ? '•' : '▼');
+  return `<span class="trend-pill ${cls}">${icon} ${trend.formatted} vs prev period</span>`;
+}
+
+// ── OBA-branded printable sheet (auto-generated header fields) ─────
+// ── Mockup-style KPI card + trend helpers (Module 4.1) ──────────────
+let reportCharts = [];
+function destroyReportCharts() {
+  reportCharts.forEach(c => { try { c.destroy(); } catch (_) {} });
+  reportCharts = [];
+}
+
+function kpiCardHTML(label, value, trend, periodWord, invertColor, plainNumber) {
+  let cls = 'flat', arrow = '•', pct = '0.0%';
+  if (trend) {
+    const isUp = trend.direction === 'up';
+    const good = invertColor ? !isUp : isUp;
+    cls = trend.percent === 0 ? 'flat' : (good ? 'up' : 'down');
+    arrow = trend.percent === 0 ? '•' : (isUp ? '▲' : '▼');
+    pct = Math.abs(trend.percent).toFixed(1) + '%';
+  }
+  let caption = '';
+  if (trend && trend.previous !== undefined) {
+    const prevText = plainNumber ? Math.round(trend.previous).toLocaleString() : fmt.currency(trend.previous);
+    caption = `<div class="rs2-kpi-caption">vs. previous ${periodWord} (${prevText})</div>`;
+  }
+  return `<div class="rs2-kpi">
+    <div class="rs2-kpi-label">${label}</div>
+    <div class="rs2-kpi-value">${value}</div>
+    <div class="rs2-kpi-trend ${cls}">${arrow} ${pct}</div>
+    ${caption}
+  </div>`;
+}
+
+function catTrendHTML(cur, prev) {
+  if (prev > 0) {
+    const pct = ((cur - prev) / prev) * 100;
+    const up = pct >= 0;
+    return `<span class="${up ? 'cat-trend-up' : 'cat-trend-down'}">${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(1)}%</span>`;
+  }
+  if (cur > 0) return '<span class="cat-trend-up">▲ 100.0%</span>';
+  return '<span style="color:var(--gray-400)">—</span>';
+}
+
+function mountDailyReportCharts(d) {
+  destroyReportCharts();
+  if (!window.Chart) return;
+
+  // Sales Trend — Current vs Previous period bars (last 7 days)
+  const trendEl = document.getElementById('chartSalesTrend');
+  if (trendEl && Array.isArray(d.dailySeries)) {
+    reportCharts.push(new Chart(trendEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: d.dailySeries.map(p => p.label),
+        datasets: [
+          { label: 'Current Period', data: d.dailySeries.map(p => p.current), backgroundColor: '#1F3D7A', borderRadius: 4, barPercentage: 0.55, categoryPercentage: 0.62 },
+          { label: 'Previous Period', data: d.dailySeries.map(p => p.previous), backgroundColor: '#9FB6D9', borderRadius: 4, barPercentage: 0.55, categoryPercentage: 0.62 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 11 } } },
+          y: { beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { color: '#6b7280', font: { size: 11 }, callback: v => '₱' + (v >= 1000 ? (v / 1000) + 'k' : v) } }
+        }
       }
-    } else if (type === 'balance') {
-      const res = await API.get(`/api/reports/${BIZ}/balance-summary`);
-      if (res.success) {
-        const d = res.data;
-        body = `
-          <div style="margin-top:10px;">
-            <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Current & Fixed Assets</h4>
-            <div class="ledger-row-sub indent"><span class="lbl">Cash and Cash Equivalents</span><span class="val">${fmt.currency(d.assets.cash)}</span></div>
-            <div class="ledger-row-sub indent"><span class="lbl">Inventory Asset Value</span><span class="val">${fmt.currency(d.assets.inventory)}</span></div>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Receivables</span><span class="val">${fmt.currency(d.assets.receivables)}</span></div>
-            <div class="ledger-row-sub total"><span class="lbl">Total Assets</span><span class="val" style="color:var(--green)">${fmt.currency(d.assets.totalAssets)}</span></div>
-            
-            <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Liabilities</h4>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Outstanding Accounts Payable</span><span class="val" style="color:var(--danger)">${fmt.currency(d.liabilities.payables)}</span></div>
-            <div class="ledger-row-sub total"><span class="lbl">Total Liabilities</span><span class="val" style="color:var(--danger)">${fmt.currency(d.liabilities.totalLiabilities)}</span></div>
-            
-            <div class="ledger-row-sub grand-total" style="margin-top:30px;">
-              <span class="lbl">OWNER'S EQUITY (Net Assets)</span>
-              <span class="val">${fmt.currency(d.equity)}</span>
-            </div>
-          </div>
-        `;
-      }
-    } else if (type === 'cashflow') {
-      const res = await API.get(`/api/reports/${BIZ}/cash-flow?period=year`);
-      if (res.success) {
-        const d = res.data;
-        body = `
-          <div style="margin-top:10px;">
-            <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Cash Flow from Operating Activities</h4>
-            <div class="ledger-row-sub indent"><span class="lbl">Cash Receipts from Sales</span><span class="val" style="color:var(--green)">+ ${fmt.currency(d.operatingActivities.salesReceipts)}</span></div>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Cash Payments for General Expenses</span><span class="val" style="color:var(--danger)">- ${fmt.currency(d.operatingActivities.expensePayments)}</span></div>
-            <div class="ledger-row-sub total"><span class="lbl">Net Cash from Operating Activities</span><span class="val" style="color:var(--green)">${fmt.currency(d.operatingActivities.netOperating)}</span></div>
-            
-            <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Cash Flow from Investing Activities</h4>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Acquisition of Equipment / Fixed Assets</span><span class="val" style="color:var(--danger)">- ${fmt.currency(d.investingActivities.equipmentPurchase)}</span></div>
-            
-            <div class="ledger-row-sub total" style="margin-top:20px;"><span class="lbl">Opening Cash Balance</span><span class="val">${fmt.currency(d.openingBalance)}</span></div>
-            <div class="ledger-row-sub grand-total" style="margin-top:20px;">
-              <span class="lbl">NET CLOSING CASH BALANCE</span>
-              <span class="val" style="color:var(--green)">${fmt.currency(d.closingBalance)}</span>
-            </div>
-          </div>
-        `;
-      }
-    } else if (type === 'sales') {
-      const res = await API.get(`/api/reports/${BIZ}/summary?period=year`);
-      if (res.success) {
-        body = `
-          <div style="margin-top:10px;">
-            <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">Annual Sales Statement</h4>
-            <div class="ledger-row-sub indent"><span class="lbl">Sales Revenue (Net)</span><span class="val">${fmt.currency(res.data.revenue)}</span></div>
-            <div class="ledger-row-sub indent"><span class="lbl">Taxes Collected (12%)</span><span class="val">${fmt.currency(res.data.taxes)}</span></div>
-            <div class="ledger-row-sub total"><span class="lbl">Total Gross Revenue</span><span class="val" style="color:var(--green)">${fmt.currency((res.data.revenue||0) + (res.data.taxes||0))}</span></div>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Registered Operating Expense Outflow</span><span class="val" style="color:var(--danger)">${fmt.currency(res.data.expenses)}</span></div>
-            <div class="ledger-row-sub grand-total" style="margin-top:30px;">
-              <span class="lbl">NET OPERATING PROFIT</span>
-              <span class="val" style="color:${res.data.profit>=0?'var(--green)':'var(--danger)'}">${fmt.currency(res.data.profit)}</span>
-            </div>
-          </div>
-        `;
-      }
-    } else if (type === 'inventory') {
-      const res = await API.get('/api/inventory?biz=' + BIZ);
-      if (res.success) {
-        const items = res.data || [];
-        const totalStockVal = items.reduce((sum, item) => sum + ((parseFloat(item.sellingPrice) || 0) * (parseInt(item.quantity || item.stock) || 0)), 0);
-        const totalItemsCount = items.length;
-        const totalUnitsCount = items.reduce((sum, item) => sum + (parseInt(item.quantity || item.stock) || 0), 0);
-        body = `
-          <div style="margin-top:10px;">
-            <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">Inventory & Asset Valuation</h4>
-            <div class="ledger-row-sub indent"><span class="lbl">Total Distinct Product Lines</span><span class="val">${totalItemsCount} Products</span></div>
-            <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Total In-Stock Units Available</span><span class="val">${totalUnitsCount} Units</span></div>
-            <div class="ledger-row-sub grand-total" style="margin-top:30px;">
-              <span class="lbl">TOTAL INVENTORY ASSET VALUATION</span>
-              <span class="val" style="color:var(--green)">${fmt.currency(totalStockVal)}</span>
-            </div>
-            
-            <table class="ledger-table" style="margin-top: 30px;">
-              <thead>
-                <tr>
-                  <th>Product / Description</th>
-                  <th style="text-align: center;">In-Stock Qty</th>
-                  <th style="text-align: right;">Unit Price</th>
-                  <th style="text-align: right;">Total Valuation</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${items.slice(0, 15).map(item => {
-                  const qty = parseInt(item.quantity || item.stock) || 0;
-                  const price = parseFloat(item.sellingPrice) || 0;
-                  return `
-                    <tr>
-                      <td>${item.name}</td>
-                      <td style="text-align: center;">${qty}</td>
-                      <td style="text-align: right;">${fmt.currency(price)}</td>
-                      <td style="text-align: right; font-weight: 700;">${fmt.currency(qty * price)}</td>
-                    </tr>
-                  `;
-                }).join('')}
-                ${items.length > 15 ? `<tr><td colspan="4" style="text-align:center; color:var(--gray-400); font-style:italic;">Showing top 15 items. Complete list available in primary inventory database.</td></tr>` : ''}
-              </tbody>
-            </table>
-          </div>
-        `;
-      }
+    }));
+  }
+
+  // Sales Distribution — donut with center total + % legend
+  const donutEl = document.getElementById('chartSalesDist');
+  if (donutEl) {
+    const cats = (d.categoryBreakdown || []).slice(0, 6);
+    if (cats.length > 0) {
+      const palette = ['#1F3D7A', '#3B82F6', '#93C5FD', '#D4A915', '#137333', '#9CA3AF'];
+      const donutTotal = cats.reduce((a, c) => a + c.amount, 0) || 1;
+      const centerText = {
+        id: 'centerText',
+        afterDraw(chart) {
+          const meta = chart.getDatasetMeta(0);
+          if (!meta.data.length) return;
+          const { ctx } = chart;
+          const x = meta.data[0].x, y = meta.data[0].y;
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#111827';
+          ctx.font = '800 14px Segoe UI, Arial, sans-serif';
+          ctx.fillText(fmt.currency(donutTotal), x, y);
+          ctx.restore();
+        }
+      };
+      reportCharts.push(new Chart(donutEl.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: cats.map(c => c.category),
+          datasets: [{ data: cats.map(c => c.amount), backgroundColor: palette, borderWidth: 2, borderColor: '#ffffff' }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 10, boxHeight: 10, font: { size: 11 },
+                generateLabels(chart) {
+                  const ds = chart.data.datasets[0];
+                  return chart.data.labels.map((l, i) => ({
+                    text: (ds.data[i] / donutTotal * 100).toFixed(1) + '%  ' + l,
+                    fillStyle: ds.backgroundColor[i],
+                    strokeStyle: ds.backgroundColor[i],
+                    index: i
+                  }));
+                }
+              }
+            },
+            tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + fmt.currency(ctx.parsed) } }
+          }
+        },
+        plugins: [centerText]
+      }));
     } else {
-      body = '<div class="empty-state">No report layout defined.</div>';
+      const wrap = donutEl.closest('.donut-wrap');
+      if (wrap) wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-400);font-size:0.8rem">No sales distribution for this period.</div>';
     }
-    document.getElementById('reportSheetContainer').innerHTML = sheetHeader + (body || '<div class="empty-state">No data available</div>') + sheetSignatures;
-  } catch(e) {
-    document.getElementById('reportSheetContainer').innerHTML = sheetHeader + '<div class="empty-state">Error generating report</div>' + sheetSignatures;
   }
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  buildNav();
-  document.getElementById('topbarTitle').textContent=meta.name+' - Reports';
-  document.title=meta.name+' Reports - OBA System';
-  getCurrentUser().then(u=>{
-    if(u){
-      employeeName = u.name;
-      document.getElementById('sidebarName').textContent=u.name;
-      document.querySelector('.sidebar-user-role').textContent='Logged in as: '+formatRole(u.role);
-      document.getElementById('sidebarAvatar').textContent=u.name.charAt(0).toUpperCase();
+// ── Overall Trend band (Module 4.1: all reports include trend indicators) ──
+const OVERALL_TREND_KEYS = {
+  overall: 'netProfit', dailysales: 'revenue', weeklyrevenue: 'revenue', monthlystatement: 'revenue',
+  transactions: 'volume', expensereport: 'expenses', profitloss: 'netProfit'
+};
+const OVERALL_TREND_NOUNS = {
+  overall: 'Net profit', dailysales: 'Sales', weeklyrevenue: 'Revenue', monthlystatement: 'Revenue',
+  transactions: 'Transaction volume', expensereport: 'Total expenditures',
+  profitloss: 'Net profit'
+};
+
+function buildOverallTrendBand(type, d) {
+  const trendKey = OVERALL_TREND_KEYS[type];
+  const mainTrend = trendKey ? (d.trends || {})[trendKey] : null;
+  if (!mainTrend) return '';
+  const isUp = mainTrend.direction === 'up';
+  const noun = OVERALL_TREND_NOUNS[type] || 'Performance';
+  let periodWord = 'previous period';
+  if (type === 'dailysales') periodWord = 'previous ' + (d.periodUnit === 'week' ? 'week' : (d.periodUnit === 'day' ? 'day' : 'period'));
+  else if (type === 'weeklyrevenue') periodWord = 'previous week';
+  else if (type === 'monthlystatement') periodWord = 'previous month';
+  const verb = isUp ? 'increased' : 'decreased';
+  return `<div class="rs2-trendband ${isUp ? '' : 'down'}">
+    <div class="band-icon"><svg width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+    <div>
+      <div class="band-title">Overall Trend</div>
+      <div class="band-sub">${noun} ${verb} by ${Math.abs(mainTrend.percent).toFixed(1)}% compared to the ${periodWord}.</div>
+    </div>
+  </div>`;
+}
+
+// ── OBA-branded printable sheet (auto-generated header fields) ──────
+function buildSheetHeader(title) {
+  const bizVal = document.getElementById('fBiz').value;
+  const metaObj = BIZ_META[bizVal] || BIZ_META.AGRI;
+  const now = new Date();
+  const docRef = 'OBA-RPT-' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + Math.floor(1000 + Math.random() * 9000);
+  const userName = currentUser ? currentUser.name : 'Sales Staff';
+  return `
+  <div class="rs2-header">
+    <div class="rs2-brand">
+      <img src="/images/logo.png" alt="OBA Logo" style="height:42px;width:auto;object-fit:contain">
+      <span class="rs2-wordmark">OBA</span>
+    </div>
+    <div class="rs2-title">
+      <h2>${title}</h2>
+      <div class="rs2-date">${metaObj.name} &middot; ${currentPeriodLabel}</div>
+    </div>
+    <div class="rs2-org">
+      <strong>OBA Business Solutions</strong>
+      Pampanga State Agricultural University<br>
+      Office of Business Affairs<br>
+      Document Ref: ${docRef}
+    </div>
+  </div>
+  <div class="report-sheet-meta">
+    <div><strong>Business Unit:</strong> ${metaObj.name}</div>
+    <div><strong>Document Ref:</strong> ${docRef}</div>
+    <div><strong>Prepared By:</strong> ${userName}</div>
+    <div><strong>Generated On:</strong> ${now.toLocaleDateString('en-PH')} ${now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })}</div>
+  </div>`;
+}
+
+function buildSheetSignatures() {
+  const userName = currentUser ? currentUser.name : 'Sales Staff';
+  return `
+  <div class="report-sheet-signatures">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Prepared By</div>
+      <div class="sig-title">${userName} (Sale Staff)</div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Checked By</div>
+      <div class="sig-title">OBA Director / Representative</div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Noted By</div>
+      <div class="sig-title">Auditor</div>
+    </div>
+  </div>
+  <div class="rs2-genfooter">Generated by OBA System<br>${new Date().toLocaleDateString('en-PH')} &middot; ${new Date().toLocaleTimeString('en-PH')}</div>`;
+}
+
+// ── Report runner ──────────────────────────────────────────────────
+async function runSelectedReport() {
+  if (!reportGenerated) return;
+  const biz = document.getElementById('fBiz').value;
+  currentBiz = biz;
+  const period = document.getElementById('fPeriod').value;
+  const startDate = document.getElementById('fStart').value;
+  const endDate = document.getElementById('fEnd').value;
+
+  currentPeriodLabel = periodLabel();
+  let queryUrl = `/api/reports/${biz}/${currentType}?period=${period}`;
+  if (period === 'custom' && startDate && endDate) {
+    queryUrl += `&startDate=${startDate}&endDate=${endDate}`;
+  }
+
+  const container = document.getElementById('reportSheetContainer');
+  container.innerHTML = `<div class="empty-state"><div class="spinner"></div><p style="margin-top:12px">Generating official ledger sheets &amp; comparative trends...</p></div>`;
+
+  try {
+    const res = await API.get(queryUrl);
+    if (!res.success) {
+      container.innerHTML = `<div class="empty-state">Unable to load report data.</div>`;
+      return;
+    }
+    const d = res.data;
+    // Trend fallback: staff-only period reports get trend indicators by
+    // comparing against the previous comparable period (Module 4.1).
+    if (!d.trends && (currentType === 'salestaff-consolidated' || currentType === 'budget-utilization-staff')) {
+      try {
+        const prevRes = await API.get(`/api/reports/${biz}/${currentType}?${prevPeriodQuery()}`);
+        if (prevRes.success) {
+          const p = prevRes.data;
+          if (currentType === 'salestaff-consolidated') {
+            d.trends = {
+              revenue: calculateTrend(d.totalSales, p.totalSales),
+              netIncome: calculateTrend(d.netIncome, p.netIncome),
+              transactions: calculateTrend(d.totalTransactions, p.totalTransactions)
+            };
+          } else {
+            d.trends = { used: calculateTrend(d.usedBalance, p.usedBalance) };
+          }
+        }
+      } catch (e) { /* trend fallback is optional */ }
+    }
+    currentReportData = d;
+    renderReportOutput(currentType, d);
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = `<div class="empty-state">Error generating report sheet.</div>`;
+  }
+}
+
+function renderReportOutput(type, d) {
+  const container = document.getElementById('reportSheetContainer');
+  let body = '';
+
+  if (type === 'overall') {
+    const t = d.trends || {};
+    const periodWord = 'previous period';
+    body = `
+    ${buildSheetHeader('OVERALL FINANCIAL REPORT')}
+    <div style="margin-bottom: 20px;">
+      <div class="rs2-kpis">
+        ${kpiCardHTML('Gross Sales', fmt.currency(d.grossSales), t.grossSales, periodWord, false)}
+        ${kpiCardHTML('Net Sales', fmt.currency(d.netSales), t.netSales, periodWord, false)}
+        ${kpiCardHTML('Total Transactions', String(d.totalTransactions || 0), t.transactions, periodWord, false, true)}
+        ${kpiCardHTML('Net Profit', fmt.currency(d.netProfit), t.netProfit, periodWord, false)}
+      </div>
+
+      <div class="rs2-kpis" style="margin-top: 14px;">
+        ${kpiCardHTML('Total Expenses', fmt.currency(d.totalExpenses), t.totalExpenses, periodWord, true)}
+        ${kpiCardHTML('Avg Order Value', fmt.currency(d.averageOrderValue), t.aov, periodWord, false)}
+        ${kpiCardHTML('ROI', (d.roi || 0).toFixed(1) + '%', t.roi, periodWord, false)}
+        ${kpiCardHTML('Taxes Collected', fmt.currency(d.taxes), t.taxes, periodWord, false)}
+      </div>
+
+      <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Revenue Summary</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Gross Sales Revenue</span><span class="val">${fmt.currency(d.grossSales)} ${renderTrendPill(t.grossSales)}</span></div>
+      <div class="ledger-row-sub indent"><span class="lbl">Less: Sales Tax / VAT</span><span class="val">(${fmt.currency(d.taxes)})</span></div>
+      <div class="ledger-row-sub indent"><span class="lbl">Other Operational Income</span><span class="val">${fmt.currency(d.otherIncome)}</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">Total Net Revenue</span><span class="val" style="color:var(--green)">${fmt.currency(d.totalRevenue)} ${renderTrendPill(t.totalRevenue)}</span></div>
+
+      <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Expenses & Cost of Sales</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Cost of Goods Sold (COGS)</span><span class="val">(${fmt.currency(d.costOfGoodsSold)}) ${renderTrendPill(t.cogs)}</span></div>
+      <div class="ledger-row-sub indent"><span class="lbl">Operating Expenses</span><span class="val">(${fmt.currency(d.operatingExpenses)}) ${renderTrendPill(t.operatingExpenses)}</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">Total Expenditures</span><span class="val" style="color:var(--danger)">${fmt.currency(d.totalExpenses)} ${renderTrendPill(t.totalExpenses)}</span></div>
+
+      <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">III. Profitability</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Gross Profit (Gross Margin: ${d.grossMarginPercent})</span><span class="val" style="color:var(--green)">${fmt.currency(d.grossProfit)} ${renderTrendPill(t.grossProfit)}</span></div>
+      <div class="ledger-row-sub grand-total" style="margin-top:16px;">
+        <span class="lbl">NET PROFIT / (LOSS) (Net Margin: ${d.netMarginPercent})</span>
+        <span class="val" style="color:${d.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.netProfit)} ${renderTrendPill(t.netProfit)}</span>
+      </div>
+
+      ${Object.keys(d.expenseCategories || {}).length > 0 ? `
+      <h4 style="margin: 28px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">IV. Expense Breakdown by Category</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Expense Category</th>
+            <th style="text-align:right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.keys(d.expenseCategories).sort((a, b) => d.expenseCategories[b] - d.expenseCategories[a]).map(cat => `
+          <tr>
+            <td><strong>${cat}</strong></td>
+            <td style="text-align:right; font-weight:700; color:var(--danger)">${fmt.currency(d.expenseCategories[cat])}</td>
+          </tr>
+          `).join('')}
+        </tbody>
+      </table>` : ''}
+
+      ${Object.keys(d.paymentMethods || {}).length > 0 ? `
+      <h4 style="margin: 28px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">V. Payment Method Summary</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Payment Method</th>
+            <th style="text-align:right">Total Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.keys(d.paymentMethods).sort((a, b) => d.paymentMethods[b] - d.paymentMethods[a]).map(pm => `
+          <tr>
+            <td><strong>${pm.charAt(0).toUpperCase() + pm.slice(1)}</strong></td>
+            <td style="text-align:right; font-weight:700; color:var(--green)">${fmt.currency(d.paymentMethods[pm])}</td>
+          </tr>
+          `).join('')}
+        </tbody>
+      </table>` : ''}
+
+      ${(d.transactions || []).length > 0 ? `
+      <h4 style="margin: 28px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">VI. Recent Transactions</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Time / Order ID</th>
+            <th>Staff / Cashier</th>
+            <th>Payment</th>
+            <th style="text-align:right">Tax</th>
+            <th style="text-align:right">Total Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${d.transactions.slice(0, 30).map(tx => `
+          <tr>
+            <td><strong>${tx.id || 'N/A'}</strong><br><span style="font-size:0.72rem; color:var(--gray-500)">${new Date(tx.date).toLocaleString('en-PH')}</span></td>
+            <td>${tx.cashierName || 'Staff'}</td>
+            <td><span class="badge badge-gray">${tx.paymentMethod || 'Cash'}</span></td>
+            <td style="text-align:right">${fmt.currency(tx.taxAmount)}</td>
+            <td style="text-align:right; font-weight:700; color:var(--green)">${fmt.currency(tx.total)}</td>
+          </tr>
+          `).join('')}
+        </tbody>
+      </table>` : ''}
+
+      <div class="rs2-kpis" style="margin-top:24px;">
+        ${kpiCardHTML('Total Products', String(d.totalProducts || 0), null, periodWord, false, true)}
+        ${kpiCardHTML('Total Stocks', String(d.totalStocks || 0), null, periodWord, false, true)}
+        ${kpiCardHTML('Inventory Cost', fmt.currency(d.totalInventoryCost), null, periodWord, false)}
+        ${kpiCardHTML('Return on Investment', (d.roi || 0).toFixed(1) + '%', t.roi, periodWord, false)}
+      </div>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'dailysales') {
+    const t = d.trends || {};
+    const catRows = (d.categoryBreakdown || []);
+    const catSum = catRows.reduce((a, c) => a + c.amount, 0);
+    const catTotal = catSum || 1;
+    const prevCatSum = catRows.reduce((a, c) => a + (c.prevAmount || 0), 0);
+    const prevDayWord = d.periodUnit === 'week' ? 'week' : (d.periodUnit === 'day' ? 'day' : 'period');
+    body = `
+    ${buildSheetHeader('Daily Sales Report')}
+    <div style="margin-bottom: 20px;">
+      <div class="rs2-kpis">
+        ${kpiCardHTML('Total Sales', fmt.currency(d.grossSales), t.revenue, prevDayWord, false)}
+        ${kpiCardHTML('Total Transactions', String(d.totalSalesCount || 0), t.transactions, prevDayWord, false, true)}
+        ${kpiCardHTML('Average Order Value', fmt.currency(d.averageOrderValue), t.aov, prevDayWord, false)}
+        ${kpiCardHTML('Total Expenses', fmt.currency(d.totalExpenses), t.expenses, prevDayWord, true)}
+      </div>
+
+      <div class="rs2-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <h4 class="rs2-section-title" style="margin:0">Sales Trend</h4>
+          <div class="rs2-legend">
+            <span><span class="dot" style="background:#1F3D7A"></span>Current Period</span>
+            <span><span class="dot" style="background:#9FB6D9"></span>Previous Period</span>
+          </div>
+        </div>
+        <div style="height:250px"><canvas id="chartSalesTrend"></canvas></div>
+      </div>
+
+      <div class="rs2-cols">
+        <div class="rs2-panel" style="margin-bottom:0">
+          <h4 class="rs2-section-title">Sales by Category</h4>
+          <table class="rs2-cat-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th style="text-align:right">Sales Amount</th>
+                <th style="text-align:right">% of Total</th>
+                <th style="text-align:right">Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${catRows.map(c => `
+              <tr>
+                <td>${c.category}</td>
+                <td style="text-align:right">${fmt.currency(c.amount)}</td>
+                <td style="text-align:right">${(c.amount / catTotal * 100).toFixed(1)}%</td>
+                <td style="text-align:right">${catTrendHTML(c.amount, c.prevAmount)}</td>
+              </tr>
+              `).join('')}
+              ${catRows.length === 0 ? '<tr><td colspan="4" style="text-align:center; color:var(--gray-500)">No categorized sales recorded for this period.</td></tr>' : ''}
+              <tr class="total">
+                <td>Total</td>
+                <td style="text-align:right">${fmt.currency(catSum)}</td>
+                <td style="text-align:right">100%</td>
+                <td style="text-align:right">${catTrendHTML(catSum, prevCatSum)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="rs2-panel" style="margin-bottom:0">
+          <h4 class="rs2-section-title">Sales Distribution</h4>
+          <div class="donut-wrap" style="height:230px"><canvas id="chartSalesDist"></canvas></div>
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">Daily Transaction Log</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Time / Order ID</th>
+            <th>Staff / Cashier</th>
+            <th>Payment</th>
+            <th style="text-align:right">Tax</th>
+            <th style="text-align:right">Total Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.transactions || []).map(tx => `
+          <tr>
+            <td><strong>${tx.id || 'N/A'}</strong><br><span style="font-size:0.72rem; color:var(--gray-500)">${new Date(tx.date || tx.createdAt).toLocaleTimeString('en-PH')}</span></td>
+            <td>${tx.cashierName || tx.cashier || tx.employeeName || 'Staff'}</td>
+            <td><span class="badge badge-gray">${tx.paymentMethod || 'Cash'}</span></td>
+            <td style="text-align:right">${fmt.currency(tx.taxAmount)}</td>
+            <td style="text-align:right; font-weight:700; color:var(--green)">${fmt.currency(tx.grossTotal || tx.total)}</td>
+          </tr>
+          `).join('')}
+          ${(d.transactions || []).length === 0 ? `<tr><td colspan="5" style="text-align:center; color:var(--gray-500)">No sales recorded for this date period.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'weeklyrevenue') {
+    const t = d.trends || {};
+    body = `
+    ${buildSheetHeader('WEEKLY REVENUE SUMMARY')}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card green">
+          <div class="kpi-label">Gross Weekly Revenue</div>
+          <div class="kpi-value" style="color:var(--green)">${fmt.currency(d.grossRevenue)}</div>
+          ${renderTrendPill(t.revenue)}
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Taxes Collected</div>
+          <div class="kpi-value">${fmt.currency(d.taxes)}</div>
+        </div>
+        <div class="kpi-card danger">
+          <div class="kpi-label">Total Expenditures</div>
+          <div class="kpi-value" style="color:var(--danger)">${fmt.currency(d.totalExpenses)}</div>
+          ${renderTrendPill(t.expenses)}
+        </div>
+        <div class="kpi-card black">
+          <div class="kpi-label">Net Operating Profit</div>
+          <div class="kpi-value" style="color:${d.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.netProfit)}</div>
+          ${renderTrendPill(t.profit)}
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">Daily Revenue Breakdown</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Day of Week</th>
+            <th style="text-align:center">Sales Count</th>
+            <th style="text-align:right">Daily Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.dailyBreakdown || []).map(db => `
+          <tr>
+            <td><strong>${db.day}</strong></td>
+            <td style="text-align:center">${db.salesCount} transactions</td>
+            <td style="text-align:right; font-weight:700;">${fmt.currency(db.revenue)}</td>
+          </tr>
+          `).join('')}
+          ${(d.dailyBreakdown || []).length === 0 ? `<tr><td colspan="3" style="text-align:center; color:var(--gray-500)">No revenue recorded for this week.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'monthlystatement') {
+    const t = d.trends || {};
+    body = `
+    ${buildSheetHeader('MONTHLY FINANCIAL STATEMENT')}
+    <div style="margin-top:10px;">
+      <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Gross Revenue &amp; Supporting Receipts</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Sales Revenue (Net of Tax)</span><span class="val">${fmt.currency(d.salesRevenue)}</span></div>
+      <div class="ledger-row-sub indent"><span class="lbl">Value Added Tax / Business Tax</span><span class="val">${fmt.currency(d.taxes)}</span></div>
+      <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">Other Operational Income</span><span class="val">${fmt.currency(d.otherIncome)}</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">Total Gross Revenue</span><span class="val" style="color:var(--green)">${fmt.currency(d.totalRevenue)} ${renderTrendPill(t.revenue)}</span></div>
+
+      <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Operating Expenditures &amp; Cost of Sales</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Cost of Goods Sold (Supplies Inventory Cost)</span><span class="val">${fmt.currency(d.costOfGoods)}</span></div>
+      <div class="ledger-row-sub indent" style="margin-bottom:4px;"><span class="lbl">General &amp; Operating Expenses</span><span class="val">${fmt.currency(d.operatingExpenses)}</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">Total Expenditures</span><span class="val" style="color:var(--danger)">${fmt.currency(d.totalExpenses)} ${renderTrendPill(t.expenses)}</span></div>
+
+      <div class="ledger-row-sub grand-total" style="margin-top:30px;">
+        <span class="lbl">NET MONTHLY FINANCIAL PROFIT</span>
+        <span class="val" style="color:${d.netIncome >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.netIncome)} ${renderTrendPill(t.netIncome)}</span>
+      </div>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'transactions') {
+    const t = d.trends || {};
+    body = `
+    ${buildSheetHeader('TRANSACTION HISTORY REPORT')}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card green">
+          <div class="kpi-label">Total Volume</div>
+          <div class="kpi-value" style="color:var(--green)">${fmt.currency(d.totalVolume)}</div>
+          ${renderTrendPill(t.volume)}
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Taxes Collected</div>
+          <div class="kpi-value">${fmt.currency(d.totalTax)}</div>
+          ${renderTrendPill(t.tax)}
+        </div>
+        <div class="kpi-card black">
+          <div class="kpi-label">Transaction Count</div>
+          <div class="kpi-value">${d.transactionCount}</div>
+          ${renderTrendPill(t.count)}
+        </div>
+      </div>
+
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Date / Ref ID</th>
+            <th>Staff Cashier</th>
+            <th>Payment Method</th>
+            <th style="text-align:right">Tax</th>
+            <th style="text-align:right">Gross Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.transactions || []).map(tx => `
+          <tr>
+            <td><strong>${tx.id}</strong><br><span style="font-size:0.72rem; color:var(--gray-500)">${fmt.datetime(tx.date)}</span></td>
+            <td>${tx.cashier || 'Staff'}</td>
+            <td><span class="badge badge-gray">${tx.paymentMethod}</span></td>
+            <td style="text-align:right">${fmt.currency(tx.taxAmount)}</td>
+            <td style="text-align:right; font-weight:700; color:var(--green)">${fmt.currency(tx.grossTotal)}</td>
+          </tr>
+          `).join('')}
+          ${(d.transactions || []).length === 0 ? `<tr><td colspan="5" style="text-align:center; color:var(--gray-500)">No transactions recorded for this period.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'expensereport') {
+    const t = d.trends || {};
+    body = `
+    ${buildSheetHeader('EXPENSE REPORT')}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card danger">
+          <div class="kpi-label">Total Expenditures</div>
+          <div class="kpi-value" style="color:var(--danger)">${fmt.currency(d.totalExpenses)}</div>
+          ${renderTrendPill(t.expenses)}
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Direct Cost of Goods Sold</div>
+          <div class="kpi-value">${fmt.currency(d.cogs)}</div>
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">Categorized Expense Ledger</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Expense Category</th>
+            <th style="text-align:right">Total Outflow Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.keys(d.categoryBreakdown || {}).filter(cat => d.categoryBreakdown[cat] > 0).map(cat => `
+          <tr>
+            <td><strong>${cat}</strong></td>
+            <td style="text-align:right; font-weight:700; color:var(--danger)">${fmt.currency(d.categoryBreakdown[cat])}</td>
+          </tr>
+          `).join('')}
+          ${Object.keys(d.categoryBreakdown || {}).filter(cat => d.categoryBreakdown[cat] > 0).length === 0 ? `<tr><td colspan="2" style="text-align:center; color:var(--gray-500)">No additional operating expense categories recorded.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'profitloss') {
+    const t = d.trends || {};
+    body = `
+    ${buildSheetHeader('PROFIT & LOSS STATEMENT')}
+    <div style="margin-top:10px;">
+      <h4 style="margin: 0 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">I. Revenue</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Gross Sales Revenue</span><span class="val">${fmt.currency(d.grossSales)} ${renderTrendPill(t.grossSales)}</span></div>
+      <div class="ledger-row-sub indent"><span class="lbl">Less: Sales Tax / VAT</span><span class="val">(${fmt.currency(d.taxes)})</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">Net Sales Revenue</span><span class="val" style="color:var(--green)">${fmt.currency(d.netSales)} ${renderTrendPill(t.netSales)}</span></div>
+
+      <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">II. Cost of Goods Sold &amp; Gross Margin</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Cost of Goods Sold (Direct Inventory Cost)</span><span class="val">(${fmt.currency(d.costOfGoodsSold)}) ${renderTrendPill(t.cogs)}</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">GROSS PROFIT (Gross Margin: ${d.grossMarginPercent})</span><span class="val" style="color:var(--green)">${fmt.currency(d.grossProfit)} ${renderTrendPill(t.grossProfit)}</span></div>
+
+      <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">III. Operating Expenses</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Registered Operating Expenditures</span><span class="val">(${fmt.currency(d.operatingExpenses)}) ${renderTrendPill(t.operatingExpenses)}</span></div>
+
+      <div class="ledger-row-sub grand-total" style="margin-top:30px;">
+        <span class="lbl">NET OPERATING PROFIT / (LOSS) (Net Margin: ${d.netMarginPercent})</span>
+        <span class="val" style="color:${d.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.netProfit)} ${renderTrendPill(t.netProfit)}</span>
+      </div>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'salestaff-consolidated') {
+    const t = d.trends || {};
+    body = `
+    ${buildSheetHeader((d.reportTitle || 'Sales & Category Comprehensive Report').toUpperCase())}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+        <div class="kpi-card green">
+          <div class="kpi-label">Total Sales</div>
+          <div class="kpi-value" style="color:var(--green)">${fmt.currency(d.totalSales)}</div>
+          ${renderTrendPill(t.revenue)}
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Tax Collected</div>
+          <div class="kpi-value">${fmt.currency(d.tax)}</div>
+        </div>
+        <div class="kpi-card danger">
+          <div class="kpi-label">Total Expenditures</div>
+          <div class="kpi-value" style="color:var(--danger)">${fmt.currency(d.totalExpenses)}</div>
+        </div>
+        <div class="kpi-card black">
+          <div class="kpi-label">${d.isNetLoss ? 'Net Loss' : 'Net Income'}</div>
+          <div class="kpi-value" style="color:${d.netIncome >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.netIncome)}</div>
+          ${renderTrendPill(t.netIncome)}
+        </div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card green">
+          <div class="kpi-label">Transactions</div>
+          <div class="kpi-value">${d.totalTransactions}</div>
+          ${renderTrendPill(t.transactions)}
+        </div>
+        <div class="kpi-card black">
+          <div class="kpi-label">Total Stocks</div>
+          <div class="kpi-value">${fmt.number(d.totalStocks)}</div>
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Inventory Cost</div>
+          <div class="kpi-value">${fmt.currency(d.totalInventoryCost)}</div>
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">I. Inventory Stock &amp; Cost Ledger</h4>
+      <table class="ledger-table" style="margin-bottom: 24px;">
+        <thead>
+          <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Unit Cost</th>
+            <th style="text-align:right">Total Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.inventory || []).map(i => `
+          <tr>
+            <td style="font-size:0.75rem">${i.id}</td>
+            <td><strong>${i.name}</strong></td>
+            <td><span class="badge badge-gray">${i.category}</span></td>
+            <td style="text-align:center">${i.quantity}</td>
+            <td style="text-align:right">${fmt.currency(i.unitCost)}</td>
+            <td style="text-align:right; font-weight:700">${fmt.currency(i.totalCost)}</td>
+          </tr>
+          `).join('')}
+          ${(d.inventory || []).length === 0 ? `<tr><td colspan="6" style="text-align:center; color:var(--gray-500)">No inventory items recorded.</td></tr>` : ''}
+        </tbody>
+      </table>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">II. Itemized Sales Register</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Sale ID / Date</th>
+            <th>Product</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Unit Price</th>
+            <th>Payment</th>
+            <th style="text-align:right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.itemizedSales || []).slice(0, 50).map(s => `
+          <tr>
+            <td><strong>${s.saleId}</strong><br><span style="font-size:0.72rem; color:var(--gray-500)">${fmt.datetime(s.date)}</span></td>
+            <td>${s.productName}</td>
+            <td style="text-align:center">${s.quantity}</td>
+            <td style="text-align:right">${fmt.currency(s.unitPrice)}</td>
+            <td><span class="badge badge-gray">${s.paymentMethod}</span></td>
+            <td style="text-align:right; font-weight:700; color:var(--green)">${fmt.currency(s.amount)}</td>
+          </tr>
+          `).join('')}
+          ${(d.itemizedSales || []).length === 0 ? `<tr><td colspan="6" style="text-align:center; color:var(--gray-500)">No itemized sales recorded for this period.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'inventoryreport') {
+    body = `
+    ${buildSheetHeader('INVENTORY STOCK & COST REPORT')}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card black">
+          <div class="kpi-label">Total Products</div>
+          <div class="kpi-value">${d.totalProducts}</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Total Stocks</div>
+          <div class="kpi-value">${fmt.number(d.totalStocks)}</div>
+        </div>
+        <div class="kpi-card danger">
+          <div class="kpi-label">Total Inventory Cost</div>
+          <div class="kpi-value" style="color:var(--danger)">${fmt.currency(d.totalInventoryCost)}</div>
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Total Selling Value</div>
+          <div class="kpi-value">${fmt.currency(d.totalSellingValue)}</div>
+        </div>
+      </div>
+
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Unit Cost</th>
+            <th style="text-align:right">Total Cost</th>
+            <th style="text-align:right">Selling Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.inventory || []).map(i => `
+          <tr>
+            <td style="font-size:0.75rem">${i.id}</td>
+            <td><strong>${i.name}</strong></td>
+            <td><span class="badge badge-gray">${i.category}</span></td>
+            <td style="text-align:center">${i.quantity}</td>
+            <td style="text-align:right">${fmt.currency(i.unitCost)}</td>
+            <td style="text-align:right; font-weight:700">${fmt.currency(i.totalCost)}</td>
+            <td style="text-align:right">${fmt.currency(i.sellingPrice)}</td>
+            <td>${stockBadge(i.status)}</td>
+          </tr>
+          `).join('')}
+          ${(d.inventory || []).length === 0 ? `<tr><td colspan="8" style="text-align:center; color:var(--gray-500)">No inventory items recorded.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'budget-utilization-staff') {
+    const t = d.trends || {};
+    const pctUsed = d.budgetSetNow > 0 ? Math.min(100, (d.usedBalance / d.budgetSetNow) * 100) : 0;
+    body = `
+    ${buildSheetHeader('BUDGET UTILIZATION & ALLOCATION REPORT')}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Allocated Budget</div>
+          <div class="kpi-value">${fmt.currency(d.budgetSetNow)}</div>
+          <div style="font-size:0.72rem; color:var(--gray-500)">Set by ${d.setBy}</div>
+        </div>
+        <div class="kpi-card danger">
+          <div class="kpi-label">Used Balance</div>
+          <div class="kpi-value" style="color:var(--danger)">${fmt.currency(d.usedBalance)}</div>
+          ${renderTrendPill(t.used)}
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Remaining Balance</div>
+          <div class="kpi-value" style="color:${d.remainingBalance >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.remainingBalance)}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--gray-100); border-radius:10px; height:16px; overflow:hidden; margin-bottom:6px;">
+        <div style="width:${pctUsed}%; height:100%; background:linear-gradient(90deg, var(--yellow), var(--danger));"></div>
+      </div>
+      <div style="font-size:0.78rem; color:var(--gray-500); margin-bottom:20px;">${pctUsed.toFixed(1)}% of the allocated budget has been utilized.</div>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">Utilization Breakdown</h4>
+      <div class="ledger-row-sub indent"><span class="lbl">Inventory Stock Cost</span><span class="val">${fmt.currency(d.stockCost)}</span></div>
+      <div class="ledger-row-sub indent"><span class="lbl">Operating Expenses (Period)</span><span class="val">${fmt.currency(d.opExpenses)}</span></div>
+      <div class="ledger-row-sub total"><span class="lbl">Total Utilized</span><span class="val" style="color:var(--danger)">${fmt.currency(d.usedBalance)}</span></div>
+
+      <h4 style="margin: 24px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">Budget Allocation History</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Date Set</th>
+            <th>Set By</th>
+            <th style="text-align:right">Budget Limit</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.budgetHistory || []).map(h => `
+          <tr>
+            <td>${fmt.date(h.date)}</td>
+            <td>${h.setBy || '—'}</td>
+            <td style="text-align:right; font-weight:700">${fmt.currency(h.budgetLimit)}</td>
+            <td>${h.notes || '—'}</td>
+          </tr>
+          `).join('')}
+          ${(d.budgetHistory || []).length === 0 ? `<tr><td colspan="4" style="text-align:center; color:var(--gray-500)">No budget allocation history recorded.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  } else if (type === 'roi') {
+    const t = d.trends || {};
+    const totals = d.totals || {};
+    body = `
+    ${buildSheetHeader('RETURN ON INVESTMENT (ROI) REPORT')}
+    <div style="margin-bottom: 20px;">
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card green">
+          <div class="kpi-label">Overall Period ROI</div>
+          <div class="kpi-value" style="color:var(--green)">${totals.roi ? totals.roi.toFixed(1) + '%' : '0.0%'}</div>
+          ${renderTrendPill(t.roi)}
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Total Investment Cost</div>
+          <div class="kpi-value">${fmt.currency(totals.cost)}</div>
+        </div>
+        <div class="kpi-card black">
+          <div class="kpi-label">Total Revenue Generated</div>
+          <div class="kpi-value" style="color:var(--green)">${fmt.currency(totals.revenue)}</div>
+          ${renderTrendPill(t.revenue)}
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Net Profit Realized</div>
+          <div class="kpi-value" style="color:${totals.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(totals.netProfit)}</div>
+          ${renderTrendPill(t.netProfit)}
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">I. Category-Level ROI Summary</h4>
+      <table class="ledger-table" style="margin-bottom: 24px;">
+        <thead>
+          <tr>
+            <th>Product Category</th>
+            <th style="text-align:center">Units Sold</th>
+            <th style="text-align:right">Total Cost</th>
+            <th style="text-align:right">Total Revenue</th>
+            <th style="text-align:right">Net Profit</th>
+            <th style="text-align:right">ROI %</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.categories || []).map(c => `
+          <tr>
+            <td><strong>${c.category}</strong></td>
+            <td style="text-align:center">${c.unitsSold} units</td>
+            <td style="text-align:right">${fmt.currency(c.cost)}</td>
+            <td style="text-align:right">${fmt.currency(c.revenue)}</td>
+            <td style="text-align:right; font-weight:700; color:${c.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(c.netProfit)}</td>
+            <td style="text-align:right; font-weight:800; color:${c.roi >= 50 ? 'var(--green)' : (c.roi >= 0 ? 'var(--yellow-dark)' : 'var(--danger)')}">${c.roi.toFixed(1)}%</td>
+          </tr>
+          `).join('')}
+          ${(d.categories || []).length === 0 ? `<tr><td colspan="6" style="text-align:center; color:var(--gray-500)">No category ROI data available for this filter.</td></tr>` : ''}
+        </tbody>
+      </table>
+
+      <h4 style="margin: 20px 0 8px 0; font-weight:700; text-transform:uppercase; font-size:0.8rem; color:var(--gray-600)">II. Product-Level ROI Breakdown</h4>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th style="text-align:center">Units Sold</th>
+            <th style="text-align:right">Total Cost</th>
+            <th style="text-align:right">Revenue Generated</th>
+            <th style="text-align:right">ROI %</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(d.products || []).map(p => `
+          <tr>
+            <td><strong>${p.name}</strong></td>
+            <td><span class="badge badge-gray">${p.category}</span></td>
+            <td style="text-align:center">${p.unitsSold}</td>
+            <td style="text-align:right">${fmt.currency(p.cost)}</td>
+            <td style="text-align:right; font-weight:700">${fmt.currency(p.revenue)}</td>
+            <td style="text-align:right; font-weight:800; color:${p.roi >= 50 ? 'var(--green)' : (p.roi >= 0 ? 'var(--yellow-dark)' : 'var(--danger)')}">${p.roi.toFixed(1)}%</td>
+          </tr>
+          `).join('')}
+          ${(d.products || []).length === 0 ? `<tr><td colspan="6" style="text-align:center; color:var(--gray-500)">No product ROI data available for this filter.</td></tr>` : ''}
+        </tbody>
+      </table>
+    </div>
+    ${buildSheetSignatures()}
+    `;
+  }
+
+  container.innerHTML = body;
+
+  // Module 4.1: Overall Trend band — every report includes a trend indicator
+  // comparing the selected period against the previous one.
+  const overallBand = buildOverallTrendBand(type, d);
+  if (overallBand) {
+    const sigs = container.querySelector('.report-sheet-signatures');
+    if (sigs) sigs.insertAdjacentHTML('beforebegin', overallBand);
+    else container.insertAdjacentHTML('beforeend', overallBand);
+  }
+
+  // Mount Sales Trend / Sales Distribution charts when present (Daily Sales Report).
+  if (type === 'dailysales') mountDailyReportCharts(d);
+
+  if (d.categories && d.categories.length > 0) {
+    const select = document.getElementById('fRoiCategory');
+    if (select && select.options.length <= 1) {
+      d.categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.category;
+        opt.textContent = c.category;
+        select.appendChild(opt);
+      });
+    }
+  }
+}
+
+// ── Export CSV ─────────────────────────────────────────────────────
+function exportReportCSV() {
+  if (!currentReportData) {
+    Toast.warning('No report data available to export.');
+    return;
+  }
+  let csv = 'OBA System — ' + (REPORT_META[currentType] ? REPORT_META[currentType].title : currentType) + '\n';
+  csv += 'Business Unit,' + (BIZ_META[currentBiz] ? BIZ_META[currentBiz].name : currentBiz) + '\n';
+  csv += 'Reporting Period,' + currentPeriodLabel + '\n';
+  csv += 'Generated On,' + new Date().toLocaleString('en-PH') + '\n\n';
+  csv += 'Metric,Value\n';
+  Object.keys(currentReportData).forEach(k => {
+    const v = currentReportData[k];
+    if (typeof v === 'number' || typeof v === 'string' || typeof v === 'boolean') {
+      csv += `${k},${v}\n`;
     }
   });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `OBA_${currentType}_${currentBiz}_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  Toast.success('Report exported as CSV.');
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+// Module 4.1: Employees & sales staff are locked to their own business unit —
+// the Business Unit filter is hidden and reports use only their assigned
+// category data (the server enforces the same restriction via router.param).
+const STAFF_ONLY_ROLES = ['employee', 'sales_staff', 'sale_staff', 'viewer', 'budgeting_officer', 'budget_officer'];
+function applyRoleReportScope(u) {
+  if (!u || !STAFF_ONLY_ROLES.includes(u.role)) return;
+  const ownBiz = (u.selectedCategory && u.selectedCategory !== 'all' && u.selectedCategory) ||
+    (Array.isArray(u.businessAccess) && u.businessAccess.length > 0 && u.businessAccess[0] !== 'all' ? u.businessAccess[0] : null) ||
+    (Array.isArray(u.businesses) && u.businesses.length > 0 ? u.businesses[0] : null) || 'AGRI';
+  currentBiz = ownBiz;
+  const sel = document.getElementById('fBiz');
+  if (sel) sel.value = ownBiz;
+  const filterWrap = document.getElementById('bizUnitFilter');
+  if (filterWrap) filterWrap.style.display = 'none';
+}
+
+function topbarRangeLabel() {
+  const period = document.getElementById('fPeriod').value;
+  const now = new Date();
+  if (period === 'custom') {
+    const s = document.getElementById('fStart').value;
+    const e = document.getElementById('fEnd').value;
+    return (s ? fmt.date(s) : '—') + ' - ' + (e ? fmt.date(e) : '—');
+  }
+  if (period === 'day') return fmt.date(now);
+  if (period === 'week') {
+    const s = new Date(now); s.setDate(s.getDate() - 7);
+    return fmt.date(s) + ' - ' + fmt.date(now);
+  }
+  if (period === 'year') return 'Jan 1, ' + now.getFullYear() + ' - Dec 31, ' + now.getFullYear();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return fmt.date(start) + ' - ' + fmt.date(end);
+}
+
+function updateTopbarDateRange() {
+  const el = document.getElementById('topbarDateRange');
+  if (el) el.textContent = topbarRangeLabel();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  syncNav();
+  if (params.get('biz')) document.getElementById('fBiz').value = params.get('biz');
+  toggleCustomDates(true);
+  getCurrentUser().then(u => {
+    if (u) {
+      currentUser = u;
+      const nameEl = document.getElementById('sidebarName');
+      const avatarEl = document.getElementById('sidebarAvatar');
+      const roleEl = document.querySelector('.sidebar-user-role');
+      if (nameEl) nameEl.textContent = u.name;
+      if (avatarEl) avatarEl.textContent = (u.name || 'E').charAt(0).toUpperCase();
+      if (roleEl) roleEl.textContent = 'Logged in as: ' + formatRole(u.role);
+      applyRoleReportScope(u);
+    }
+    updateTopbarDateRange();
+  }).catch(() => { updateTopbarDateRange(); });
 });
 </script>
+
 </body>
 </html>
-
