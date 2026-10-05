@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | OBA System</title>
+  <meta name="description" content="Contact the Office of Business Affairs at Pampanga State Agricultural University or request a system demo.">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+  body { background: var(--white); font-family: var(--font-main); }
+  .navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 60px; background: var(--white);
+  border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+  }
+  .navbar-logo { display:flex; align-items:center; gap:10px; font-size: 1.3rem; font-weight: 800; color: var(--black); text-decoration: none; }
+  .navbar-logo span { color: var(--green); }
+  .navbar-logo img { width: 36px; height: 36px; object-fit: contain; }
+  .navbar-links { display: flex; align-items: center; gap: 28px; }
+  .navbar-links a { font-size: 0.95rem; font-weight: 500; color: var(--gray-600); text-decoration: none; transition: 0.2s; }
+  .navbar-links a:hover, .navbar-links a.active { color: var(--green); font-weight: 600; }
+
+  .header-banner { background: var(--black); padding: 80px 60px; text-align: center; color: var(--white); }
+  .header-banner h1 { font-size: 3rem; margin-bottom: 20px; color: var(--yellow); }
+  .header-banner p { color: rgba(255,255,255,0.8); max-width: 700px; margin: 0 auto; font-size: 1.2rem; line-height: 1.6; }
+
+  .section { padding: 80px 60px; max-width: 1100px; margin: 0 auto; }
+
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+
+  .contact-form-card {
+  padding: 40px; border-radius: 16px; background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  }
+  .contact-form-card h2 { font-size: 1.8rem; color: var(--black); margin-bottom: 8px; }
+  .contact-form-card .subtitle { font-size: 1rem; color: var(--gray-600); margin-bottom: 32px; line-height: 1.6; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--black); margin-bottom: 6px; }
+  .form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 12px 16px; border: 1px solid var(--gray-200);
+  border-radius: 8px; font-size: 0.95rem; font-family: var(--font-main);
+  background: var(--white); color: var(--black); transition: border-color 0.2s;
+  box-sizing: border-box;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  outline: none; border-color: var(--green);
+  }
+  .form-group textarea { resize: vertical; min-height: 120px; }
+
+  .btn-submit {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--green); color: var(--white); padding: 14px 32px;
+  border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: var(--font-main);
+  }
+  .btn-submit:hover { background: var(--green-dark); transform: translateY(-2px); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .form-message {
+  margin-top: 16px; padding: 12px 16px; border-radius: 8px;
+  font-size: 0.9rem; font-weight: 500; display: none;
+  }
+  .form-message.success { display: block; background: var(--green-light); color: var(--green); }
+  .form-message.error { display: block; background: #fef2f2; color: #dc2626; }
+
+  .contact-info-card {
+  display: flex; flex-direction: column; gap: 32px;
+  }
+
+  .info-block {
+  padding: 32px; border-radius: 16px; background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  }
+  .info-block h3 { font-size: 1.3rem; color: var(--black); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .info-block h3 svg { color: var(--green); flex-shrink: 0; }
+  .info-block p { font-size: 0.95rem; color: var(--gray-600); line-height: 1.7; margin-bottom: 8px; }
+  .info-block p:last-child { margin-bottom: 0; }
+
+  .info-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+  .info-item:last-child { margin-bottom: 0; }
+  .info-item svg { color: var(--green); flex-shrink: 0; margin-top: 2px; }
+  .info-item .info-text { font-size: 0.95rem; color: var(--gray-600); line-height: 1.5; }
+  .info-item .info-label { font-weight: 600; color: var(--black); display: block; margin-bottom: 2px; }
+
+  .demo-block {
+  padding: 32px; border-radius: 16px;
+  background: #1b5e20;
+  color: var(--white);
+  }
+  .demo-block h3 { font-size: 1.3rem; color: var(--white); margin-bottom: 12px; }
+  .demo-block p { font-size: 0.95rem; color: rgba(255,255,255,0.85); line-height: 1.7; margin-bottom: 16px; }
+  .demo-block ul { list-style: none; padding: 0; margin: 0; }
+  .demo-block ul li {
+  display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+  color: rgba(255,255,255,0.9); margin-bottom: 8px;
+  }
+  .demo-block ul li svg { flex-shrink: 0; }
+
+  @media (max-width: 768px) {
+  .navbar { padding: 16px 20px; }
+  .header-banner { padding: 60px 20px; }
+  .header-banner h1 { font-size: 2rem; }
+  .section { padding: 40px 20px; }
+  .contact-grid { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  footer { background: var(--black); color: rgba(255,255,255,0.6); text-align: center; padding: 30px 40px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+  <a href="/" class="navbar-logo">
+  <img src="/images/psaulogo.png" alt="OBA Logo">
+  PSAU <span>OBA System</span>
+  </a>
+  <div class="navbar-links">
+  <a href="/">Home</a>
+  <a href="/features">Features</a>
+  <a href="/contact" class="active">Contact</a>
+  <a href="/careers">Careers</a>
+  </div>
+  <div>
+  <a href="/login" class="btn btn-green">System Login</a>
+  </div>
+  </nav>
+
+  <div class="header-banner">
+  <h1>Contact Us</h1>
+  <p>Have questions about the OBA System? Want to request a demo or submit an inquiry? Reach out to the Office of Business Affairs.</p>
+  </div>
+
+  <div class="section">
+  <div class="contact-grid">
+  <!-- Contact Form -->
+  <div class="contact-form-card">
+  <h2>Send a Message</h2>
+  <p class="subtitle">Fill out the form below and our team will get back to you as soon as possible.</p>
+  <form id="contactForm" onsubmit="handleContactSubmit(event)">
+  <div class="form-group">
+  <label for="contactName">Full Name</label>
+  <input type="text" id="contactName" name="name" placeholder="Enter your full name" required>
+  </div>
+  <div class="form-group">
+  <label for="contactEmail">Email Address</label>
+  <input type="email" id="contactEmail" name="email" placeholder="Enter your email address" required>
+  </div>
+  <div class="form-group">
+  <label for="contactSubject">Subject</label>
+  <select id="contactSubject" name="subject" required>
+  <option value="">Select a subject</option>
+  <option value="general">General Inquiry</option>
+  <option value="demo">Request a Demo</option>
+  <option value="access">Request System Access</option>
+  <option value="support">Technical Support</option>
+  <option value="feedback">Feedback</option>
+  </select>
+  </div>
+  <div class="form-group">
+  <label for="contactMessage">Message</label>
+  <textarea id="contactMessage" name="message" placeholder="Describe your inquiry or request in detail..." required></textarea>
+  </div>
+  <button type="submit" class="btn-submit" id="submitBtn">
+  
+  Send Message
+  </button>
+  <div class="form-message" id="formMessage"></div>
+  </form>
+  </div>
+
+  <!-- Contact Info & Demo Request -->
+  <div class="contact-info-card">
+  <div class="info-block">
+  <h3>
+  
+  Office Information
+  </h3>
+  <div class="info-item">
+  
+  <div>
+  <span class="info-label">Office of Business Affairs</span>
+  <span class="info-text">Pampanga State Agricultural University</span>
+  </div>
+  </div>
+  <div class="info-item">
+  
+  <div>
+  <span class="info-label">Address</span>
+  <span class="info-text">PAC, Magalang, Pampanga, Philippines</span>
+  </div>
+  </div>
+  </div>
+
+  <div class="info-block">
+  <h3>
+  
+  Office Hours
+  </h3>
+  <p>Monday – Friday: 8:00 AM – 5:00 PM</p>
+  <p>Saturday – Sunday: Closed</p>
+  </div>
+
+  <div class="demo-block">
+  <h3>Request a Demo</h3>
+  <p>Interested in seeing the OBA System in action? Select "Request a Demo" in the contact form and provide your preferred schedule. Our team will coordinate a live walkthrough of all system modules.</p>
+  <ul>
+  <li>
+  
+  Live walkthrough of all 5 modules
+  </li>
+  <li>
+  
+  Q&A with the development team
+  </li>
+  <li>
+  
+  No technical expertise required
+  </li>
+  </ul>
+  </div>
+  </div>
+  </div>
+  </div>
+
+  <footer>
+  <p>&copy; 2025 OBA System &middot; Pampanga State Agricultural University</p>
+  <p style="margin-top: 8px; font-size: 0.8rem; opacity: 0.7;">Capstone Project by Ondot, Salenga &amp; Tolosa</p>
+  </footer>
+
+  <script>
+  async function handleContactSubmit(e) {
+  e.preventDefault();
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('formMessage');
+  var name = document.getElementById('contactName').value.trim();
+  var email = document.getElementById('contactEmail').value.trim();
+  var subject = document.getElementById('contactSubject').value;
+  var message = document.getElementById('contactMessage').value.trim();
+
+  if (!name || !email || !subject || !message) {
+  msg.className = 'form-message error';
+  msg.textContent = 'Please fill in all fields.';
+  return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  // Submit to public contact endpoint (no login required)
+  try {
+  const res = await fetch('/api/contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name, email, subject, message })
+  });
+  const data = await res.json();
+  if (data.success) {
+  msg.className = 'form-message success';
+  msg.textContent = data.message;
+  document.getElementById('contactForm').reset();
+  } else {
+  msg.className = 'form-message error';
+  msg.textContent = data.message || 'Failed to send. Please try again.';
+  }
+  } catch (err) {
+  msg.className = 'form-message error';
+  msg.textContent = 'Network error. Please try again later.';
+  } finally {
+  btn.disabled = false;
+  btn.textContent = 'Send Message';
+  }
+  }
+  </script>
+
+
+</body>
+</html>

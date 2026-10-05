@@ -25,11 +25,6 @@
     .pos-summary-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; }
     .pos-summary-row.total { font-weight: 800; font-size: 1.2rem; border-top: 1px solid var(--gray-200); padding-top: 8px; margin-top: 8px; }
     .pos-actions { padding: 16px 20px; border-top: 1px solid var(--gray-200); display: flex; flex-direction: column; gap: 10px; }
-    .search-bar { display: flex; gap: 10px; }
-    .search-bar input { flex: 1; }
-    .scanner-wrap { background: var(--gray-50); border-radius: var(--radius); padding: 16px; text-align: center; }
-    .scanner-wrap #scanner { width: 100%; max-width: 320px; margin: 0 auto; }
-    .scanner-wrap video { border-radius: 8px; }
     .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .payment-methods button { padding: 10px; border: 2px solid var(--gray-200); border-radius: var(--radius-sm); background: var(--white); cursor: pointer; font-weight: 600; font-size: 0.82rem; transition: 0.2s; }
     .payment-methods button.active { border-color: var(--green); background: var(--green-light); }
@@ -46,11 +41,16 @@
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav" id="sidebarNav">
-      <!-- Generated Dynamically based on user role -->
+      <a class="nav-item" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+      <a class="nav-item" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item active" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+      <a class="nav-item" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+      <a class="nav-item" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+      <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
@@ -67,7 +67,6 @@
     <div class="topbar topbar-green">
       <div class="flex-c gap-12">
         
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
         <span class="topbar-title">Point of Sale</span>
       </div>
       <div class="topbar-actions">
@@ -84,35 +83,6 @@
       <div class="pos-layout">
         <div class="pos-left">
           <div class="card" style="padding:20px">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-              <div class="form-group" style="margin:0;flex:1">
-                <select id="posBiz" class="form-control" onchange="switchBiz()">
-                  <option value="RENTAL">Rental</option>
-                  <option value="BUSINESS">Business</option>
-                  <option value="AGRI">Agriculture</option>
-                  <option value="NON_AGRI">Non-Agriculture</option>
-                  <option value="MAIN">Main</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin:0;flex:1">
-                <select id="posEntity" class="form-control">
-                  <option value="">All Entities</option>
-                </select>
-              </div>
-            </div>
-            <div class="search-bar">
-              <input type="text" id="barcodeInput" class="form-control" placeholder="Scan barcode or search product..." autofocus>
-              <button class="btn btn-primary" onclick="searchProduct()">Search</button>
-              <button class="btn btn-outline" onclick="toggleScanner()">Scan QR</button>
-            </div>
-            <div id="productResults" style="margin-top:12px;display:none"></div>
-          </div>
-          <div class="scanner-wrap" id="scannerWrap" style="display:none">
-            <div id="scanner"></div>
-            <p style="font-size:0.82rem;color:var(--gray-500);margin-top:8px">Position QR code or barcode in front of camera</p>
-            <button class="btn btn-outline btn-sm" onclick="stopScanner()">Stop Scanner</button>
-          </div>
-          <div class="card" style="padding:20px">
             <div class="card-header" style="padding:0 0 12px 0">
               <span class="card-title">Quick Products</span>
             </div>
@@ -121,8 +91,12 @@
         </div>
 
         <div class="pos-right" id="cartPanel">
-          <div class="pos-header">
-            <h3>Shopping Cart</h3>
+          <div class="pos-header" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <h3 style="margin:0">Shopping Cart</h3>
+            <button class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px" onclick="openCartScanner()" title="Scan product QR codes with your camera to add them to the cart">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Scan QR
+            </button>
           </div>
           <div class="pos-items" id="cartItems">
             <div class="empty-state" style="padding:30px 10px"><h3>Cart is empty</h3><p>Search or scan products to add</p></div>
@@ -143,10 +117,13 @@
               <input type="number" id="amountPaid" class="form-control" placeholder="Amount received" step="0.01" min="0">
             </div>
             <div class="change-display" id="changeDisplay">₱0.00</div>
-            <button class="btn btn-primary" style="width:100%;padding:14px;font-size:1.1rem" onclick="checkout()">
+            <button class="btn btn-primary" id="completeSaleBtn" style="width:100%;padding:14px;font-size:1.1rem" onclick="checkout()">
               Complete Sale
             </button>
             <button class="btn btn-outline" style="width:100%" onclick="clearCart()">Clear Cart</button>
+            <button class="btn btn-outline" style="width:100%;color:var(--danger);border-color:var(--danger)" onclick="openReturnModal()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Return / Refund
+            </button>
           </div>
         </div>
       </div>
@@ -168,14 +145,76 @@
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<div class="modal-overlay" id="cartScannerModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <span class="modal-title">Scan Product QR</span>
+      <button class="modal-close" onclick="closeModal('cartScannerModal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:16px;text-align:center">
+      <div style="margin-bottom:10px">
+        <select id="cartCameraSelect" class="form-control" onchange="changeCartCamera(this.value)"></select>
+      </div>
+      <div id="cartReader" style="width:100%;max-width:340px;margin:0 auto;border-radius:8px;overflow:hidden;border:1px solid var(--gray-200)"></div>
+      <div id="cartScanStatus" style="font-size:0.85rem;color:var(--gray-500);margin-top:10px;min-height:1.2em">Starting camera...</div>
+      <div id="cartScannedList" style="max-height:140px;overflow-y:auto;text-align:left;margin-top:8px;font-size:0.82rem"></div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="closeModal('cartScannerModal')">Done Scanning</button>
+      <p style="font-size:0.75rem;color:var(--gray-400);margin:8px 0 0">Each scan adds the product to the cart. Point the camera at a product's QR code.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="returnModal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <span class="modal-title">Return / Refund</span>
+      <button class="modal-close" onclick="closeModal('returnModal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:20px">
+      <!-- Step 1: lookup the original sale -->
+      <div id="returnStepLookup">
+        <div class="form-group">
+          <label class="form-label">Transaction ID *</label>
+          <div style="display:flex;gap:8px">
+            <input id="returnTxnInput" class="form-control" placeholder="e.g. TXN-1A2B3C4D" onkeydown="if(event.key==='Enter')lookupReturnSale()">
+            <button class="btn btn-primary" style="white-space:nowrap" onclick="lookupReturnSale()">Find Sale</button>
+          </div>
+        </div>
+        <div id="returnLookupStatus" style="font-size:0.85rem;min-height:1.4em"></div>
+        <p style="font-size:0.78rem;color:var(--gray-400);margin:8px 0 0">Enter the TXN number from the customer's receipt. Returned items are restocked and the sale total is reversed from the dashboard.</p>
+      </div>
+
+      <!-- Step 2: pick items & quantities to return -->
+      <div id="returnStepItems" style="display:none">
+        <div id="returnSaleInfo" style="font-size:0.85rem;padding:10px 12px;background:var(--gray-100);border-radius:8px;margin-bottom:12px"></div>
+        <div id="returnItemsList" style="max-height:240px;overflow-y:auto"></div>
+        <div id="returnTotalsRow" style="display:flex;justify-content:space-between;font-weight:800;border-top:1px solid var(--gray-200);margin-top:10px;padding-top:10px"></div>
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label">Reason</label>
+          <textarea id="returnReason" class="form-control" rows="2" placeholder="e.g. Damaged item, wrong order..."></textarea>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;margin-bottom:14px">
+          <input type="checkbox" id="returnRestock" checked> Restock returned items into inventory
+        </label>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" style="flex:1" onclick="backToReturnLookup()">Back</button>
+          <button class="btn btn-primary" style="flex:1;background:var(--danger);border-color:var(--danger)" onclick="processReturn()">Process Return</button>
+        </div>
+      </div>
+
+      <!-- Step 3: done / receipt -->
+      <div id="returnStepDone" style="display:none;text-align:center"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=2"></script>
 <script>
 let cart = [];
 let inventory = [];
 let paymentMethod = 'cash';
-let currentBiz = 'RENTAL';
-let scanner = null;
-const DEFAULT_TAX_RATES = { RENTAL: 12, BUSINESS: 12, AGRI: 0, NON_AGRI: 12, MAIN: 12 };
+let currentBiz = 'AGRI';
+const DEFAULT_TAX_RATES = { AGRI: 0, NON_AGRI: 12, MAIN: 12 };
 let taxRates = { ...DEFAULT_TAX_RATES };
 
 async function fetchTaxRates() {
@@ -199,31 +238,50 @@ function getTaxRate() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  currentBiz = getBizId() || 'RENTAL';
+  currentBiz = getBizId() || 'AGRI';
   await fetchTaxRates();
-  document.getElementById('posBiz').value = currentBiz;
   getCurrentUser().then(u => {
     if (u) {
       document.getElementById('sidebarName').textContent = u.name;
       document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
       document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
 
-      const nav = document.getElementById('sidebarNav');
-      const bizParam = `?biz=${currentBiz}`;
+  const ADMIN_ROLES = ['super_admin', 'admin', 'system_administrator'];
+  const isAdmin = ADMIN_ROLES.includes(u.role);
+  // Sales Staff (sales_staff / sale_staff / viewer / employee / budgeting_officer etc.)
+  // must NEVER see the admin sidebar. Only true admins get admin nav.
+  const isSaleStaff = !isAdmin;
 
-      if (u.role === 'employee' || u.role === 'manager') {
-        // Employee/Manager Sidebar
-        nav.innerHTML = `
-          <a class="nav-item" href="/employee/dashboard${bizParam}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span> Dashboard</a>
-          <a class="nav-item active" href="/employee/pos${bizParam}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
-          <a class="nav-item" href="/employee/inventory${bizParam}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></span> Inventory</a>
-          <a class="nav-item" href="/employee/sales${bizParam}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-          <a class="nav-item" href="/employee/expenses${bizParam}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span> Expenses</a>
-          <a class="nav-item" href="/employee/reports${bizParam}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-          <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
-        `;
+  if (isSaleStaff) {
+  // Lock Sales Staff to their assigned category (e.g. Agriculture).
+  // businessAccess may hold a category ('AGRI') or an entity id ('AGRI-slug-xxx').
+  const rawAccess = (u.selectedCategory) ||
+  (u.businessAccess && Array.isArray(u.businessAccess) && u.businessAccess[0] !== 'all' ? u.businessAccess[0] : null) ||
+  (u.businesses && Array.isArray(u.businesses) && u.businesses[0] !== 'all' ? u.businesses[0] : null) ||
+  currentBiz || 'AGRI';
+  let assignedBiz = 'AGRI';
+  const s = String(rawAccess);
+  if (s.startsWith('NON_AGRI')) assignedBiz = 'NON_AGRI';
+  else if (s.startsWith('MAIN')) assignedBiz = 'MAIN';
+  else if (s.startsWith('AGRI')) assignedBiz = 'AGRI';
+  else assignedBiz = s;
+  // The category dropdown was removed from the POS page; the assigned
+  // category is still applied to business logic and sidebar links.
+  currentBiz = assignedBiz;
+  }
+
+      const nav = document.getElementById('sidebarNav');
+      const _ent = (typeof getEntityId === 'function' ? getEntityId() : '');
+      const bizParam = `?biz=${currentBiz}` + (_ent ? `&entity=${encodeURIComponent(_ent)}` : '');
+
+      if (!isAdmin) {
+        // Employee sidebar is rendered statically in the HTML (prevents sidebar
+        // flicker). Only sync the workspace query params onto the links.
+        nav.querySelectorAll('a[data-page]').forEach(a => {
+          a.href = a.getAttribute('data-page') + bizParam;
+        });
       } else {
-        // Admin/Super Admin/Viewer Sidebar
+        // Admin Sidebar (super_admin / admin / system_administrator only)
         nav.innerHTML = `
           <a class="nav-item" href="/admin/about"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> About</a>
           <a class="nav-item" href="/admin/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
@@ -238,12 +296,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   loadInventory();
-  loadEntities();
-
-  // Enter key triggers search
-  document.getElementById('barcodeInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') searchProduct();
-  });
 
   // Auto-compute change
   document.getElementById('amountPaid').addEventListener('input', updateChange);
@@ -251,29 +303,86 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function getBizId() {
   const p = new URLSearchParams(window.location.search);
-  return p.get('biz') || 'RENTAL';
+  return p.get('biz') || 'AGRI';
 }
-
-async function loadEntities() {
-  try {
-    const res = await API.get('/api/admin/businesses');
-    if (res.success) {
-      const filtered = res.data.filter(e => e.categoryId === currentBiz);
-      const sel = document.getElementById('posEntity');
-      sel.innerHTML = '<option value="">All Entities</option>' +
-        filtered.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-    }
-  } catch(e) {}
+function getEntityId() {
+  const p = new URLSearchParams(window.location.search);
+  return p.get('entity') || '';
 }
 
 async function loadInventory() {
   try {
-    const res = await API.get('/api/inventory?biz=' + currentBiz);
+    const ent = getEntityId() || '';
+    const q = '?biz=' + currentBiz + (ent ? '&entity=' + encodeURIComponent(ent) : '');
+    const res = await API.get('/api/inventory' + q);
     if (res.success) {
       inventory = res.data || [];
       renderQuickProducts();
+      ensureAllProductsHaveQR();
     }
   } catch(e) { console.error(e); }
+}
+
+// ── Unique QR guarantee ─────────────────────────────────────────────
+// On load, if ANY product is missing its unique QR code (e.g. legacy
+// products), ask the server to backfill one. Runs once per page load.
+let qrBackfillDone = false;
+async function ensureAllProductsHaveQR() {
+  if (qrBackfillDone) return;
+  const missing = inventory.filter(p => !p.qrCode || !p.id);
+  if (!missing.length) return;
+  qrBackfillDone = true;
+  try {
+    const res = await API.post('/api/inventory/backfill-qr', {});
+    if (res.success && res.updated > 0) {
+      Toast.info(`${res.updated} product(s) were missing QR codes — unique QR codes generated`);
+      loadInventory(); // reload so scans can match the new codes
+    }
+  } catch (e) { console.warn('QR backfill failed:', e); }
+}
+
+// ── QR matching helpers ─────────────────────────────────────────────
+// Extracts the encoded payload from a QR image URL (?data=<payload>)
+function extractQrData(qrValue) {
+  if (!qrValue || typeof qrValue !== 'string') return '';
+  const m = qrValue.match(/[?&]data=([^&]+)/);
+  return m ? decodeURIComponent(m[1]) : qrValue;
+}
+
+// Normalizes a scanned value: trims whitespace; if the QR holds a URL,
+// pulls the product identifier from ?data= or the last path segment.
+function normalizeScanText(raw) {
+  let text = String(raw || '').trim();
+  if (!text) return '';
+  if (/^https?:\/\//i.test(text)) {
+    try {
+      const url = new URL(text);
+      const data = url.searchParams.get('data');
+      if (data) return data.trim();
+      const seg = url.pathname.split('/').filter(Boolean).pop();
+      if (seg) return decodeURIComponent(seg).trim();
+    } catch (e) { /* fall through with raw text */ }
+  }
+  return text;
+}
+
+// Finds a product by its unique QR payload (product ID), barcode or
+// stored QR value — exact match first, then case-insensitive fallback.
+function findProductByCode(raw) {
+  const text = normalizeScanText(raw);
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  return inventory.find(p =>
+    p.id === text ||
+    (p.barcode && p.barcode === text) ||
+    p.qrCode === text ||
+    p.id.toLowerCase() === lower ||
+    extractQrData(p.qrCode).toLowerCase() === lower
+  ) || null;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function renderQuickProducts() {
@@ -283,34 +392,14 @@ function renderQuickProducts() {
     return;
   }
   el.innerHTML = inventory.filter(p => parseInt(p.quantity||0) > 0).slice(0, 20).map(p => `
-    <div class="card" style="cursor:pointer;padding:12px;text-align:center;border:1px solid var(--gray-200)" onclick="addToCart('${p.id}')">
-      <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</div>
+    <div class="card" style="cursor:pointer;padding:12px;text-align:center;border:1px solid var(--gray-200);position:relative" onclick="addToCart('${p.id}')">
+      <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name)}</div>
       <div style="font-weight:700;color:var(--green);font-size:0.9rem">&#8369;${parseFloat(p.sellingPrice||0).toLocaleString('en',{minimumFractionDigits:2})}</div>
+      ${p.accountingComment ? `<div style="margin-top:4px;font-size:0.68rem;background:#FFF9C4;color:#B78103;border-radius:4px;padding:2px 4px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(p.accountingComment)}">💬 Notice: ${escapeHtml(p.accountingComment)}</div>` : ''}
     </div>`).join('');
 }
 
-function switchBiz() {
-  currentBiz = document.getElementById('posBiz').value;
-  loadInventory();
-  loadEntities();
-  clearCart();
-}
 
-function searchProduct() {
-  const q = document.getElementById('barcodeInput').value.trim().toLowerCase();
-  if (!q) return;
-  const product = inventory.find(p =>
-    p.name.toLowerCase().includes(q) ||
-    p.id.toLowerCase().includes(q) ||
-    (p.barcode && p.barcode === q)
-  );
-  if (product) {
-    addToCart(product.id);
-    document.getElementById('barcodeInput').value = '';
-  } else {
-    Toast.warning('Product not found: ' + q);
-  }
-}
 
 function addToCart(productId) {
   const product = inventory.find(p => p.id === productId);
@@ -415,8 +504,16 @@ function clearCart() {
   updateChange();
 }
 
+let isCheckingOut = false; // prevents double-click / duplicate sale submissions
+
 async function checkout() {
-  if (!cart.length) { Toast.warning('Cart is empty'); return; }
+  if (isCheckingOut) return;
+  isCheckingOut = true;
+  const btn = document.getElementById('completeSaleBtn');
+  const btnOriginalText = btn ? btn.innerHTML : null;
+  if (btn) { btn.disabled = true; btn.innerHTML = 'Processing…'; btn.style.opacity = '0.6'; }
+  try {
+    if (!cart.length) { Toast.warning('Cart is empty'); return; }
   const subtotal = cart.reduce((a,c) => a + (c.unitPrice * c.qty), 0);
   const rate = getTaxRate();
   const taxAmount = subtotal * (rate / 100);
@@ -425,16 +522,22 @@ async function checkout() {
   const paid = parseFloat(document.getElementById('amountPaid').value) || 0;
   if (paid < total) { Toast.warning('Insufficient payment'); return; }
 
-  const entitySelect = document.getElementById('posEntity');
-  const entityId = entitySelect.value;
-  const entityName = entitySelect.options[entitySelect.selectedIndex]?.text || '';
+  // Entity picker was removed from the POS page; fall back to the
+  // workspace entity from the URL (?entity=...) when present.
+  const entityId = getEntityId() || '';
+  const entityName = '';
 
   const data = {
-    items: cart.map(c => ({ id: c.id, name: c.name, unitPrice: c.unitPrice, quantity: c.qty })),
+    items: cart.map(c => {
+      const p = inventory.find(x => x.id === c.id) || {};
+      return { id: c.id, name: c.name, category: p.category || '', unitPrice: c.unitPrice, quantity: c.qty };
+    }),
     subtotal,
     taxRate: rate,
     taxAmount,
     total,
+    amountPaid: paid,
+    customerName: 'Walk-in',
     paymentMethod,
     businessCategory: currentBiz,
     entityId,
@@ -484,49 +587,303 @@ async function checkout() {
   } catch(e) {
     Toast.error('Error processing sale');
   }
-}
-
-// QR/Barcode Scanner
-function toggleScanner() {
-  const wrap = document.getElementById('scannerWrap');
-  if (wrap.style.display !== 'none') { stopScanner(); return; }
-  wrap.style.display = 'block';
-  startScanner();
-}
-
-function startScanner() {
-  if (scanner) scanner.stop();
-  scanner = new Html5Qrcode("scanner");
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
-    onScanSuccess
-  ).catch(e => {
-    Toast.error('Camera access denied or unavailable');
-    document.getElementById('scannerWrap').style.display = 'none';
-  });
-}
-
-function stopScanner() {
-  if (scanner) { scanner.stop().catch(()=>{}); scanner = null; }
-  document.getElementById('scannerWrap').style.display = 'none';
-}
-
-function onScanSuccess(decodedText) {
-  stopScanner();
-  // Try to find product by QR code (which contains product ID)
-  const product = inventory.find(p => p.id === decodedText || p.qrCode === decodedText);
-  if (product) {
-    addToCart(product.id);
-    Toast.success('Scanned: ' + product.name);
-  } else {
-    // Try as barcode input
-    document.getElementById('barcodeInput').value = decodedText;
-    searchProduct();
+  } finally {
+    isCheckingOut = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = btnOriginalText || 'Complete Sale';
+      btn.style.opacity = '';
+    }
   }
 }
 
-window.addEventListener('beforeunload', () => { if (scanner) scanner.stop().catch(()=>{}); });
+// ── Return / Refund ──────────────────────────────────────────────────
+// Staff looks up a completed sale by its TXN number, picks the items and
+// quantities to refund, and the server restocks inventory + reverses the
+// revenue (negative sales adjustment) so dashboards drop accordingly.
+let returnSale = null;
+let returnReturnedMap = {};
+
+function openReturnModal() {
+  returnSale = null;
+  returnReturnedMap = {};
+  document.getElementById('returnTxnInput').value = '';
+  document.getElementById('returnLookupStatus').innerHTML = '';
+  document.getElementById('returnStepLookup').style.display = '';
+  document.getElementById('returnStepItems').style.display = 'none';
+  document.getElementById('returnStepDone').style.display = 'none';
+  openModal('returnModal');
+  setTimeout(() => { const el = document.getElementById('returnTxnInput'); if (el) el.focus(); }, 120);
+}
+
+async function lookupReturnSale() {
+  const txn = document.getElementById('returnTxnInput').value.trim();
+  const statusEl = document.getElementById('returnLookupStatus');
+  if (!txn) { Toast.warning('Enter a transaction ID first'); return; }
+  statusEl.innerHTML = '<span style="color:var(--gray-500)">Searching...</span>';
+  try {
+    const res = await fetch(`/api/sales/lookup?txnId=${encodeURIComponent(txn)}&biz=${encodeURIComponent(currentBiz)}`, { credentials: 'same-origin' });
+    const body = await res.json().catch(() => ({}));
+    if (res.ok && body.success && body.data) {
+      returnSale = body.data.sale;
+      returnReturnedMap = body.data.returnedMap || {};
+      statusEl.innerHTML = '';
+      renderReturnItems();
+      document.getElementById('returnStepLookup').style.display = 'none';
+      document.getElementById('returnStepItems').style.display = '';
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--danger)">${escapeHtml(body.message || 'Sale not found. Check the TXN number and try again.')}</span>`;
+    }
+  } catch (e) {
+    statusEl.innerHTML = '<span style="color:var(--danger)">Failed to search for the sale. Check your connection and try again.</span>';
+  }
+}
+
+function backToReturnLookup() {
+  document.getElementById('returnStepItems').style.display = 'none';
+  document.getElementById('returnStepLookup').style.display = '';
+  returnSale = null;
+  returnReturnedMap = {};
+}
+
+function renderReturnItems() {
+  const s = returnSale;
+  if (!s) return;
+  document.getElementById('returnSaleInfo').innerHTML =
+    `<strong>${escapeHtml(s.transactionId || s.id || '')}</strong> &middot; ${fmt.datetime(s.date || s.createdAt)} &middot; ${escapeHtml(s.customerName || 'Walk-in')}` +
+    (s.hasReturn ? ' &middot; <span style="color:var(--warning,#e6a700)">partially returned before</span>' : '');
+  const wrap = document.getElementById('returnItemsList');
+  wrap.innerHTML = (s.items || []).map((it, idx) => {
+    const soldQty = parseInt(it.quantity ?? it.qty ?? 0) || 0;
+    const already = returnReturnedMap[it.id || it.name] || 0;
+    const remaining = Math.max(0, soldQty - already);
+    const price = parseFloat(it.unitPrice) || 0;
+    const lineRight = remaining > 0
+      ? `<div class="pos-item-qty"><input type="number" id="retQty_${idx}" min="0" max="${remaining}" value="0" oninput="updateReturnTotals()"></div>
+         <div class="pos-item-total" id="retLine_${idx}">&#8369;0.00</div>`
+      : '<span class="stock-badge out" style="font-size:0.7rem">Fully returned</span>';
+    return `<div class="pos-item" style="gap:12px">
+      <div class="pos-item-info">
+        <div class="pos-item-name">${escapeHtml(it.name)}</div>
+        <div class="pos-item-price">&#8369;${price.toLocaleString('en',{minimumFractionDigits:2})} each &middot; Sold: ${soldQty}${already ? ' &middot; Returned: ' + already : ''}</div>
+      </div>
+      ${lineRight}
+    </div>`;
+  }).join('');
+  updateReturnTotals();
+}
+
+function collectReturnQty(idx) {
+  const inp = document.getElementById('retQty_' + idx);
+  if (!inp) return 0;
+  const max = parseInt(inp.max) || 0;
+  return Math.max(0, Math.min(max, parseInt(inp.value) || 0));
+}
+
+function updateReturnTotals() {
+  let subtotal = 0;
+  ((returnSale && returnSale.items) || []).forEach((it, idx) => {
+    const qty = collectReturnQty(idx);
+    const line = qty * (parseFloat(it.unitPrice) || 0);
+    subtotal += line;
+    const lineEl = document.getElementById('retLine_' + idx);
+    if (lineEl) lineEl.innerHTML = '&#8369;' + line.toLocaleString('en',{minimumFractionDigits:2});
+  });
+  const rate = parseFloat((returnSale && returnSale.taxRate) || 0);
+  const tax = subtotal * (rate / 100);
+  const total = subtotal + tax;
+  document.getElementById('returnTotalsRow').innerHTML =
+    `<span>Refund Total${rate ? ` (incl. ${rate}% tax)` : ''}</span>
+     <span style="color:var(--danger)">&#8369;${total.toLocaleString('en',{minimumFractionDigits:2})}</span>`;
+}
+
+async function processReturn() {
+  if (!returnSale) return;
+  const items = [];
+  (returnSale.items || []).forEach((it, idx) => {
+    const qty = collectReturnQty(idx);
+    if (qty > 0) items.push({ id: it.id || '', name: it.name, quantity: qty });
+  });
+  if (!items.length) { Toast.warning('Enter a quantity to return for at least one item'); return; }
+  const reason = document.getElementById('returnReason').value.trim();
+  const restock = document.getElementById('returnRestock').checked;
+  const btn = document.querySelector('#returnStepItems button.btn-primary');
+  confirm(`Process this return/refund (${items.length} item line(s))?`, async () => {
+    try {
+      if (btn) btn.disabled = true;
+      const res = await fetch(`/api/sales/${returnSale.id}/return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ items, reason, restock, customerName: returnSale.customerName || '' })
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body.success && body.data) {
+        showReturnDone(body.data);
+        Toast.success('Return processed!');
+        loadInventory();
+      } else {
+        Toast.error(body.message || 'Return failed');
+      }
+    } catch (e) {
+      Toast.error('Error processing return');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+function showReturnDone(r) {
+  document.getElementById('returnStepItems').style.display = 'none';
+  const doneEl = document.getElementById('returnStepDone');
+  doneEl.style.display = '';
+  doneEl.innerHTML = `
+    <div style="font-size:2.4rem;color:var(--green)">&#10003;</div>
+    <h3 style="margin:6px 0 2px">Return Completed</h3>
+    <p style="color:var(--gray-500);font-size:0.85rem;margin:0 0 12px">${escapeHtml(r.returnId)} &middot; Original: ${escapeHtml(r.originalTransactionId || '')}</p>
+    <div id="returnDoneDetails" style="text-align:left;border:1px solid var(--gray-200);border-radius:8px;padding:12px;font-size:0.85rem;margin-bottom:14px">
+      ${r.items.map(it => `<div style="display:flex;justify-content:space-between;padding:2px 0"><span>${escapeHtml(it.name)} &times; ${it.quantity}</span><span>&#8369;${it.subtotal.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-weight:800;border-top:1px solid var(--gray-200);margin-top:6px;padding-top:6px"><span>Refunded</span><span style="color:var(--danger)">&#8369;${r.refundTotal.toLocaleString('en',{minimumFractionDigits:2})}</span></div>
+      <div style="color:var(--gray-500);font-size:0.78rem;margin-top:6px">${r.restocked ? 'Items restocked to inventory.' : 'Items were NOT restocked.'}<br>Sale totals on the dashboard have been adjusted.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" style="flex:1" onclick="closeModal('returnModal')">Close</button>
+      <button class="btn btn-primary" style="flex:1" onclick="printSection('returnDoneDetails')">Print</button>
+    </div>`;
+}
+
+// ── Shopping Cart camera scanner (modal) ────────────────────────────
+// Opens a live camera view so staff can scan product QR codes one after
+// another directly from the cart. Each unique scan adds the product to
+// the cart (reusing findProductByCode/addToCart) and is logged below the
+// camera so the cashier gets visible feedback per scan.
+let cartScanner = null;
+let isCartScannerRunning = false;
+let cartSelectedCameraId = null;
+let cartScannedLog = [];
+
+async function openCartScanner() {
+  openModal('cartScannerModal');
+  document.getElementById('cartScanStatus').textContent = 'Starting camera...';
+  document.getElementById('cartScannedList').innerHTML = '';
+  cartScannedLog = [];
+  await startCartScanner();
+}
+
+async function startCartScanner() {
+  if (cartScanner) {
+    try { await cartScanner.stop(); } catch (e) {}
+    cartScanner = null;
+  }
+  isCartScannerRunning = false;
+
+  cartScanner = new Html5Qrcode("cartReader");
+  const onCartScan = (decodedText) => {
+    const text = String(decodedText || '').trim();
+    if (!text) return;
+    // Debounce: the camera re-reads the same code at fps — ignore repeats
+    // of the same code within the window so one scan = one add.
+    const now = Date.now();
+    if (text === lastScan.text && now - lastScan.time < SCAN_DEBOUNCE_MS) return;
+    lastScan = { text, time: now };
+
+    const product = findProductByCode(text);
+    if (!product) {
+      document.getElementById('cartScanStatus').innerHTML =
+        '<span style="color:var(--danger)">Unknown QR code: ' + normalizeScanText(text) + '</span>';
+      return;
+    }
+
+    const cartItem = cart.find(c => c.id === product.id);
+    const beforeQty = cartItem ? cartItem.qty : 0;
+    addToCart(product.id); // shows its own success / out-of-stock toast
+    const afterQty = (cart.find(c => c.id === product.id) || {}).qty || 0;
+
+    if (afterQty > beforeQty) {
+      cartScannedLog.unshift({
+        name: product.name,
+        qty: afterQty,
+        price: parseFloat(product.sellingPrice || 0)
+      });
+      document.getElementById('cartScannedList').innerHTML = cartScannedLog.map(s =>
+        `<div style="display:flex;justify-content:space-between;padding:4px 8px;border-bottom:1px solid var(--gray-100)">
+           <span>${s.name} <span style="color:var(--gray-400)">× ${s.qty}</span></span>
+           <span style="font-weight:600">&#8369;${(s.price * s.qty).toLocaleString('en',{minimumFractionDigits:2})}</span>
+         </div>`).join('');
+      document.getElementById('cartScanStatus').innerHTML =
+        '<span style="color:var(--green);font-weight:600">' + product.name + ' added to cart ✓</span>';
+    } else {
+      document.getElementById('cartScanStatus').innerHTML =
+        '<span style="color:var(--warning,#e6a700)">' + product.name + ' — no stock left to add</span>';
+    }
+
+    // Brief pause so one scan = one add
+    try {
+      if (cartScanner && cartScanner.pauseVideo) {
+        cartScanner.pauseVideo(true);
+        setTimeout(() => { if (cartScanner && cartScanner.resumeVideo) cartScanner.resumeVideo(); }, 800);
+      }
+    } catch (e) { /* keep scanning even if pause fails */ }
+  };
+
+  const config = { fps: 10, qrbox: { width: 230, height: 230 } };
+  try {
+    const cameras = await Html5Qrcode.getCameras();
+    const selectEl = document.getElementById('cartCameraSelect');
+    if (cameras && cameras.length > 0) {
+      selectEl.innerHTML = cameras.map((c, i) =>
+        `<option value="${c.id}">${c.label || ('Camera ' + (i + 1))}</option>`).join('');
+      // Prefer the rear camera when starting fresh
+      if (!cartSelectedCameraId) {
+        const back = cameras.find(c => /back|rear|environment/i.test(c.label));
+        cartSelectedCameraId = (back || cameras[0]).id;
+      }
+      selectEl.value = cartSelectedCameraId;
+      await cartScanner.start(cartSelectedCameraId, config, onCartScan);
+      isCartScannerRunning = true;
+      document.getElementById('cartScanStatus').textContent = 'Camera ready — scan a product QR code';
+    } else {
+      throw new Error('No cameras found');
+    }
+  } catch (err) {
+    console.error('Cart scanner failed:', err);
+    document.getElementById('cartScanStatus').innerHTML =
+      '<span style="color:var(--danger)">Camera access denied or unavailable. Allow camera permission and try again.</span>';
+  }
+}
+
+async function changeCartCamera(cameraId) {
+  cartSelectedCameraId = cameraId;
+  await startCartScanner();
+}
+
+function stopCartScanner() {
+  if (cartScanner && isCartScannerRunning) {
+    try {
+      cartScanner.stop().then(() => { if (cartScanner) cartScanner.clear(); }).catch(() => {});
+    } catch (err) {
+      console.error('Failed to stop cart scanner', err);
+    }
+  }
+  cartScanner = null;
+  isCartScannerRunning = false;
+  lastScan = { text: null, time: 0 };
+}
+
+// Intercept modal closing so the camera always stops when the
+// scanner modal is dismissed in any way.
+const originalCloseModal = window.closeModal;
+window.closeModal = function (id) {
+  if (id === 'cartScannerModal') stopCartScanner();
+  if (originalCloseModal) originalCloseModal(id);
+};
+
+// Scan debounce state — shared by the cart scanner so one scan = one add
+// (the old inline scanner UI was removed from the POS page).
+let lastScan = { text: null, time: 0 };
+const SCAN_DEBOUNCE_MS = 2500;
+
+window.addEventListener('beforeunload', () => { stopCartScanner(); });
 </script>
 </body>
 </html>

@@ -7,182 +7,1370 @@
   <link rel="stylesheet" href="/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    .biz-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .biz-header .biz-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-    .biz-header .biz-title { font-size: 1.4rem; font-weight: 800; }
-    .biz-header .biz-subtitle { font-size: 0.85rem; color: var(--gray-600); }
-    .kpi-card .kpi-icon-box { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; position: absolute; top: 18px; right: 18px; }
-    .kpi-card.yellow .kpi-icon-box { background: var(--yellow-light); color: var(--yellow-dark); }
-    .kpi-card.green .kpi-icon-box { background: var(--green-light); color: var(--green); }
-    .kpi-card.danger .kpi-icon-box { background: var(--danger-light); color: var(--danger); }
-    .kpi-card.black .kpi-icon-box { background: var(--gray-100); color: var(--black); }
-    .chart-section { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
-    .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-    .quick-action-card { background: var(--white); border-radius: var(--radius); padding: 18px; border: 1px solid var(--gray-200); cursor: pointer; transition: var(--transition); text-align: center; text-decoration: none; color: var(--black); }
-    .quick-action-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--yellow); }
-    .quick-action-card svg { margin-bottom: 8px; }
-    .quick-action-card .qa-label { font-size: 0.82rem; font-weight: 600; }
-    @media (max-width: 1024px) { .chart-section { grid-template-columns: 1fr; } .quick-actions { grid-template-columns: 1fr 1fr; } }
+    /* ── Topbar Enhancements ─────────────────────────────────────── */
+    .topbar-cat-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar-cat-name {
+      color: #15803d;
+    }
+    .topbar-cat-suffix {
+      color: #334155;
+      font-weight: 700;
+    }
+    .profile-btn-modern {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .profile-btn-modern:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    /* Main dashboard date filter (topbar) — filters the entire dashboard */
+    .dash-date-filter {
+      max-width: 165px;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    /* Custom date range pickers (shown when "Custom Range" is selected) */
+    .dash-custom-range {
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    .dash-custom-range.visible { display: flex; }
+    .dash-custom-range input[type="date"] {
+      padding: 6px 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: #1e293b;
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      outline: none;
+      transition: var(--transition);
+      max-width: 138px;
+    }
+    .dash-custom-range input[type="date"]:focus { border-color: #10b981; }
+    .dash-custom-range .dash-range-sep {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+
+    /* ── Quick Actions (Image 2) ─────────────────────────────────── */
+    .quick-actions-modern {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .qa-card-modern {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .qa-card-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06);
+      border-color: #10b981;
+    }
+    .qa-card-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .qa-icon-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ecfdf5;
+      border: 1px solid #d1fae5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #059669;
+      flex-shrink: 0;
+    }
+    .qa-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 2px;
+    }
+    .qa-sub {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 400;
+    }
+    .qa-arrow-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .qa-card-modern:hover .qa-arrow-btn {
+      background: #ecfdf5;
+      color: #059669;
+      border-color: #a7f3d0;
+      transform: translateX(2px);
+    }
+
+    /* ── 5 KPI Cards (Image 2) ───────────────────────────────────── */
+    .kpi-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card-modern {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 18px 20px;
+      border: 1px solid #e2e8f0;
+      border-left-width: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .kpi-card-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+    }
+    .kpi-border-green  { border-left-color: #10b981; }
+    .kpi-border-teal   { border-left-color: #0d9488; }
+    .kpi-border-red    { border-left-color: #ef4444; }
+    .kpi-border-purple { border-left-color: #8b5cf6; }
+    .kpi-border-blue   { border-left-color: #3b82f6; }
+
+    .kpi-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .kpi-icon-pill {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .kpi-ic-green  { background: #ecfdf5; color: #059669; }
+    .kpi-ic-teal   { background: #f0fdfa; color: #0d9488; }
+    .kpi-ic-red    { background: #fef2f2; color: #dc2626; }
+    .kpi-ic-purple { background: #f5f3ff; color: #7c3aed; }
+    .kpi-ic-blue   { background: #eff6ff; color: #2563eb; }
+
+    .kpi-pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+    .kpi-pill-green  { background: #ecfdf5; color: #059669; }
+    .kpi-pill-teal   { background: #f0fdfa; color: #0d9488; }
+    .kpi-pill-red    { background: #fef2f2; color: #dc2626; }
+    .kpi-pill-purple { background: #f5f3ff; color: #7c3aed; }
+    .kpi-pill-blue   { background: #eff6ff; color: #2563eb; }
+
+    .kpi-label-modern {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .kpi-val-modern {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+    .kpi-sub-modern {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* ── Middle Row: Revenue vs Expenses & Recent Sales (Image 2) ── */
+    .middle-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .card-modern {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-head-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .filter-select-modern {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      background: #ffffff;
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .filter-select-modern:focus {
+      border-color: #10b981;
+    }
+    .view-all-link {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #10b981;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .view-all-link:hover {
+      color: #059669;
+      text-decoration: underline;
+    }
+
+    /* Recent sales rows */
+    .recent-sales-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .recent-sale-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .recent-sale-row:last-child {
+      border-bottom: none;
+    }
+    .recent-sale-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .recent-sale-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+    .recent-sale-name {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #1e293b;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .recent-sale-meta {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .recent-sale-amt {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #10b981;
+    }
+
+    /* ── Category Performance Row: Bar + Pie charts (Module 4.2) ─── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .donut-wrapper-flex {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+    }
+    .donut-canvas-relative {
+      position: relative;
+      height: 240px;
+      width: 100%;
+    }
+    .donut-center-info {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      max-width: 120px;
+    }
+    .donut-center-val {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .donut-center-label {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    /* ── Bottom Row: Top & Lowest Selling Products (Image 2) ─────── */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .product-perf-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .perf-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .perf-item:last-child {
+      border-bottom: none;
+    }
+    .perf-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .perf-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .perf-rank {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .rank-green { background: #ecfdf5; color: #059669; }
+    .rank-red   { background: #fef2f2; color: #dc2626; }
+
+    .perf-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+    .perf-name {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #1e293b;
+    }
+    .perf-sub {
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+    .perf-sub-red {
+      color: #ef4444;
+      font-weight: 500;
+    }
+    .perf-amount {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .perf-amount-green { color: #10b981; }
+    .perf-amount-red   { color: #ef4444; }
+
+    .perf-progress-bg {
+      width: 100%;
+      height: 6px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .perf-progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+    .fill-green { background: #10b981; }
+    .fill-red   { background: #f87171; }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .kpi-grid-5 { grid-template-columns: repeat(3, 1fr); }
+      .middle-grid { grid-template-columns: 1fr; }
+      .category-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .quick-actions-modern { grid-template-columns: 1fr; }
+      .kpi-grid-5 { grid-template-columns: 1fr 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .kpi-grid-5 { grid-template-columns: 1fr; }
+      .welcome-banner-emp { padding: 20px; }
+      .welcome-art { display: none; }
+    }
   </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
-    <nav class="sidebar-nav" id="empNav"></nav>
+    <nav class="sidebar-nav" id="empNav">
+      <a class="nav-item active" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+      <a class="nav-item" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+      <a class="nav-item" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+      <a class="nav-item" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+      <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+    </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="sidebarAvatar">E</div>
-        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Logged in as:</div></div>
+        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Logged in as: Sales Staff</div></div>
       </div>
     </div>
   </aside>
 
   <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <!-- Topbar matching mockup -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+          <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+        </svg>
+        <div class="topbar-title" id="topbarTitle">
+          <span id="topbarCat">Store</span>
+          <span class="topbar-sub-header">Office of Business Affairs &mdash; Store &amp; Daily POS Operations</span>
+        </div>
       </div>
       <div class="topbar-actions">
+        <select class="filter-select-modern dash-date-filter" id="bizSwitcher" style="display:none; max-width:230px" title="Switch which business you are managing" onchange="switchBusiness()"></select>
         <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
           <span class="notif-count" id="notifCount" style="display:none">0</span>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
+        <select class="filter-select-modern dash-date-filter" id="dashDateFilter" onchange="onMainDateFilterChange()" title="Filter the entire dashboard by date">
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month" selected>This Month</option>
+          <option value="6months">Last 6 Months</option>
+          <option value="year">This Year</option>
+          <option value="all">All Time</option>
+          <option value="custom">Custom Range</option>
+        </select>
+        <div class="dash-custom-range" id="dashCustomRange">
+          <input type="date" id="dashCustomFrom" onchange="onCustomDateChange()" title="Start date">
+          <span class="dash-range-sep">&ndash;</span>
+          <input type="date" id="dashCustomTo" onchange="onCustomDateChange()" title="End date">
+        </div>
+        <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
     </div>
 
-    <div class="page-content">
-      <div class="biz-header">
-        <div class="biz-icon" id="bizIcon" style="background:#EDE7F6"><svg width="24" height="24" fill="none" stroke="#6B3FA0" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/></svg></div>
-        <div>
-          <div class="biz-title" id="bizTitle">Loading...</div>
-          <div class="biz-subtitle" id="bizSubtitle">Employee Dashboard</div>
-        </div>
-      </div>
+    <!-- Hidden compat anchors for scripts -->
+    <div id="bizIcon" style="display:none"><svg width="24" height="24" fill="none" stroke="#6B3FA0" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/></svg></div>
+    <span id="bizTitle" style="display:none">Loading...</span>
+    <span id="bizSubtitle" style="display:none">Employee Dashboard</span>
+    <span id="welcomeGreeting" style="display:none"></span>
+    <span id="welcomeRole" style="display:none"></span>
+    <span id="welcomeDate" style="display:none"></span>
+    <span id="welcomeCatDesc" style="display:none"></span>
 
-      <div class="quick-actions" id="quickActions">
-        <a class="quick-action-card" id="qaInventory">
-          <svg width="28" height="28" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          <div class="qa-label">Manage Inventory</div>
-        </a>
-        <a class="quick-action-card" id="qaSales">
-          <svg width="28" height="28" fill="none" stroke="var(--yellow-dark)" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          <div class="qa-label">Record Sales</div>
-        </a>
-        <a class="quick-action-card" id="qaExpenses">
-          <svg width="28" height="28" fill="none" stroke="var(--danger)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          <div class="qa-label">Expenses / Income</div>
-        </a>
-        <a class="quick-action-card" id="qaReports">
-          <svg width="28" height="28" fill="none" stroke="#6B3FA0" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          <div class="qa-label">View Reports</div>
-        </a>
-      </div>
-
-      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
-        <div class="kpi-card yellow">
-          <div class="kpi-label">Total Revenue</div>
-          <div class="kpi-value" id="kpiRevenue">&#8369;0</div>
-          <div style="font-size:0.75rem;color:var(--gray-400)">This Month</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">Total Expenses</div>
-          <div class="kpi-value" id="kpiExpenses" style="color:var(--green)">&#8369;0</div>
-          <div style="font-size:0.75rem;color:var(--gray-400)">This Month</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-        </div>
-        <div class="kpi-card danger">
-          <div class="kpi-label">Low Stock Items</div>
-          <div class="kpi-value" id="kpiLowStock" style="color:var(--danger)">0</div>
-          <div style="font-size:0.75rem;color:var(--gray-400)">Needs Attention</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        </div>
-        <div class="kpi-card black">
-          <div class="kpi-label" id="kpiProfitLabel">Net Profit</div>
-          <div class="kpi-value" id="kpiProfit">&#8369;0</div>
-          <div style="font-size:0.75rem;color:var(--gray-400)">Revenue - COGS - Expenses</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-        </div>
-      </div>
-
-      <div class="chart-section">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Revenue vs Expenses</span></div>
-          <div style="position:relative;height:250px;width:100%"><canvas id="revExpChart"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Recent Sales</span>
-            <a id="linkAllSales" style="font-size:0.82rem;color:var(--green);font-weight:600;cursor:pointer">View All</a>
+    <div class="page-content" style="padding: 24px 32px;">
+      <!-- 7 Pastel KPI Metric Wave Sparkline Cards Grid -->
+      <div class="kpi-grid-7">
+        <!-- Card 1: Total Revenue (Green) -->
+        <div class="pastel-kpi-card pastel-green">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-green">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <span class="kpi-title-text">TOTAL REVENUE</span>
+            </div>
+            <span class="kpi-pill-badge pill-green"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
           </div>
-          <div id="recentSalesList">
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiRevenue">&#8369;0.00</div>
+            <div class="kpi-sub-label" id="kpiRevenueSubLabel">This Month (Net Sales)</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#16a34a">
+            <path d="M0 35 C20 30, 40 38, 60 22 C80 8, 100 24, 120 12 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 35 C20 30, 40 38, 60 22 C80 8, 100 24, 120 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 2: Total Expenses (Blue) -->
+        <div class="pastel-kpi-card pastel-blue">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-blue">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <span class="kpi-title-text">TOTAL EXPENSES</span>
+            </div>
+            <span class="kpi-pill-badge pill-blue"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiExpenses" style="color:#1e3a8a">&#8369;0.00</div>
+            <div class="kpi-sub-label">Operating + COGS</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#2563eb">
+            <path d="M0 30 C20 36, 40 18, 60 28 C80 38, 100 16, 120 22 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 30 C20 36, 40 18, 60 28 C80 38, 100 16, 120 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 3: Net Profit (Emerald) -->
+        <div class="pastel-kpi-card pastel-emerald">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-emerald">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <span class="kpi-title-text" id="kpiProfitLabel">NET PROFIT</span>
+            </div>
+            <span class="kpi-pill-badge pill-green"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiProfit">&#8369;0.00</div>
+            <div class="kpi-sub-label">Operating Margin</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#059669">
+            <path d="M0 32 C30 35, 50 15, 80 20 C100 24, 110 8, 120 5 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 32 C30 35, 50 15, 80 20 C100 24, 110 8, 120 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 4: Low Stock Items (Red) -->
+        <div class="pastel-kpi-card pastel-red">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-red">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <span class="kpi-title-text">LOW STOCK ITEMS</span>
+            </div>
+            <span class="kpi-pill-badge pill-red"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiLowStock" style="color:#b91c1c">0</div>
+            <div class="kpi-sub-label">Needs Replenishment</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#dc2626">
+            <path d="M0 25 C25 22, 45 38, 70 28 C95 18, 105 30, 120 20 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 25 C25 22, 45 38, 70 28 C95 18, 105 30, 120 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 5: Average Sale Value (Amber) -->
+        <div class="pastel-kpi-card pastel-amber">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-amber">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <span class="kpi-title-text">AVG SALE VALUE</span>
+            </div>
+            <span class="kpi-pill-badge pill-amber"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiAvg">&#8369;0.00</div>
+            <div class="kpi-sub-label">Per Customer Ticket</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#d97706">
+            <path d="M0 38 C25 35, 45 15, 70 25 C95 32, 105 10, 120 6 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 38 C25 35, 45 15, 70 25 C95 32, 105 10, 120 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 6: Inventory Value (Cyan) -->
+        <div class="pastel-kpi-card pastel-cyan">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-cyan">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <span class="kpi-title-text">INVENTORY VALUE</span>
+            </div>
+            <span class="kpi-pill-badge pill-blue"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiInvValue">&#8369;0.00</div>
+            <div class="kpi-sub-label">Stock Value at Cost</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#0284c7">
+            <path d="M0 28 C25 24, 45 36, 75 18 C95 8, 110 20, 120 14 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 28 C25 24, 45 36, 75 18 C95 8, 110 20, 120 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 7: Total Transactions (Purple) -->
+        <div class="pastel-kpi-card pastel-purple">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-purple">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              </div>
+              <span class="kpi-title-text">TRANSACTIONS</span>
+            </div>
+            <span class="kpi-pill-badge pill-purple"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="kpiTransactions">0</div>
+            <div class="kpi-sub-label">Completed Store Sales</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#7c3aed">
+            <path d="M0 15 C20 18, 45 32, 70 26 C90 22, 105 38, 120 40 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 15 C20 18, 45 32, 70 26 C90 22, 105 38, 120 40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Quick Actions (Image 2) -->
+      <div class="quick-actions-modern" id="quickActions" style="margin-bottom: 24px;">
+        <a class="qa-card-modern" id="qaInventory">
+          <div class="qa-card-left">
+            <div class="qa-icon-circle">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div class="qa-info">
+              <div class="qa-title">Manage Inventory</div>
+              <div class="qa-sub">Add &amp; manage stock</div>
+            </div>
+          </div>
+          <div class="qa-arrow-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
+
+        <a class="qa-card-modern" id="qaSales">
+          <div class="qa-card-left">
+            <div class="qa-icon-circle" style="background:#f0fdfa;border-color:#ccfbf1;color:#0d9488">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </div>
+            <div class="qa-info">
+              <div class="qa-title">Record Sales</div>
+              <div class="qa-sub">Point of sale checkout</div>
+            </div>
+          </div>
+          <div class="qa-arrow-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
+
+        <a class="qa-card-modern" id="qaReports">
+          <div class="qa-card-left">
+            <div class="qa-icon-circle">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="qa-info">
+              <div class="qa-title">View Reports</div>
+              <div class="qa-sub">Daily shift summary</div>
+            </div>
+          </div>
+          <div class="qa-arrow-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
+      </div>
+
+      <!-- Middle Row: Revenue vs Expenses & Recent Sales (Image 2) -->
+      <div class="middle-grid">
+        <div class="card-modern">
+          <div class="card-head">
+            <span class="card-head-title">Revenue vs Expenses</span>
+          </div>
+          <div style="position:relative;height:260px;width:100%">
+            <canvas id="revExpChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card-modern">
+          <div class="card-head">
+            <span class="card-head-title">Recent Sales</span>
+            <a id="linkAllSales" class="view-all-link">View All <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+          <div id="recentSalesList" class="recent-sales-wrap">
             <div class="empty-state" style="padding:30px 10px"><h3>No sales yet</h3><p>Start recording sales to see them here</p></div>
           </div>
         </div>
       </div>
 
-      <!-- Product Performance -->
-      <div class="chart-section">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Top Selling Products</span></div>
-          <div id="topProductsList" style="padding:8px 16px"></div>
+      <!-- Category Performance Row: Bar + Pie charts (Module 4.2 KPI Dashboard) -->
+      <div class="category-grid">
+        <div class="card-modern">
+          <div class="card-head">
+            <span class="card-head-title">Sales by Product Category</span>
+          </div>
+          <div style="position:relative;height:260px;width:100%">
+            <canvas id="catBarChart"></canvas>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Lowest Selling Products</span></div>
-          <div id="lowProductsList" style="padding:8px 16px"></div>
+
+        <div class="card-modern">
+          <div class="card-head">
+            <span class="card-head-title">Category Revenue Share</span>
+          </div>
+          <div class="donut-wrapper-flex">
+            <div class="donut-canvas-relative">
+              <canvas id="catPieChart"></canvas>
+              <div class="donut-center-info">
+                <div class="donut-center-val" id="donutTopCat">&mdash;</div>
+                <div class="donut-center-label">Top Category</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Top Selling & Lowest Selling Products (Image 2) -->
+      <div class="bottom-grid">
+        <div class="card-modern">
+          <div class="card-head">
+            <span class="card-head-title">Top Selling Products</span>
+          </div>
+          <div id="topProductsList" class="product-perf-list"></div>
+        </div>
+
+        <div class="card-modern">
+          <div class="card-head">
+            <span class="card-head-title">Lowest Selling Products</span>
+          </div>
+          <div id="lowProductsList" class="product-perf-list"></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
 const BIZ_META = {
   RENTAL:   { name: 'Rental', color: '#6B3FA0', bg: '#EDE7F6', desc: 'Rental services and property management' },
   BUSINESS: { name: 'Business', color: '#2d6a2e', bg: '#E8F5E9', desc: 'Commercial and trading operations' },
-  AGRI:     { name: 'Agriculture', color: '#D4A915', bg: '#FFF8E1', desc: 'Agricultural produce and farming' },
+  AGRI:     { name: 'Agriculture', color: '#15803d', bg: '#FFF8E1', desc: 'Agricultural produce and farming' },
   NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A', bg: '#F5F5F5', desc: 'Non-agricultural products and services' },
   MAIN:     { name: 'Main', color: '#0D6EFD', bg: '#E3F2FD', desc: 'Main business operations and services' },
 };
 
-const params = new URLSearchParams(window.location.search);
-const BIZ = params.get('biz') || 'RENTAL';
-const meta = BIZ_META[BIZ] || BIZ_META.RENTAL;
+// Workspace-aware (supports ?biz=CAT with optional ?entity=ID for B1 / B8-B17 workspaces)
+function getWS() {
+  const q = new URLSearchParams(window.location.search);
+  return { biz: q.get('biz') || 'AGRI', entity: q.get('entity') || '' };
+}
+let BIZ = getWS().biz;
+let ENTITY = getWS().entity;
+let meta = BIZ_META[BIZ] || BIZ_META.AGRI;
+function wsQuery() {
+  let q = '?biz=' + encodeURIComponent(BIZ);
+  if (ENTITY) q += '&entity=' + encodeURIComponent(ENTITY);
+  return q;
+}
+
+// ── Business switcher (multi-business accounts) ─────────────────────
+// Only shown when the employee has access to more than one business.
+function switchBusiness() {
+  const sel = document.getElementById('bizSwitcher');
+  const id = sel ? sel.value : '';
+  if (!id || id === ENTITY) return;
+  const b = (window._bizSwitcherList || []).find(x => x.id === id);
+  const cat = b ? (b.categoryId || BIZ) : BIZ;
+  window.location.href = '/employee/dashboard?biz=' + encodeURIComponent(cat) + '&entity=' + encodeURIComponent(id);
+}
+
+async function initBizSwitcher() {
+  try {
+    const uB = await getCurrentUser();
+    if (!uB) return;
+    const accessB = uB.businessAccess || [];
+    const isAllB = ['super_admin', 'admin', 'system_administrator'].includes(uB.role) || accessB.includes('all');
+    if (isAllB) return; // admins manage everything via the admin panel
+    const resBiz = await API.get('/api/admin/businesses');
+    const activeBiz = (resBiz.success ? (resBiz.data || []) : []).filter(b => (b.status || 'active') === 'active');
+    // Same access filter as /business-select: exact entity ids or legacy category ids
+    const availBiz = activeBiz.filter(b => accessB.includes(b.id) || accessB.includes(b.categoryId));
+    const swSel = document.getElementById('bizSwitcher');
+    if (swSel && availBiz.length > 1) {
+      window._bizSwitcherList = availBiz;
+      swSel.innerHTML = availBiz.map(b =>
+        '<option value="' + b.id + '"' + (b.id === ENTITY ? ' selected' : '') + '>' + (b.name || b.id) + '</option>'
+      ).join('');
+      swSel.style.display = '';
+    }
+  } catch (e) { console.warn('Business switcher unavailable:', e); }
+}
 
 function buildNav() {
-  const b = BIZ;
-  document.getElementById('empNav').innerHTML = `
-    <a class="nav-item active" href="/employee/dashboard?biz=${b}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/employee/inventory?biz=${b}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
-    <a class="nav-item" href="/employee/sales?biz=${b}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item" href="/employee/expenses?biz=${b}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Expenses / Income</a>
-    <a class="nav-item" href="/employee/reports?biz=${b}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
-  `;
+  const q = wsQuery();
+  document.querySelectorAll('#empNav a[data-page]').forEach(a => {
+    a.href = a.getAttribute('data-page') + q;
+  });
+}
+
+// Dynamic greeting
+function updateGreeting() {
+  if (typeof updateHeaderGreeting === 'function') {
+    updateHeaderGreeting('SALE STAFF');
+  } else {
+    const h = new Date().getHours();
+    const el = document.getElementById('welcomeGreeting');
+    if (el) el.textContent = h < 12 ? 'GOOD MORNING,' : h < 18 ? 'GOOD AFTERNOON,' : 'GOOD EVENING,';
+  }
+  const descEl = document.getElementById('welcomeCatDesc');
+  if (descEl && meta && meta.name) descEl.textContent = meta.name;
 }
 
 let revExpChart;
+let cachedSales = [];
+let cachedExpenses = [];
+let cachedInventory = [];
+
+// ── Main dashboard date filter ──────────────────────────────────────
+// A single filter in the topbar that scopes the ENTIRE dashboard:
+// KPI cards, Revenue vs Expenses chart, category charts, recent sales
+// and top/lowest selling product lists.
+function getMainPeriod() {
+  const el = document.getElementById('dashDateFilter');
+  return (el && el.value) || 'month';
+}
+
+function getPeriodLabel() {
+  const period = getMainPeriod();
+  if (period === 'custom') {
+    const range = getCustomRange();
+    if (!range) return 'Custom Range';
+    const fmt = d => d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    if (range.start.getFullYear() !== range.end.getFullYear()) {
+      return fmt(range.start) + ', ' + range.start.getFullYear() + ' \u2013 ' + fmt(range.end) + ', ' + range.end.getFullYear();
+    }
+    return fmt(range.start) + ' \u2013 ' + fmt(range.end) + ', ' + range.end.getFullYear();
+  }
+  const labels = {
+    today: 'Today',
+    week: 'This Week',
+    month: 'This Month',
+    '6months': 'Last 6 Months',
+    year: 'This Year',
+    all: 'All Time'
+  };
+  return labels[period] || 'This Month';
+}
+
+// Returns the selected custom range as {start, end} Date objects (end inclusive),
+// or null when either date is missing or the range is invalid (from > to)
+function getCustomRange() {
+  const fromEl = document.getElementById('dashCustomFrom');
+  const toEl = document.getElementById('dashCustomTo');
+  if (!fromEl || !toEl || !fromEl.value || !toEl.value) return null;
+  const start = new Date(fromEl.value + 'T00:00:00');
+  const end = new Date(toEl.value + 'T23:59:59.999');
+  if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) return null;
+  return { start, end };
+}
+
+// Returns a predicate over a record (sale or expense) based on the selected period
+function getDateFilterFn() {
+  const period = getMainPeriod();
+  const now = new Date();
+  if (period === 'custom') {
+    const range = getCustomRange();
+    if (!range) return () => false;
+    return r => { const d = new Date(r.date || r.createdAt || Date.now()); return d >= range.start && d <= range.end; };
+  }
+  if (period === 'all') return () => true;
+  if (period === 'today') {
+    const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    return r => (r.date || r.createdAt || '').startsWith(today);
+  }
+  if (period === 'week') {
+    const cutoff = new Date(now);
+    cutoff.setDate(now.getDate() - 6);
+    cutoff.setHours(0, 0, 0, 0);
+    return r => { const d = new Date(r.date || r.createdAt || Date.now()); return d >= cutoff && d <= now; };
+  }
+  if (period === 'month') {
+    const ym = now.toISOString().substring(0, 7);
+    return r => (r.date || r.createdAt || '').startsWith(ym);
+  }
+  if (period === '6months') {
+    const cutoff = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    cutoff.setHours(0, 0, 0, 0);
+    return r => { const d = new Date(r.date || r.createdAt || Date.now()); return d >= cutoff && d <= now; };
+  }
+  if (period === 'year') {
+    const y = String(now.getFullYear());
+    return r => (r.date || r.createdAt || '').startsWith(y);
+  }
+  return () => true;
+}
+
+// Re-render the whole dashboard from cached data when the main filter changes
+function onMainDateFilterChange() {
+  const customWrap = document.getElementById('dashCustomRange');
+  if (customWrap) customWrap.classList.toggle('visible', getMainPeriod() === 'custom');
+  // While on Custom Range, wait until both dates are chosen before re-rendering
+  if (getMainPeriod() === 'custom' && !getCustomRange()) return;
+  renderDashboard();
+}
+
+// Fired by the custom from/to date inputs
+function onCustomDateChange() {
+  if (getMainPeriod() === 'custom' && getCustomRange()) renderDashboard();
+}
+
+function renderChartFromData() {
+  const period = getMainPeriod();
+  const now = new Date();
+  const salesIn = cachedSales.filter(getDateFilterFn());
+  const expIn = cachedExpenses.filter(getDateFilterFn());
+  let chartLabels = [];
+  let revChartData = [];
+  let expChartData = [];
+
+  const sumNet = list => list.reduce((a, s) => a + ((parseFloat(s.total) || 0) - (parseFloat(s.taxAmount) || 0)), 0);
+  const sumInc = list => list.filter(e => e.type === 'income').reduce((a, e) => a + (parseFloat(e.amount) || 0), 0);
+  const sumExp = list => list.filter(e => e.type === 'expense').reduce((a, e) => a + (parseFloat(e.amount) || 0), 0);
+
+  if (period === 'today') {
+    // 4 time-of-day segments for the current day
+    chartLabels = ['12AM–6AM', '6AM–12PM', '12PM–6PM', '6PM–12AM'];
+    const bucketOf = r => {
+      const h = new Date(r.date || r.createdAt || Date.now()).getHours();
+      return h < 6 ? 0 : h < 12 ? 1 : h < 18 ? 2 : 3;
+    };
+    const rev = [0, 0, 0, 0], exp = [0, 0, 0, 0];
+    salesIn.forEach(s => { rev[bucketOf(s)] += (parseFloat(s.total) || 0) - (parseFloat(s.taxAmount) || 0); });
+    expIn.forEach(e => {
+      if (e.type === 'income') rev[bucketOf(e)] += (parseFloat(e.amount) || 0);
+      else if (e.type === 'expense') exp[bucketOf(e)] += (parseFloat(e.amount) || 0);
+    });
+    revChartData = rev;
+    expChartData = exp;
+  } else if (period === 'week') {
+    // Last 7 days (per-day buckets)
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      days.push({
+        label: d.toLocaleDateString('en', { weekday: 'short' }),
+        key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+      });
+    }
+    chartLabels = days.map(d => d.label);
+    revChartData = days.map(d =>
+      sumNet(salesIn.filter(s => (s.date || s.createdAt || '').startsWith(d.key))) +
+      sumInc(expIn.filter(e => (e.date || e.createdAt || '').startsWith(d.key)))
+    );
+    expChartData = days.map(d => sumExp(expIn.filter(e => (e.date || e.createdAt || '').startsWith(d.key))));
+  } else if (period === 'month') {
+    // 4 weeks of current month (Image 2 style)
+    chartLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    const weeks = [
+      { start: 1, end: 7 },
+      { start: 8, end: 14 },
+      { start: 15, end: 21 },
+      { start: 22, end: 31 }
+    ];
+    const dayOf = r => new Date(r.date || r.createdAt || Date.now()).getDate();
+    revChartData = weeks.map(w =>
+      sumNet(salesIn.filter(s => { const d = dayOf(s); return d >= w.start && d <= w.end; })) +
+      sumInc(expIn.filter(e => { const d = dayOf(e); return d >= w.start && d <= w.end; }))
+    );
+    expChartData = weeks.map(w => sumExp(expIn.filter(e => { const d = dayOf(e); return d >= w.start && d <= w.end; })));
+  } else if (period === 'custom') {
+    // Custom range → daily buckets for short ranges (≤ 62 days), monthly buckets otherwise
+    const range = getCustomRange();
+    if (range) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const dayMs = 24 * 60 * 60 * 1000;
+      const days = Math.floor((range.end - range.start) / dayMs) + 1;
+      if (days <= 62) {
+        const keys = [];
+        for (let d = new Date(range.start.getFullYear(), range.start.getMonth(), range.start.getDate()); d <= range.end; d.setDate(d.getDate() + 1)) {
+          keys.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+          chartLabels.push((d.getMonth() + 1) + '/' + d.getDate());
+        }
+        revChartData = keys.map(k =>
+          sumNet(salesIn.filter(s => (s.date || s.createdAt || '').startsWith(k))) +
+          sumInc(expIn.filter(e => (e.date || e.createdAt || '').startsWith(k)))
+        );
+        expChartData = keys.map(k => sumExp(expIn.filter(e => (e.date || e.createdAt || '').startsWith(k))));
+      } else {
+        const buckets = [];
+        const cur = new Date(range.start.getFullYear(), range.start.getMonth(), 1);
+        const lastKey = range.end.getFullYear() + '-' + String(range.end.getMonth() + 1).padStart(2, '0');
+        while (buckets.length < 24) {
+          const key = cur.getFullYear() + '-' + String(cur.getMonth() + 1).padStart(2, '0');
+          buckets.push({ label: months[cur.getMonth()], key });
+          if (key === lastKey) break;
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        chartLabels = buckets.map(b => b.label);
+        revChartData = buckets.map(b =>
+          sumNet(salesIn.filter(s => (s.date || s.createdAt || '').startsWith(b.key))) +
+          sumInc(expIn.filter(e => (e.date || e.createdAt || '').startsWith(b.key)))
+        );
+        expChartData = buckets.map(b => sumExp(expIn.filter(e => (e.date || e.createdAt || '').startsWith(b.key))));
+      }
+    }
+  } else {
+    // '6months' → last 6 months, 'year' / 'all' → last 12 months (monthly buckets)
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const buckets = [];
+    if (period === 'year') {
+      for (let m = 0; m < 12; m++) {
+        buckets.push({ label: months[m], key: now.getFullYear() + '-' + String(m + 1).padStart(2, '0') });
+      }
+    } else {
+      const back = period === 'all' ? 11 : 5;
+      for (let i = back; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        buckets.push({ label: months[d.getMonth()], key: d.toISOString().substring(0, 7) });
+      }
+    }
+    chartLabels = buckets.map(b => b.label);
+    revChartData = buckets.map(b =>
+      sumNet(salesIn.filter(s => (s.date || s.createdAt || '').startsWith(b.key))) +
+      sumInc(expIn.filter(e => (e.date || e.createdAt || '').startsWith(b.key)))
+    );
+    expChartData = buckets.map(b => sumExp(expIn.filter(e => (e.date || e.createdAt || '').startsWith(b.key))));
+  }
+
+  const canvas = document.getElementById('revExpChart');
+  if (!canvas) return;
+  if (revExpChart) revExpChart.destroy();
+
+  const ctx = canvas.getContext('2d');
+  const revGrad = ctx.createLinearGradient(0, 0, 0, 240);
+  revGrad.addColorStop(0, 'rgba(16, 185, 129, 0.15)');
+  revGrad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+  revExpChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [
+        {
+          label: 'Revenue',
+          data: revChartData,
+          borderColor: '#10b981',
+          backgroundColor: revGrad,
+          fill: true,
+          tension: 0.35,
+          borderWidth: 2.5,
+          pointBackgroundColor: '#10b981',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 4.5,
+          pointHoverRadius: 6
+        },
+        {
+          label: 'Expenses',
+          data: expChartData,
+          borderColor: '#64748b',
+          backgroundColor: 'transparent',
+          fill: false,
+          tension: 0.35,
+          borderWidth: 2.5,
+          pointBackgroundColor: '#64748b',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 4.5,
+          pointHoverRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            font: { family: "'Inter', sans-serif", size: 12, weight: 600 },
+            padding: 16
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(c) {
+              return ' ' + c.dataset.label + ': ₱' + (parseFloat(c.raw)||0).toLocaleString('en', {minimumFractionDigits: 2});
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: {
+            callback: v => '₱' + Number(v).toLocaleString(),
+            font: { family: "'Inter', sans-serif", size: 11 }
+          }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: "'Inter', sans-serif", size: 11, weight: 500 } }
+        }
+      }
+    }
+  });
+}
+
+// ── Module 4.2: Sales performance by product category ──────────────
+// Item categories are enriched from inventory at sale time (routes/sales.js),
+// so each sale item carries a `category` field we can aggregate on.
+let catBarChart = null;
+let catPieChart = null;
+const CAT_PALETTE = ['#10b981','#0d9488','#2563eb','#7c3aed','#d97706','#dc2626','#0284c7','#059669','#8b5cf6','#64748b'];
+
+function computeCategoryBreakdown(filterFn) {
+  const map = {};
+  cachedSales.filter(filterFn).forEach(s => {
+    (s.items || []).forEach(i => {
+      const cat = (i.category || '').trim() || 'Uncategorized';
+      const amt = parseFloat(i.subtotal || ((parseFloat(i.unitPrice) || 0) * (parseInt(i.quantity || i.qty || 1))) || 0);
+      if (!map[cat]) map[cat] = 0;
+      map[cat] += amt;
+    });
+  });
+  return Object.entries(map)
+    .map(([name, revenue]) => ({ name, revenue }))
+    .sort((a, b) => b.revenue - a.revenue);
+}
+
+function renderCategoryCharts() {
+  const breakdown = computeCategoryBreakdown(getDateFilterFn());
+
+  // ── Bar chart: revenue per product category ──
+  const barCanvas = document.getElementById('catBarChart');
+  if (barCanvas) {
+    if (catBarChart) catBarChart.destroy();
+    const labels = breakdown.map(c => c.name);
+    catBarChart = new Chart(barCanvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue',
+          data: breakdown.map(c => c.revenue),
+          backgroundColor: labels.map((_, i) => CAT_PALETTE[i % CAT_PALETTE.length] + 'CC'),
+          borderColor: labels.map((_, i) => CAT_PALETTE[i % CAT_PALETTE.length]),
+          borderWidth: 1.5,
+          borderRadius: 6,
+          maxBarThickness: 46
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: c => ' Revenue: ₱' + (parseFloat(c.raw) || 0).toLocaleString('en', { minimumFractionDigits: 2 })
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0,0,0,0.04)' },
+            ticks: {
+              callback: v => '₱' + Number(v).toLocaleString(),
+              font: { family: "'Inter', sans-serif", size: 11 }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { family: "'Inter', sans-serif", size: 11, weight: 500 } }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Pie (donut) chart: category revenue share ──
+  const pieCanvas = document.getElementById('catPieChart');
+  if (pieCanvas) {
+    if (catPieChart) catPieChart.destroy();
+    const total = breakdown.reduce((a, c) => a + c.revenue, 0);
+    const topEl = document.getElementById('donutTopCat');
+    if (topEl) topEl.textContent = breakdown.length ? breakdown[0].name : '—';
+    catPieChart = new Chart(pieCanvas.getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: breakdown.map(c => c.name),
+        datasets: [{
+          data: breakdown.map(c => c.revenue),
+          backgroundColor: breakdown.map((_, i) => CAT_PALETTE[i % CAT_PALETTE.length]),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 8,
+              boxHeight: 8,
+              font: { family: "'Inter', sans-serif", size: 12, weight: 600 },
+              padding: 14
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: c => {
+                const pct = total ? Math.round((c.raw / total) * 100) : 0;
+                return ' ' + c.label + ': ₱' + (parseFloat(c.raw) || 0).toLocaleString('en', { minimumFractionDigits: 2 }) + ' (' + pct + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+}
 
 async function loadDashboardData() {
   let sales = [], expenses = [], inventory = [];
   try {
+    const q = wsQuery();
     const [sRes, eRes, iRes] = await Promise.all([
-      API.get('/api/sales?biz=' + BIZ),
-      API.get('/api/expenses?biz=' + BIZ),
-      API.get('/api/inventory?biz=' + BIZ),
+      API.get('/api/sales' + q),
+      API.get('/api/expenses' + q),
+      API.get('/api/inventory' + q),
     ]);
     if (sRes.success) sales = sRes.data || [];
     if (eRes.success) expenses = eRes.data || [];
     if (iRes.success) inventory = iRes.data || [];
   } catch(e) { console.error('Data fetch error:', e); }
+
+  cachedSales = sales;
+  cachedExpenses = expenses;
+  cachedInventory = inventory;
+
+  renderDashboard();
+}
+
+// Renders all dashboard widgets (KPIs, charts, recent sales, top/lowest
+// products) from the cached data, scoped to the main dashboard date filter.
+function renderDashboard() {
+  const dFilter = getDateFilterFn();
+  const sales = cachedSales.filter(dFilter);
+  const expenses = cachedExpenses.filter(dFilter);
+  const inventory = cachedInventory;
 
   // KPIs — Net revenue = total - tax (tax goes to super admin)
   const salesRev = sales.reduce((a,s) => a + ((parseFloat(s.total)||0) - (parseFloat(s.taxAmount)||0)), 0);
@@ -213,117 +1401,188 @@ async function loadDashboardData() {
   const isLoss = netProfit < 0;
 
   document.getElementById('kpiRevenue').innerHTML = '&#8369;' + totalRevenue.toLocaleString('en',{minimumFractionDigits:2});
+  const revSubLabel = document.getElementById('kpiRevenueSubLabel');
+  if (revSubLabel) revSubLabel.textContent = getPeriodLabel() + ' (Net Sales)';
   document.getElementById('kpiExpenses').innerHTML = '&#8369;' + totalExpenses.toLocaleString('en',{minimumFractionDigits:2});
   document.getElementById('kpiLowStock').textContent = lowStock.length;
+  
+  // Module 2.1: average sale value = total sales / number of transactions
+  const avgSale = sales.length ? sales.reduce((a, s) => a + (parseFloat(s.total) || 0), 0) / sales.length : 0;
+  document.getElementById('kpiAvg').innerHTML = '&#8369;' + avgSale.toLocaleString('en', { minimumFractionDigits: 2 });
+  
   document.getElementById('kpiProfit').innerHTML = (isLoss ? '-&#8369;' : '&#8369;') + Math.abs(netProfit).toLocaleString('en',{minimumFractionDigits:2});
-  document.getElementById('kpiProfit').style.color = isLoss ? 'var(--danger)' : 'var(--green)';
-  document.getElementById('kpiProfitLabel').textContent = isLoss ? 'Net Loss (Revenue - COGS - Expenses)' : 'Net Profit';
+  document.getElementById('kpiProfit').style.color = isLoss ? '#ef4444' : '#10b981';
+  document.getElementById('kpiProfitLabel').textContent = isLoss ? 'Net Loss' : 'Net Profit';
 
-  // Monthly chart data
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now = new Date();
-  const last6 = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    last6.push({ label: months[d.getMonth()], key: d.toISOString().substring(0,7) });
+  const invEl = document.getElementById('kpiInvValue');
+  if (invEl) {
+    const invVal = inventory.reduce((sum, p) => sum + ((parseFloat(p.unitCost) || 0) * (parseInt(p.quantity || p.stock) || 0)), 0);
+    invEl.innerHTML = '&#8369;' + invVal.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-  const revByMonth = last6.map(m => {
-    const sRev = sales.filter(s => (s.date||s.createdAt||'').startsWith(m.key)).reduce((a,s) => a + ((parseFloat(s.total)||0) - (parseFloat(s.taxAmount)||0)), 0);
-    const iRev = expenses.filter(e => e.type==='income' && (e.date||'').startsWith(m.key)).reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
-    return sRev + iRev;
-  });
-  const expByMonth = last6.map(m => {
-    return expenses.filter(e => e.type==='expense' && (e.date||'').startsWith(m.key)).reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
-  });
+  const txEl = document.getElementById('kpiTransactions');
+  if (txEl) txEl.textContent = sales.length;
 
-  if (revExpChart) revExpChart.destroy();
-  revExpChart = new Chart(document.getElementById('revExpChart'), {
-    type: 'bar',
-    data: {
-      labels: last6.map(m => m.label),
-      datasets: [
-        { label: 'Revenue', data: revByMonth, backgroundColor: meta.color, borderRadius: 6 },
-        { label: 'Expenses', data: expByMonth, backgroundColor: '#ccc', borderRadius: 6 },
-      ]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } },
-      scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
-    }
-  });
+  // Render charts (line + category bar/pie — Module 4.2)
+  renderChartFromData();
+  renderCategoryCharts();
 
-  // Recent sales list
+  // Recent sales list (Image 2 style)
   const recentEl = document.getElementById('recentSalesList');
   const recent = sales.slice(0, 5);
   if (!recent.length) {
     recentEl.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No sales yet</h3><p>Start recording sales to see them here</p></div>';
   } else {
-    recentEl.innerHTML = recent.map(s => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--gray-200)">
-        <div>
-          <div style="font-weight:600;font-size:0.88rem">${(s.items||[]).map(i=>i.name).join(', ')||'Sale'}</div>
-          <div style="font-size:0.75rem;color:var(--gray-400)">${new Date(s.date||s.createdAt).toLocaleDateString()} - ${s.paymentMethod||'cash'}</div>
-        </div>
-        <div style="font-weight:700;color:var(--green)">&#8369;${parseFloat(s.total||0).toLocaleString('en',{minimumFractionDigits:2})}</div>
-      </div>`).join('');
+    recentEl.innerHTML = recent.map(s => {
+      const dateStr = s.date || s.createdAt;
+      const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Recent';
+      const itemsSummary = (s.items||[]).map(i=>i.name).join(', ') || 'Sale Transaction';
+      return `
+        <div class="recent-sale-row">
+          <div class="recent-sale-left">
+            <div class="recent-sale-icon">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div>
+              <div class="recent-sale-name" title="${itemsSummary}">${itemsSummary}</div>
+              <div class="recent-sale-meta">${formattedDate} • ${s.paymentMethod || 'Cash'}</div>
+            </div>
+          </div>
+          <div class="recent-sale-amt">&#8369;${parseFloat(s.total||0).toLocaleString('en',{minimumFractionDigits:2})}</div>
+        </div>`;
+    }).join('');
   }
 
-  // Top & Bottom products
+  // Top & Lowest Selling Products (Image 2 style)
   const productMap = {};
   sales.forEach(s => {
     (s.items||[]).forEach(i => {
-      const key = i.name||'Unknown';
-      if(!productMap[key]) productMap[key] = { name:key, qty:0, revenue:0 };
-      productMap[key].qty += parseInt(i.quantity||i.qty||1);
-      productMap[key].revenue += parseFloat(i.subtotal||i.unitPrice||0);
+      const key = i.name || 'Unknown';
+      if(!productMap[key]) productMap[key] = { name: key, qty: 0, revenue: 0 };
+      productMap[key].qty += parseInt(i.quantity || i.qty || 1);
+      productMap[key].revenue += parseFloat(i.subtotal || i.unitPrice || 0);
     });
   });
   const allProducts = Object.values(productMap);
-  const rankColors = ['gold','silver','bronze','default','default'];
 
-  // Top 5
+  // Top 5 Products
   const topEl = document.getElementById('topProductsList');
-  const top5 = [...allProducts].sort((a,b) => b.revenue - a.revenue).slice(0,5);
+  const top5 = [...allProducts].sort((a,b) => b.revenue - a.revenue).slice(0, 5);
   if(!top5.length) {
     topEl.innerHTML = '<div class="empty-state" style="padding:20px 10px"><h3>No sales yet</h3><p>Record sales to see top products</p></div>';
   } else {
-    topEl.innerHTML = top5.map((p,i) => `
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-200)">
-        <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;${i===0?'background:#FFD700;color:#000':i===1?'background:#C0C0C0;color:#000':i===2?'background:#CD7F32;color:#fff':'background:var(--gray-200);color:var(--gray-600)'}">${i+1}</div>
-        <div style="flex:1"><div style="font-weight:600;font-size:0.88rem">${p.name}</div><small style="color:var(--gray-400)">${p.qty} sold</small></div>
-        <div style="font-weight:700;font-size:0.85rem">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
-      </div>`).join('');
+    const maxRev = Math.max(...top5.map(p => p.revenue), 1);
+    topEl.innerHTML = top5.map((p, i) => {
+      const pct = Math.min(100, Math.round((p.revenue / maxRev) * 100));
+      return `
+        <div class="perf-item">
+          <div class="perf-item-top">
+            <div class="perf-item-left">
+              <span class="perf-rank rank-green">#${i+1}</span>
+              <div class="perf-icon-box">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <div>
+                <div class="perf-name">${p.name}</div>
+                <div class="perf-sub">${p.qty} sold</div>
+              </div>
+            </div>
+            <div class="perf-amount perf-amount-green">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
+          </div>
+          <div class="perf-progress-bg">
+            <div class="perf-progress-fill fill-green" style="width: ${pct}%"></div>
+          </div>
+        </div>`;
+    }).join('');
   }
 
-  // Bottom 5
+  // Lowest 5 Products
   const lowEl = document.getElementById('lowProductsList');
-  const bottom5 = [...allProducts].sort((a,b) => a.qty - b.qty).slice(0,5);
+  const bottom5 = [...allProducts].sort((a,b) => a.qty - b.qty).slice(0, 5);
   if(!bottom5.length) {
     lowEl.innerHTML = '<div class="empty-state" style="padding:20px 10px"><h3>No data</h3><p>Record sales to see underperforming products</p></div>';
   } else {
-    lowEl.innerHTML = bottom5.map((p,i) => `
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-200)">
-        <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;background:var(--danger-light);color:var(--danger)">${i+1}</div>
-        <div style="flex:1"><div style="font-weight:600;font-size:0.88rem">${p.name}</div><small style="color:var(--gray-400)">Only ${p.qty} sold</small></div>
-        <div style="font-weight:700;font-size:0.82rem;color:var(--danger)">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
-      </div>`).join('');
+    const maxLowQty = Math.max(...bottom5.map(p => p.qty), 1);
+    lowEl.innerHTML = bottom5.map((p, i) => {
+      const pct = Math.min(100, Math.max(10, Math.round((p.qty / maxLowQty) * 100)));
+      return `
+        <div class="perf-item">
+          <div class="perf-item-top">
+            <div class="perf-item-left">
+              <span class="perf-rank rank-red">#${i+1}</span>
+              <div class="perf-icon-box">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <div>
+                <div class="perf-name">${p.name}</div>
+                <div class="perf-sub perf-sub-red">Only ${p.qty} sold</div>
+              </div>
+            </div>
+            <div class="perf-amount perf-amount-red">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
+          </div>
+          <div class="perf-progress-bg">
+            <div class="perf-progress-fill fill-red" style="width: ${pct}%"></div>
+          </div>
+        </div>`;
+    }).join('');
   }
 }
 
 async function initPage() {
+  updateGreeting();
+
+  // Resolve workspace from URL first, then fall back to user's assigned business
+  try {
+    const u0 = await getCurrentUser();
+    if (u0) {
+      const access = u0.businessAccess || [];
+      if (!BIZ || BIZ === 'RENTAL') {
+        const first = access.includes('all') ? 'AGRI' : (access[0] || 'AGRI');
+        if (String(first).startsWith('AGRI')) BIZ = 'AGRI';
+        else if (String(first).startsWith('NON_AGRI')) BIZ = 'NON_AGRI';
+        else if (String(first).startsWith('MAIN')) BIZ = 'MAIN';
+        else BIZ = first;
+      }
+      if (!ENTITY && access.length && access[0] !== 'all' && access[0].includes('-')) {
+        ENTITY = access[0];
+      }
+      meta = BIZ_META[BIZ] || BIZ_META.AGRI;
+    }
+  } catch (e) { console.warn('user resolve failed', e); }
+
   buildNav();
-  document.getElementById('bizTitle').textContent = meta.name + ' Dashboard';
-  document.getElementById('bizSubtitle').textContent = meta.desc;
-  document.getElementById('bizIcon').style.background = meta.bg;
-  document.getElementById('bizIcon').querySelector('svg').setAttribute('stroke', meta.color);
-  document.getElementById('topbarTitle').textContent = meta.name + ' - Dashboard';
-  document.title = meta.name + ' Dashboard - OBA System';
-  document.getElementById('qaInventory').href = '/employee/inventory?biz=' + BIZ;
-  document.getElementById('qaSales').href = '/employee/sales?biz=' + BIZ;
-  document.getElementById('qaExpenses').href = '/employee/expenses?biz=' + BIZ;
-  document.getElementById('qaReports').href = '/employee/reports?biz=' + BIZ;
-  document.getElementById('linkAllSales').onclick = () => location.href = '/employee/sales?biz=' + BIZ;
+
+  // Business switcher — visible only when this account manages multiple businesses
+  initBizSwitcher();
+
+  // If inside a specific workspace (e.g. B1), show its real name
+  let displayName = meta.name;
+  try {
+    if (ENTITY && typeof loadWorkspaceName === 'function') {
+      const wsName = await loadWorkspaceName();
+      if (wsName) displayName = wsName;
+    }
+  } catch (e) { /* fallback */ }
+
+  const topbarCat = document.getElementById('topbarCat');
+  if (topbarCat) topbarCat.textContent = displayName;
+  
+  const bizTitle = document.getElementById('bizTitle');
+  if (bizTitle) bizTitle.textContent = displayName + ' Dashboard';
+  
+  document.title = displayName + ' Dashboard - OBA System';
+
+  document.getElementById('qaInventory').href = '/employee/inventory' + wsQuery();
+  document.getElementById('qaSales').href = '/employee/pos' + wsQuery();
+  document.getElementById('qaReports').href = '/employee/reports' + wsQuery();
+  document.getElementById('linkAllSales').onclick = () => location.href = '/employee/sales' + wsQuery();
 
   await loadDashboardData();
+
+  // Real-time polling every 30s
+  setInterval(() => {
+    if (document.hidden) return;
+    loadDashboardData();
+  }, 30000);
 
   getCurrentUser().then(user => {
     if (user) {

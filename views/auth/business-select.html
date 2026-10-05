@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <style>
     body { background: var(--black); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: var(--font-main); }
-    .biz-wrap { background: var(--white); border-radius: var(--radius); padding: 48px; max-width: 640px; width: 90%; text-align: center; box-shadow: var(--shadow-lg); }
+    .biz-wrap { background: var(--white); border-radius: var(--radius); padding: 48px; max-width: 720px; width: 92%; text-align: center; box-shadow: var(--shadow-lg); }
     .biz-wrap img { width: 64px; height: 64px; object-fit: contain; margin-bottom: 16px; }
     .biz-wrap h2 { font-size: 1.5rem; margin-bottom: 4px; color: var(--black); }
     .biz-wrap p { font-size: 0.9rem; color: var(--gray-600); margin-bottom: 28px; }
@@ -20,6 +20,7 @@
     .biz-option .icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
     .biz-option .name { font-weight: 700; font-size: 1rem; color: var(--black); }
     .biz-option .desc { font-size: 0.78rem; color: var(--gray-500); margin-top: 4px; }
+    .cat-badge { display:inline-block; font-size:0.7rem; font-weight:700; padding:2px 10px; border-radius:12px; margin-top:8px; }
     .logout-link { margin-top: 20px; display: inline-block; font-size: 0.85rem; color: var(--gray-400); text-decoration: none; }
     .logout-link:hover { color: var(--danger); }
     @media (max-width: 480px) { .biz-grid { grid-template-columns: 1fr; } .biz-wrap { padding: 24px; } }
@@ -28,68 +29,96 @@
 <body>
   <div class="biz-wrap">
     <img src="/images/psaulogo.png" alt="PSAU Logo">
-    <h2>Select Business Unit</h2>
-    <p id="greeting">Welcome! Choose which business category you want to access.</p>
+    <h2>Select Business</h2>
+    <p id="greeting">Welcome! Choose which business workspace you want to access.</p>
+    <div id="errBox" style="display:none;background:#FDECEC;border:1px solid #F5C6C6;color:#B42318;padding:10px 14px;border-radius:8px;font-size:0.85rem;font-weight:600;margin-bottom:16px"></div>
     <div class="biz-grid" id="bizGrid"></div>
     <a href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');" class="logout-link">Logout</a>
   </div>
 
-  <script src="/js/app.js"></script>
+  <script src="/js/app.js?v=2"></script>
   <script>
-    const CATS = [
-      { id: 'RENTAL', name: 'Rental', icon: `<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`, color: '#6B3FA0', bg: '#EDE7F6', desc: 'Rental services and property management' },
-      { id: 'BUSINESS', name: 'Business', icon: `<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`, color: '#2d6a2e', bg: '#E8F5E9', desc: 'Commercial and trading operations' },
-      { id: 'AGRI', name: 'Agriculture', icon: `<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`, color: '#D4A915', bg: '#FFF8E1', desc: 'Agricultural produce and farming' },
-      { id: 'NON_AGRI', name: 'Non-Agriculture', icon: `<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`, color: '#1A1A1A', bg: '#F5F5F5', desc: 'Non-agricultural products and services' },
-      { id: 'MAIN', name: 'Main', icon: `<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`, color: '#0D6EFD', bg: '#E3F2FD', desc: 'Main business operations and services' },
-    ];
+    const CAT_META = {
+      AGRI: { label: 'Agriculture', color: '#D4A915', bg: '#FFF8E1' },
+      NON_AGRI: { label: 'Non-Agriculture', color: '#1A1A1A', bg: '#F5F5F5' },
+      MAIN: { label: 'Main', color: '#0D6EFD', bg: '#E3F2FD' },
+    };
 
     document.addEventListener('DOMContentLoaded', async () => {
+      const qp = new URLSearchParams(window.location.search);
+      const qErr = qp.get('error');
+      if (qErr) {
+        const box = document.getElementById('errBox');
+        box.textContent = qErr;
+        box.style.display = 'block';
+        if (window.Toast) Toast.error(qErr);
+      }
       const currentUser = await getCurrentUser();
       if (!currentUser) { window.location.href = '/login'; return; }
 
       const user = currentUser.user || currentUser;
       const access = user.businessAccess || [];
 
-      // Intercept with pre-selected category from login role flow
+      // Pre-selected category from login role flow (managers) — resolve to first business in that category
       const savedCategory = sessionStorage.getItem('selectedCategory');
-      const savedRole = sessionStorage.getItem('selectedRole');
-      if (savedCategory && (user.role === 'employee' || user.role === 'manager' || savedRole === 'employee' || savedRole === 'manager')) {
-        // Double check access controls
-        if (user.role === 'super_admin' || user.role === 'admin' || access.includes('all') || access.includes(savedCategory)) {
-          goToBusiness(savedCategory);
-          return;
-        }
-      }
 
-      let available;
-      if (user.role === 'super_admin' || user.role === 'admin' || access.includes('all')) {
-        available = CATS;
-      } else {
-        available = CATS.filter(c => access.includes(c.id));
-      }
+      let businesses = [];
+      try {
+        const res = await API.get('/api/admin/businesses');
+        if (res.success) businesses = (res.data || []).filter(b => (b.status || 'active') === 'active');
+      } catch (e) { console.error(e); }
 
-      if (available.length === 0) available = CATS;
+      let available = businesses;
+      const isAll = user.role === 'super_admin' || user.role === 'admin' || access.includes('all');
+      if (!isAll && access.length) {
+        // access may contain entity ids (AGRI-slug-xxx) or legacy category ids (AGRI)
+        available = businesses.filter(b =>
+          access.includes(b.id) || access.includes(b.categoryId)
+        );
+      }
+      if (savedCategory && (user.role === 'manager')) {
+        const inCat = available.filter(b => b.categoryId === savedCategory);
+        if (inCat.length === 1) { goToBusiness(inCat[0].id); return; }
+        if (inCat.length > 1) available = inCat;
+      }
 
       const grid = document.getElementById('bizGrid');
-      grid.innerHTML = available.map(c => `
-        <div class="biz-option" onclick="goToBusiness('${c.id}')">
-          <div class="icon" style="background:${c.bg};color:${c.color}">${c.icon}</div>
-          <div class="name">${c.name}</div>
-          <div class="desc">${c.desc}</div>
-        </div>
-      `).join('');
+      if (!available.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;color:var(--gray-500)">No businesses assigned to you yet.<br>Contact your administrator to create one via Admin → Businesses → + Add Business.</div>';
+        return;
+      }
 
-      document.getElementById('greeting').textContent = 'Welcome, ' + user.name + '! Choose which business category you want to access.';
+      grid.innerHTML = available.map(b => {
+        const meta = CAT_META[b.categoryId] || CAT_META.AGRI;
+        return `
+        <div class="biz-option" onclick="goToBusiness('${b.id}')">
+          <div class="icon" style="background:${meta.bg};color:${meta.color}">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/></svg>
+          </div>
+          <div class="name">${b.name}</div>
+          <div class="desc">${b.location || b.description || ''}</div>
+          <div><span class="cat-badge" style="background:${meta.bg};color:${meta.color}">${meta.label}</span></div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('greeting').textContent = 'Welcome, ' + user.name + '! Choose which business workspace you want to access.';
+      window._bizCache = available;
     });
 
     window.goToBusiness = function(bizId) {
+      const list = window._bizCache || [];
+      const b = list.find(x => x.id === bizId);
+      const cat = b ? b.categoryId : bizId;
+      const entity = b ? bizId : '';
+      const qs = '?biz=' + cat + (entity ? '&entity=' + encodeURIComponent(entity) : '');
       getCurrentUser().then(u => {
         const user = u.user || u;
-        if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'viewer') {
-          window.location.href = '/admin/dashboard?biz=' + bizId;
+        if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'system_administrator') {
+          window.location.href = '/admin/dashboard' + qs;
+        } else if (user.role === 'manager' || user.role === 'accounting_officer' || user.role === 'business_manager') {
+          window.location.href = '/manager/dashboard' + qs;
         } else {
-          window.location.href = '/employee/dashboard?biz=' + bizId;
+          window.location.href = '/employee/dashboard' + qs;
         }
       });
     };

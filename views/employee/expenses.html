@@ -3,26 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Expenses &amp; Income — OBA System</title>
+  <title>Budget — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <style>
     .type-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
     .type-badge.income { background: var(--green-light); color: var(--green); }
     .type-badge.expense { background: var(--danger-light); color: var(--danger); }
-    .summary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
     .summary-card { background: var(--white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--gray-200); text-align: center; }
     .summary-card .sc-label { font-size: 0.78rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
     .summary-card .sc-value { font-size: 1.5rem; font-weight: 800; }
+  .table-tab-btn { padding: 8px 16px; border: 1px solid var(--gray-300); background: var(--white); border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+  .table-tab-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
   </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
-    <nav class="sidebar-nav" id="empNav"></nav>
+    <nav class="sidebar-nav" id="empNav">
+      <a class="nav-item" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+      <a class="nav-item" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+      <a class="nav-item" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+      <a class="nav-item" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+      <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+    </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="sidebarAvatar">E</div>
@@ -34,203 +43,560 @@
   <div class="main-content">
     <div class="topbar topbar-green">
       <div class="flex-c gap-12">
-        
-        <span class="topbar-title" id="topbarTitle">Expenses &amp; Income</span>
+  <span class="topbar-title" id="topbarTitle">Budget</span>
       </div>
     </div>
 
     <div class="page-content">
-      <div class="summary-row">
-        <div class="summary-card"><div class="sc-label">Total Income</div><div class="sc-value" id="sumIncome" style="color:var(--green)">&#8369;0</div></div>
-        <div class="summary-card"><div class="sc-label">Total Expenses</div><div class="sc-value" id="sumExpense" style="color:var(--danger)">&#8369;0</div></div>
-        <div class="summary-card"><div class="sc-label">Net Cash Flow</div><div class="sc-value" id="sumNet">&#8369;0</div></div>
+  <!-- Budget Overview -->
+  <div style="background:#fff;border-radius:12px;padding:22px;border:1px solid var(--gray-200);margin-bottom:20px;box-shadow:var(--shadow-sm)">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+  <div>
+  <h3 style="margin:0;font-size:1.25rem;font-weight:800;color:var(--gray-800)">Virtual Business Budget &amp; Balance Tracking</h3>
+  <span style="font-size:0.82rem;color:var(--gray-500)">Manage remaining business balance, track inventory costs, sales income, loss &amp; tax collected</span>
+  </div>
+  <button id="btnSetBudget" class="btn btn-outline" onclick="openBudgetModal()" style="border-color:var(--green);color:var(--green);font-weight:700">
+  Set Remaining Balance / Budget
+  </button>
       </div>
 
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-          <div class="flex-c gap-8">
-            <select id="fType" class="form-control" style="max-width:160px" onchange="renderTable()">
-              <option value="">All Types</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-            </select>
-            <input id="fSearch" class="form-control" placeholder="Search..." style="max-width:220px" oninput="renderTable()">
+  <div class="summary-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom:16px">
+  <div class="summary-card" style="border-top:4px solid #0D6EFD;background:#F8FAFC">
+  <div class="sc-label">Base Virtual Budget</div>
+  <div class="sc-value" id="allocatedBudget" style="color:#0D6EFD">&#8369;500,000.00</div>
+  <div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Initial budget set by staff</div>
           </div>
-          <div class="flex-c gap-8">
             <button class="btn btn-outline" style="border-color:var(--green);color:var(--green)" onclick="openEntry('income')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Income</button>
             <button class="btn btn-primary" style="background:var(--danger);border-color:var(--danger)" onclick="openEntry('expense')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Expense</button>
+  <div class="summary-card" style="border-top:4px solid var(--danger);background:#FFF5F5">
+  <div class="sc-label">Total Product Inventory Cost (Loss)</div>
+  <div class="sc-value" id="inventoryCostDeduction" style="color:var(--danger)">&#8369;0.00</div>
+  <div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Deducted when products are added</div>
+  </div>
+  <div class="summary-card" style="border-top:4px solid var(--green);background:#F0FDF4">
+  <div class="sc-label">Remaining Balance (Virtual Budget)</div>
+  <div class="sc-value" id="remainingBudget" style="color:var(--green)">&#8369;500,000.00</div>
+  <div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Available business balance</div>
           </div>
         </div>
-        <div id="entryTable">
-          <div class="empty-state"><h3>No records yet</h3><p>Start recording income and expenses for this business category</p></div>
+
+  <!-- Income, Tax & Net Profit Grid -->
+  <div class="summary-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom:16px">
+  <div class="summary-card" style="border-top:3px solid var(--green)">
+  <div class="sc-label">Total Sales Income</div>
+  <div class="sc-value" id="sumSalesIncome" style="color:var(--green)">&#8369;0.00</div>
+  <div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Revenue recorded from POS &amp; sales</div>
+  </div>
+  <div class="summary-card" style="border-top:3px solid #6B3FA0">
+  <div class="sc-label">Tax Collected</div>
+  <div class="sc-value" id="sumTaxCollected" style="color:#6B3FA0">&#8369;0.00</div>
+  <div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Value-Added Tax collected</div>
+  </div>
+  <div class="summary-card" style="border-top:3px solid var(--black)">
+  <div class="sc-label">Net Gain / Loss</div>
+  <div class="sc-value" id="sumNetGainLoss">&#8369;0.00</div>
+  <div style="font-size:0.75rem;color:var(--gray-500);margin-top:4px">Sales Income minus Product Cost</div>
+  </div>
+  </div>
+
+  <div style="margin-top:14px">
+  <div style="display:flex;justify-content:space-between;font-size:0.85rem;font-weight:700;margin-bottom:6px">
+  <span>Budget Utilization: <strong id="budgetGaugePercent">0%</strong></span>
+  <span id="budgetGaugeStatus" class="badge badge-green">Within Budget</span>
+  </div>
+  <div style="width:100%;height:12px;background:var(--gray-200);border-radius:6px;overflow:hidden">
+  <div id="budgetGaugeBar" style="width:0%;height:100%;background:var(--green);transition:width 0.4s ease, background 0.4s ease"></div>
+  </div>
+  </div>
+  </div>
+
+  <!-- Detailed Breakdown Section -->
+  <div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--gray-200);padding-bottom:14px">
+  <div class="flex-c gap-8">
+  <button id="btnTabInv" class="table-tab-btn active" onclick="switchTableTab('inventory')">
+  Inventory Budget Deductions
+  </button>
+  <button id="btnTabSales" class="table-tab-btn" onclick="switchTableTab('sales')">
+  Sales Income &amp; Tax Collected
+  </button>
+  <button id="btnTabEntries" class="table-tab-btn" onclick="switchTableTab('entries')">
+  Income &amp; Expense Entries
+  </button>
+  </div>
+  <div style="flex:1;max-width:280px">
+  <input id="fSearch" class="form-control" placeholder="Search breakdown..." oninput="filterTables()">
+  </div>
+  </div>
+
+  <!-- Inventory Deductions Table View -->
+  <div id="viewInventoryTable">
+  <div style="margin-bottom:12px;font-size:0.85rem;color:var(--gray-600)">
+  Products added to inventory automatically deduct their total cost (Quantity &times; Unit Cost) from the Virtual Budget remaining balance.
+  </div>
+  <div id="invDeductionTable">
+  <div class="empty-state"><h3>Loading breakdown...</h3></div>
+  </div>
+  </div>
+
+  <!-- Sales & Tax Table View -->
+  <div id="viewSalesTable" style="display:none">
+  <div style="margin-bottom:12px;font-size:0.85rem;color:var(--gray-600)">
+  Sales transactions recorded by staff, showing generated income and tax collected.
+  </div>
+  <div id="salesTaxTable">
+  <div class="empty-state"><h3>Loading sales &amp; tax data...</h3></div>
+  </div>
         </div>
+  <!-- Income & Expense Entries Table View -->
+  <div id="viewEntriesTable" style="display:none">
+  <div style="margin-bottom:12px;font-size:0.85rem;color:var(--gray-600)">
+  Manually recorded income and expense entries. These feed the Revenue &amp; Expenses breakdown on the Dashboard charts.
+  </div>
+  <div id="entriesTable">
+  <div class="empty-state"><h3>Loading entries...</h3></div>
+  </div>
+  </div>
+
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add Entry Modal -->
-<div class="modal-overlay" id="entryModal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header"><h3 id="entryTitle">Add Entry</h3><button class="modal-close" onclick="closeModal('entryModal')">&times;</button></div>
-    <input type="hidden" id="e_id">
-    <input type="hidden" id="e_type">
-    <div class="form-group"><label class="form-label">Description *</label><input id="e_desc" class="form-control" placeholder="e.g. Utilities, Supplier payment, Rental income"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Amount (&#8369;) *</label><input id="e_amount" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Date</label><input id="e_date" type="date" class="form-control"></div>
+<!-- Set Budget Limit Modal -->
+<div class="modal-overlay" id="budgetModal">
+  <div class="modal" style="max-width:440px">
+  <div class="modal-header"><h3>Set Virtual Budget / Remaining Balance</h3><button class="modal-close" onclick="closeModal('budgetModal')">&times;</button></div>
+  <div class="form-group">
+  <label class="form-label">Base Virtual Budget Amount (&#8369;) *</label>
+  <input id="b_totalAllocated" type="number" class="form-control" placeholder="500000.00" min="0" step="1000">
+  <small style="color:var(--gray-500);font-size:0.75rem">This amount forms the virtual budget of the business. Inventory product costs will deduct from this balance.</small>
     </div>
-    <div class="form-group"><label class="form-label">Category</label>
-      <select id="e_category" class="form-control">
-        <option value="utilities">Utilities</option>
-        <option value="supplies">Supplies</option>
-        <option value="salary">Salary / Wages</option>
-        <option value="maintenance">Maintenance</option>
-        <option value="procurement">Procurement</option>
-        <option value="sales_income">Sales Income</option>
-        <option value="rental_income">Rental Income</option>
-        <option value="service_fee">Service Fee</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="form-group"><label class="form-label">Notes</label><input id="e_notes" class="form-control" placeholder="Optional notes"></div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('entryModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEntry()">Save</button>
+  <button class="btn btn-outline" onclick="closeModal('budgetModal')">Cancel</button>
+  <button class="btn btn-primary" onclick="saveBudgetLimit()">Save Remaining Balance</button>
     </div>
   </div>
 </div>
+<!-- Add Income / Expense Entry Modal -->
+<div class="modal-overlay" id="entryModal">
+  <div class="modal" style="max-width:460px">
+  <div class="modal-header"><h3 id="entryModalTitle">Add Entry</h3><button class="modal-close" onclick="closeModal('entryModal')">&times;</button></div>
+  <div class="form-group">
+  <label class="form-label">Entry Type *</label>
+  <select id="e_type" class="form-control">
+  <option value="expense">Expense</option>
+  <option value="income">Income</option>
+  </select>
+  </div>
+  <div class="form-group">
+  <label class="form-label">Description *</label>
+  <input id="e_desc" type="text" class="form-control" placeholder="e.g. Fertilizer purchase" maxlength="200">
+  </div>
+  <div class="form-group">
+  <label class="form-label">Category</label>
+  <select id="e_category" class="form-control">
+  <option value="utilities">Utilities</option>
+  <option value="suppliers">Suppliers</option>
+  <option value="salaries">Salaries</option>
+  <option value="maintenance">Maintenance</option>
+  <option value="marketing">Marketing</option>
+  <option value="supplies">Supplies</option>
+  <option value="rent">Rent</option>
+  <option value="equipment">Equipment</option>
+  <option value="general">General</option>
+  <option value="other">Other</option>
+  </select>
+  </div>
+  <div class="form-group">
+  <label class="form-label">Amount (&#8369;) *</label>
+  <input id="e_amount" type="number" class="form-control" placeholder="0.00" min="0.01" step="0.01">
+  </div>
+  <div class="form-group">
+  <label class="form-label">Date</label>
+  <input id="e_date" type="date" class="form-control">
+  </div>
+  <div class="modal-footer">
+  <button class="btn btn-outline" onclick="closeModal('entryModal')">Cancel</button>
+  <button class="btn btn-primary" id="btnSaveEntry" onclick="saveEntry()">Save Entry</button>
+  </div>
+  </div>
+</div>
 
-<script src="/js/app.js"></script>
+
+
+<script src="/js/app.js?v=2"></script>
 <script>
-const BIZ_META = {
-  RENTAL:   { name: 'Rental', color: '#6B3FA0' },
-  BUSINESS: { name: 'Business', color: '#2d6a2e' },
-  AGRI:     { name: 'Agriculture', color: '#D4A915' },
+const BIZ_META = {  AGRI:     { name: 'Agriculture', color: '#D4A915' },
   NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A' },
   MAIN:     { name: 'Main', color: '#0D6EFD' },
 };
 const params = new URLSearchParams(window.location.search);
-const BIZ = params.get('biz') || 'RENTAL';
-const meta = BIZ_META[BIZ] || BIZ_META.RENTAL;
-let entries = [];
+const BIZ = params.get('biz') || 'AGRI';
+const meta = BIZ_META[BIZ] || BIZ_META.AGRI;
+function getEntityId() {
+  const p = new URLSearchParams(window.location.search);
+  return p.get('entity') || '';
+}
+function wsQuery() {
+  let q = '?biz=' + encodeURIComponent(BIZ);
+  const e = getEntityId();
+  if (e) q += '&entity=' + encodeURIComponent(e);
+  return q;
+}
 
-function buildNav() {
-  document.getElementById('empNav').innerHTML = `
-    <a class="nav-item" href="/employee/dashboard?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/employee/inventory?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
-    <a class="nav-item" href="/employee/sales?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item active" href="/employee/expenses?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Expenses / Income</a>
-    <a class="nav-item" href="/employee/reports?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
-  `;
+let allocatedBudgetLimit = 500000;
+let inventoryProducts = [];
+let salesRecords = [];
+let entryRecords = [];
+let canDeleteEntries = false;
+let activeTab = 'inventory';
+function buildNav(user) {
+  // Sidebar nav is rendered statically in the HTML (prevents the sidebar from
+  // flickering/disappearing on page load). Here we only sync the workspace
+  // query params (?biz= & entity=) onto the links.
+  const q = wsQuery();
+  document.querySelectorAll('#empNav a[data-page]').forEach(a => {
+    a.href = a.getAttribute('data-page') + q;
+  });
 }
 
 async function loadData() {
   try {
-    const res = await API.get('/api/expenses?biz=' + BIZ);
-    if (res.success) { entries = res.data || []; renderTable(); updateSummary(); }
+  const q = wsQuery();
+  const [limitRes, invRes, salesRes, entryRes] = await Promise.all([
+  API.get('/api/expenses/budget-limits' + q).catch(() => ({ success: false })),
+  API.get('/api/inventory' + q).catch(() => ({ success: false })),
+  API.get('/api/sales' + q).catch(() => ({ success: false })),
+  API.get('/api/expenses' + q).catch(() => ({ success: false }))
+  ]);
+
+  if (limitRes && limitRes.success && limitRes.data && limitRes.data.totalBudget !== undefined) {
+  allocatedBudgetLimit = parseFloat(limitRes.data.totalBudget);
+  }
+  if (invRes && invRes.success) {
+  inventoryProducts = invRes.data || [];
+  }
+  if (salesRes && salesRes.success) {
+  salesRecords = salesRes.data || [];
+  }
+  if (entryRes && entryRes.success) {
+  entryRecords = entryRes.data || [];
+  }
+
+  updateSummary();
+  renderInventoryDeductionsTable();
+  renderSalesTaxTable();
+  renderEntriesTable();
   } catch(e) { console.error(e); }
 }
 
-function updateSummary() {
-  const income = entries.filter(e => e.type === 'income').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
-  const expense = entries.filter(e => e.type === 'expense').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
-  const net = income - expense;
-  document.getElementById('sumIncome').innerHTML = '&#8369;' + income.toLocaleString('en',{minimumFractionDigits:2});
-  document.getElementById('sumExpense').innerHTML = '&#8369;' + expense.toLocaleString('en',{minimumFractionDigits:2});
-  document.getElementById('sumNet').innerHTML = '&#8369;' + net.toLocaleString('en',{minimumFractionDigits:2});
-  document.getElementById('sumNet').style.color = net >= 0 ? 'var(--green)' : 'var(--danger)';
+function openBudgetModal() {
+  document.getElementById('b_totalAllocated').value = allocatedBudgetLimit;
+  openModal('budgetModal');
 }
 
-function renderTable() {
-  const search = document.getElementById('fSearch').value.toLowerCase();
-  const typeFilter = document.getElementById('fType').value;
-  let list = entries;
-  if (typeFilter) list = list.filter(e => e.type === typeFilter);
-  if (search) list = list.filter(e => (e.description||'').toLowerCase().includes(search) || (e.category||'').toLowerCase().includes(search));
-  const el = document.getElementById('entryTable');
-  if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No records found</h3><p>Add income or expense records to see them here</p></div>'; return; }
-  el.innerHTML = `<table><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Category</th><th>Amount</th><th>Actions</th></tr></thead><tbody>
-    ${list.map(e => `<tr>
-      <td style="font-size:0.82rem">${e.date || '—'}</td>
-      <td><span class="type-badge ${e.type}">${e.type === 'income' ? 'Income' : 'Expense'}</span></td>
-      <td class="fw-bold">${e.description || '—'}</td>
-      <td style="font-size:0.82rem">${e.category || '—'}</td>
-      <td class="fw-bold" style="color:${e.type==='income'?'var(--green)':'var(--danger)'}">
-        ${e.type==='income'?'+':'-'}&#8369;${parseFloat(e.amount||0).toLocaleString('en',{minimumFractionDigits:2})}
-      </td>
-      <td class="table-actions">
-        <button class="btn btn-outline btn-sm" onclick="editEntry('${e.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-        <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteEntry('${e.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-      </td>
-    </tr>`).join('')}
-  </tbody></table>`;
-}
-
+// ── Add Income / Expense Entry ─────────────────────────────────────
 function openEntry(type) {
-  document.getElementById('entryTitle').textContent = type === 'income' ? 'Add Income' : 'Add Expense';
-  document.getElementById('e_id').value = '';
-  document.getElementById('e_type').value = type;
+  const t = type === 'income' ? 'income' : 'expense';
+  document.getElementById('entryModalTitle').textContent = t === 'income' ? 'Add Income Entry' : 'Add Expense Entry';
+  document.getElementById('e_type').value = t;
   document.getElementById('e_desc').value = '';
+  document.getElementById('e_category').value = t === 'income' ? 'other' : 'general';
   document.getElementById('e_amount').value = '';
   document.getElementById('e_date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('e_category').value = type === 'income' ? 'sales_income' : 'utilities';
-  document.getElementById('e_notes').value = '';
-  openModal('entryModal');
-}
-
-function editEntry(id) {
-  const e = entries.find(x => x.id === id);
-  if (!e) return;
-  document.getElementById('entryTitle').textContent = 'Edit ' + (e.type === 'income' ? 'Income' : 'Expense');
-  document.getElementById('e_id').value = e.id;
-  document.getElementById('e_type').value = e.type;
-  document.getElementById('e_desc').value = e.description || '';
-  document.getElementById('e_amount').value = e.amount || '';
-  document.getElementById('e_date').value = e.date || '';
-  document.getElementById('e_category').value = e.category || 'other';
-  document.getElementById('e_notes').value = e.notes || '';
   openModal('entryModal');
 }
 
 async function saveEntry() {
-  const id = document.getElementById('e_id').value;
-  const data = {
-    type: document.getElementById('e_type').value,
-    description: document.getElementById('e_desc').value,
-    amount: parseFloat(document.getElementById('e_amount').value) || 0,
-    date: document.getElementById('e_date').value,
-    category: document.getElementById('e_category').value,
-    notes: document.getElementById('e_notes').value,
-    businessCategory: BIZ,
-  };
-  if (!data.description) { Toast.warning('Description is required'); return; }
-  if (data.amount <= 0) { Toast.warning('Amount must be greater than 0'); return; }
+  const type = document.getElementById('e_type').value;
+  const description = document.getElementById('e_desc').value.trim();
+  const category = document.getElementById('e_category').value;
+  const amount = parseFloat(document.getElementById('e_amount').value);
+  const date = document.getElementById('e_date').value;
+  if (!description) { Toast.warning('Enter a description'); return; }
+  if (isNaN(amount) || amount <= 0) { Toast.warning('Enter a valid amount'); return; }
+  const btn = document.getElementById('btnSaveEntry');
+  btn.disabled = true;
   try {
-    const res = id
-      ? await API.put('/api/expenses/' + id, data)
-      : await API.post('/api/expenses', data);
-    if (res.success) { Toast.success('Entry saved'); closeModal('entryModal'); loadData(); }
-    else { Toast.error(res.message); }
-  } catch(e) { Toast.error('Error saving entry'); }
+  const res = await API.post('/api/expenses', {
+  type,
+  description,
+  amount,
+  date,
+  category,
+  businessCategory: BIZ,
+  entityId: getEntityId()
+  });
+  if (res.success) {
+  Toast.success((type === 'income' ? 'Income' : 'Expense') + ' entry recorded');
+  closeModal('entryModal');
+  loadData();
+  } else {
+  Toast.error(res.message || 'Failed to record entry');
+  }
+  } catch(e) { Toast.error('Error recording entry: ' + e.message); }
+  btn.disabled = false;
 }
 
 async function deleteEntry(id) {
-  if (!window.confirm('Delete this record?')) return;
+  confirm('Delete this entry? This cannot be undone.', async () => {
   try {
-    const res = await API.del('/api/expenses/' + id);
-    if (res.success) { Toast.success('Deleted'); loadData(); }
-    else { Toast.error(res.message); }
-  } catch(e) { Toast.error('Error'); }
+  const res = await API.del('/api/expenses/' + encodeURIComponent(id) + '?biz=' + encodeURIComponent(BIZ));
+  if (res.success) {
+  Toast.success('Entry deleted');
+  loadData();
+  } else {
+  Toast.error(res.message || 'Failed to delete entry');
+  }
+  } catch(e) { Toast.error('Error deleting entry: ' + e.message); }
+  });
+}
+
+async function saveBudgetLimit() {
+  const val = parseFloat(document.getElementById('b_totalAllocated').value);
+  if (isNaN(val) || val <= 0) { Toast.warning('Enter a valid budget limit'); return; }
+  try {
+  const res = await API.post('/api/expenses/budget-limits', { businessCategory: BIZ, entityId: getEntityId(), totalBudget: val });
+  if (res.success) {
+  allocatedBudgetLimit = val;
+  Toast.success('Virtual Budget Remaining Balance limit updated to ₱' + val.toLocaleString('en',{minimumFractionDigits:2}));
+  closeModal('budgetModal');
+  updateSummary();
+  } else {
+  Toast.error(res.message || 'Failed to update budget limit');
+  }
+  } catch(e) { Toast.error('Error saving budget limit: ' + e.message); }
+}
+
+function updateSummary() {
+  // Calculate total inventory cost (Loss / Expense)
+  const totalInventoryCost = inventoryProducts.reduce((acc, p) => {
+  const qty = parseInt(p.quantity || p.stock || 0);
+  const unitCost = parseFloat(p.unitCost || 0);
+  return acc + (qty * unitCost);
+  }, 0);
+
+  // Calculate gross sales income and tax collected
+  const grossSales = salesRecords.reduce((acc, s) => acc + parseFloat(s.total || 0), 0);
+  const taxCollected = salesRecords.reduce((acc, s) => acc + parseFloat(s.taxAmount || 0), 0);
+  const netSalesIncome = grossSales - taxCollected;
+
+  // Virtual Budget Remaining Balance formula: Base Budget - Inventory Cost
+  const remainingBalance = allocatedBudgetLimit - totalInventoryCost;
+  const netGainLoss = netSalesIncome - totalInventoryCost;
+
+  const pct = allocatedBudgetLimit > 0 ? Math.min(100, Math.round((totalInventoryCost / allocatedBudgetLimit) * 100)) : 0;
+
+  document.getElementById('allocatedBudget').innerHTML = '&#8369;' + allocatedBudgetLimit.toLocaleString('en',{minimumFractionDigits:2});
+  document.getElementById('inventoryCostDeduction').innerHTML = '&#8369;' + totalInventoryCost.toLocaleString('en',{minimumFractionDigits:2});
+  document.getElementById('remainingBudget').innerHTML = '&#8369;' + remainingBalance.toLocaleString('en',{minimumFractionDigits:2});
+  document.getElementById('remainingBudget').style.color = remainingBalance >= 0 ? 'var(--green)' : 'var(--danger)';
+
+  document.getElementById('sumSalesIncome').innerHTML = '&#8369;' + netSalesIncome.toLocaleString('en',{minimumFractionDigits:2});
+  document.getElementById('sumTaxCollected').innerHTML = '&#8369;' + taxCollected.toLocaleString('en',{minimumFractionDigits:2});
+  document.getElementById('sumNetGainLoss').innerHTML = (netGainLoss >= 0 ? '&#8369;' : '-&#8369;') + Math.abs(netGainLoss).toLocaleString('en',{minimumFractionDigits:2});
+  document.getElementById('sumNetGainLoss').style.color = netGainLoss >= 0 ? 'var(--green)' : 'var(--danger)';
+
+  document.getElementById('budgetGaugePercent').textContent = pct + '%';
+  const bar = document.getElementById('budgetGaugeBar');
+  const status = document.getElementById('budgetGaugeStatus');
+  bar.style.width = Math.min(100, pct) + '%';
+  
+  if (pct >= 100) {
+  bar.style.background = 'var(--danger)';
+  status.className = 'badge badge-danger';
+  status.textContent = 'OVER BUDGET';
+  } else if (pct >= 75) {
+  bar.style.background = 'var(--yellow-dark)';
+  status.className = 'badge badge-yellow';
+  status.textContent = 'Near Budget Limit';
+  } else {
+  bar.style.background = 'var(--green)';
+  status.className = 'badge badge-green';
+  status.textContent = 'Within Budget';
+  }
+}
+
+function switchTableTab(tab) {
+  activeTab = tab;
+  document.getElementById('btnTabInv').classList.toggle('active', tab === 'inventory');
+  document.getElementById('btnTabSales').classList.toggle('active', tab === 'sales');
+  document.getElementById('btnTabEntries').classList.toggle('active', tab === 'entries');
+  document.getElementById('viewInventoryTable').style.display = tab === 'inventory' ? 'block' : 'none';
+  document.getElementById('viewSalesTable').style.display = tab === 'sales' ? 'block' : 'none';
+  document.getElementById('viewEntriesTable').style.display = tab === 'entries' ? 'block' : 'none';
+}
+
+function filterTables() {
+  if (activeTab === 'inventory') renderInventoryDeductionsTable();
+  else if (activeTab === 'entries') renderEntriesTable();
+  else renderSalesTaxTable();
+}
+
+function renderEntriesTable() {
+  const search = document.getElementById('fSearch').value.toLowerCase();
+  let list = (entryRecords || []).slice().sort((a, b) => String(b.date || b.createdAt || '') < String(a.date || a.createdAt || '') ? -1 : 1);
+  if (search) {
+  list = list.filter(e => (e.description||'').toLowerCase().includes(search) || (e.category||'').toLowerCase().includes(search) || (e.entityName||'').toLowerCase().includes(search));
+  }
+  const el = document.getElementById('entriesTable');
+  if (!list.length) {
+  el.innerHTML = '<div class="empty-state"><h3>No income or expense entries yet</h3><p>Use the Add Income / Add Expense buttons to record one — they will appear on the Dashboard Revenue by Category chart</p></div>';
+  return;
+  }
+
+  const totalIncome = list.filter(e => (e.type || '').toLowerCase() === 'income').reduce((a, e) => a + (parseFloat(e.amount) || 0), 0);
+  const totalExpense = list.filter(e => (e.type || '').toLowerCase() === 'expense').reduce((a, e) => a + (parseFloat(e.amount) || 0), 0);
+
+  el.innerHTML = `<table>
+  <thead>
+  <tr>
+  <th>Date</th>
+  <th>Description</th>
+  <th>Category</th>
+  <th>Type</th>
+  <th>Amount</th>
+  <th>Recorded By</th>
+  ${canDeleteEntries ? '<th></th>' : ''}
+  </tr>
+  </thead>
+  <tfoot>
+  <tr>
+  <td colspan="4" class="fw-bold">Totals (filtered)</td>
+  <td class="fw-bold"><span style="color:var(--green)">+&#8369;${totalIncome.toLocaleString('en',{minimumFractionDigits:2})}</span> / <span style="color:var(--danger)">-&#8369;${totalExpense.toLocaleString('en',{minimumFractionDigits:2})}</span></td>
+  <td></td>
+  ${canDeleteEntries ? '<td></td>' : ''}
+  </tr>
+  </tfoot>
+  <tbody>
+  ${list.map(e => {
+  const type = (e.type || 'expense').toLowerCase();
+  const isInc = type === 'income';
+  const amount = parseFloat(e.amount) || 0;
+  return `<tr>
+  <td style="font-size:0.82rem">${e.date ? new Date(e.date).toLocaleDateString('en-PH') : '—'}</td>
+  <td class="fw-bold">${e.description || '—'}</td>
+  <td style="text-transform:capitalize">${e.category || 'other'}</td>
+  <td><span class="type-badge ${type}">${isInc ? 'Income' : 'Expense'}</span></td>
+  <td class="fw-bold" style="color:${isInc ? 'var(--green)' : 'var(--danger)'}">${isInc ? '+' : '-'}&#8369;${amount.toLocaleString('en',{minimumFractionDigits:2})}</td>
+  <td style="font-size:0.82rem">${e.recordedBy || '—'}</td>
+  ${canDeleteEntries ? `<td><button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteEntry('${e.id || ''}')">Delete</button></td>` : ''}
+  </tr>`;
+  }).join('')}
+  </tbody>
+  </table>`;
+}
+
+function renderInventoryDeductionsTable() {
+  const search = document.getElementById('fSearch').value.toLowerCase();
+  let list = inventoryProducts;
+  if (search) {
+  list = list.filter(p => (p.name||'').toLowerCase().includes(search) || (p.category||'').toLowerCase().includes(search));
+  }
+  const el = document.getElementById('invDeductionTable');
+  if (!list.length) {
+  el.innerHTML = '<div class="empty-state"><h3>No inventory deductions recorded</h3><p>Adding products in inventory will show cost deductions here</p></div>';
+  return;
+  }
+
+  el.innerHTML = `<table>
+  <thead>
+  <tr>
+  <th>Product Name</th>
+  <th>Category</th>
+  <th>Stock Qty</th>
+  <th>Unit Cost</th>
+  <th>Total Cost</th>
+  <th>Virtual Budget Impact</th>
+  </tr>
+  </thead>
+  <tbody>
+  ${list.map(p => {
+  const qty = parseInt(p.quantity || p.stock || 0);
+  const unitCost = parseFloat(p.unitCost || 0);
+  const totalCost = qty * unitCost;
+  return `<tr>
+  <td class="fw-bold">${p.name}</td>
+  <td>${p.category || '—'}</td>
+  <td>${qty} ${p.unit || 'pcs'}</td>
+  <td>&#8369;${unitCost.toLocaleString('en',{minimumFractionDigits:2})}</td>
+  <td class="fw-bold" style="color:var(--danger)">&#8369;${totalCost.toLocaleString('en',{minimumFractionDigits:2})}</td>
+  <td>
+  <span class="type-badge expense">-&#8369;${totalCost.toLocaleString('en',{minimumFractionDigits:2})}</span>
+  </td>
+  </tr>`;
+  }).join('')}
+  </tbody>
+  </table>`;
+}
+
+function renderSalesTaxTable() {
+  const search = document.getElementById('fSearch').value.toLowerCase();
+  let list = salesRecords;
+  if (search) {
+  list = list.filter(s => (s.transactionId||s.id||'').toLowerCase().includes(search) || (s.paymentMethod||'').toLowerCase().includes(search));
+  }
+  const el = document.getElementById('salesTaxTable');
+  if (!list.length) {
+  el.innerHTML = '<div class="empty-state"><h3>No sales transactions found</h3><p>Sales recorded via POS will display income and tax collected here</p></div>';
+  return;
+  }
+
+  el.innerHTML = `<table>
+  <thead>
+  <tr>
+  <th>Date &amp; Time</th>
+  <th>Transaction ID</th>
+  <th>Payment</th>
+  <th>Gross Total</th>
+  <th>Tax Rate</th>
+  <th>Tax Collected</th>
+  <th>Net Income</th>
+  </tr>
+  </thead>
+  <tbody>
+  ${list.map(s => {
+  const gross = parseFloat(s.total || 0);
+  const tax = parseFloat(s.taxAmount || 0);
+  const net = gross - tax;
+  const rate = s.taxRate !== undefined ? s.taxRate : 12;
+  return `<tr>
+  <td style="font-size:0.82rem">${s.date ? new Date(s.date).toLocaleString('en-PH') : '—'}</td>
+  <td class="fw-bold">${s.transactionId || s.id || '—'}</td>
+  <td><span class="badge badge-gray">${s.paymentMethod || 'cash'}</span></td>
+  <td>&#8369;${gross.toLocaleString('en',{minimumFractionDigits:2})}</td>
+  <td>${rate}%</td>
+  <td style="color:#6B3FA0;font-weight:600">&#8369;${tax.toLocaleString('en',{minimumFractionDigits:2})}</td>
+  <td class="fw-bold" style="color:var(--green)">+&#8369;${net.toLocaleString('en',{minimumFractionDigits:2})}</td>
+  </tr>`;
+  }).join('')}
+  </tbody>
+  </table>`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  buildNav();
-  document.getElementById('topbarTitle').textContent = meta.name + ' - Expenses & Income';
-  document.title = meta.name + ' Expenses - OBA System';
+  document.getElementById('topbarTitle').textContent = meta.name + ' - Budget';
+  document.title = meta.name + ' Budget - OBA System';
+  getCurrentUser().then(u => {
+  if (u) {
+  buildNav(u);
+  document.getElementById('sidebarName').textContent = u.name;
+  document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
+  document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
+
+  const STAFF_ROLES = ['viewer','sales_staff','sale_staff','employee','budgeting_officer','budget_officer'];
+  const isSaleStaff = STAFF_ROLES.includes(u.role);
+  canDeleteEntries = !isSaleStaff;
+  if (isSaleStaff) {
+  const btnSet = document.getElementById('btnSetBudget');
+  if (btnSet) btnSet.style.display = 'none';
+  }
+  } else {
+  buildNav(null);
+  }
   loadData();
-  getCurrentUser().then(u => { if(u){ document.getElementById('sidebarName').textContent = u.name; document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role); document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase(); }});
+  });
 });
 </script>
 </body>

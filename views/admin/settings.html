@@ -6,8 +6,32 @@
   <title>Settings — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <style>
-    .suspicious-row { background: var(--danger-light) !important; }
-    .suspicious-row td:first-child { border-left: 4px solid var(--danger); }
+    /* ── Audit summary chips ─────────────────────────────────────── */
+    .audit-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .audit-stat {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .audit-stat:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .audit-stat .as-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .audit-stat .as-val { font-size: 1.25rem; font-weight: 800; line-height: 1.1; }
+    .audit-stat .as-lbl { font-size: 0.72rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-top: 3px; }
     .activity-card {
       display: flex;
       align-items: center;
@@ -44,8 +68,8 @@
       font-size: 0.85rem;
       box-shadow: var(--shadow-sm);
     }
-    .backup-card { max-width: 640px; margin: 0 auto; }
-    .backup-info { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+    .backup-card { max-width: 720px; margin: 0 auto; }
+    .backup-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .backup-stat {
       background: var(--white);
       border: 1px solid var(--gray-200);
@@ -71,6 +95,29 @@
       color: #991b1b;
       line-height: 1.5;
     }
+    .backup-security-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #EFF6FF;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 0.84rem;
+      color: #1e40af;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .backup-history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+    }
+    .backup-history-item:last-child { border-bottom: none; }
     .settings-tabs {
       display: flex;
       gap: 8px;
@@ -104,22 +151,62 @@
       color: var(--green);
       box-shadow: var(--shadow-sm);
     }
+    /* ── OTP modal ────────────────────────────────────────────────── */
+    .otp-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .otp-overlay.active { display: flex; }
+    .otp-modal {
+      background: var(--white);
+      border-radius: 16px;
+      max-width: 430px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+      animation: otpPop 0.18s ease-out;
+    }
+    @keyframes otpPop { from { transform: scale(0.94) translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .otp-modal h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .otp-sub { font-size: 0.85rem; color: var(--gray-600); line-height: 1.5; margin-bottom: 18px; }
+    .otp-steps { display: flex; gap: 8px; margin-bottom: 20px; }
+    .otp-step-dot { flex: 1; height: 4px; border-radius: 2px; background: var(--gray-200); transition: var(--transition); }
+    .otp-step-dot.active { background: var(--green); }
+    .otp-inputs { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+    .otp-inputs input {
+      width: 46px; height: 54px;
+      text-align: center; font-size: 1.3rem; font-weight: 800;
+      border: 2px solid var(--gray-200); border-radius: 10px;
+      outline: none; transition: var(--transition);
+      color: var(--green);
+    }
+    .otp-inputs input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(45, 106, 46, 0.12); }
+    .otp-err { display: none; font-size: 0.8rem; color: var(--danger); margin-bottom: 10px; text-align: center; }
+    .otp-mail-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--gray-100); border: 1px solid var(--gray-200);
+      border-radius: 999px; padding: 6px 14px;
+      font-size: 0.82rem; font-weight: 700; color: var(--gray-700);
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item" href="/admin/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
       <a class="nav-item" href="/admin/business"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/></svg></span> Business</a>
       <a class="nav-item" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" href="/admin/all-inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> Business Inventory</a>
       <a class="nav-item" href="/admin/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
       <a class="nav-item" href="/admin/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-      <a class="nav-item" href="/admin/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
       <a class="nav-item" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Users</a>
       <a class="nav-item active" href="/admin/settings"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</a>
       <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
@@ -130,19 +217,23 @@
   </aside>
 
   <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+          <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+        </svg>
         <span class="topbar-title">System Settings</span>
       </div>
       <div class="topbar-actions">
         <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
           <span class="notif-count" id="notifCount" style="display:none">0</span>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
+        <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
     </div>
 
@@ -161,35 +252,69 @@
 
       <!-- Audit Trail Tab -->
       <div id="panel-audit">
+        <div class="audit-stats">
+          <div class="audit-stat">
+            <div class="as-icon" style="background:rgba(45,106,46,0.1);color:var(--green)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <div><div class="as-val" id="asTotal">—</div><div class="as-lbl">Total Events</div></div>
+          </div>
+          <div class="audit-stat">
+            <div class="as-icon" style="background:rgba(59,130,246,0.1);color:var(--info)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div><div class="as-val" id="asToday">—</div><div class="as-lbl">Today</div></div>
+          </div>
+          <div class="audit-stat">
+            <div class="as-icon" style="background:rgba(234,179,8,0.14);color:var(--yellow-dark)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+            <div><div class="as-val" id="asLogins">—</div><div class="as-lbl">Logins</div></div>
+          </div>
+          <div class="audit-stat">
+            <div class="as-icon" style="background:rgba(239,68,68,0.1);color:var(--danger)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div><div class="as-val" id="asUsers">—</div><div class="as-lbl">Users Involved</div></div>
+          </div>
+        </div>
         <div class="report-tabs">
           <div class="report-tab active" onclick="switchAudit('logs',this)">Transaction Logs</div>
-          <div class="report-tab" onclick="switchAudit('edits',this)">Edit History</div>
-          <div class="report-tab" onclick="switchAudit('suspicious',this)">Suspicious Changes</div>
           <div class="report-tab" onclick="switchAudit('activity',this)">User Activity</div>
           <div class="report-tab" onclick="switchAudit('alerts',this)">Alert Logs</div>
         </div>
-        <div class="filters-bar" style="margin-bottom:20px">
+        <div class="filters-bar" id="auditFilters" style="margin-bottom:20px">
           <div class="filter-item"><div class="filter-label">Filter by User</div><input type="text" id="fUser" class="filter-control" placeholder="User name..." oninput="applyFilters()"></div>
           <div class="filter-item"><div class="filter-label">Date From</div><input type="date" id="fFrom" class="filter-control" onchange="applyFilters()"></div>
           <div class="filter-item"><div class="filter-label">Date To</div><input type="date" id="fTo" class="filter-control" onchange="applyFilters()"></div>
           <div class="filter-item"><div class="filter-label">Action</div>
             <select id="fAction" class="filter-control" onchange="applyFilters()"><option value="">All Actions</option><option value="LOGIN">Login</option><option value="CREATE">Create</option><option value="EDIT">Edit</option><option value="DELETE">Delete</option></select>
           </div>
-          <button class="btn-export" style="margin-top:18px" onclick="exportAudit()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg> Export</button>
         </div>
-        <div id="panel-logs"><div class="card"><div id="logsTable"><div class="spinner"></div></div></div></div>
-        <div id="panel-edits" style="display:none"><div class="card"><div class="card-header"><span class="card-title">Edit History Tracking</span></div><div id="editsTable"></div></div></div>
-        <div id="panel-suspicious" style="display:none"><div class="card"><div class="card-header"><span class="card-title">Suspicious Changes Detection</span></div><p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:16px">Flagged changes include: bulk edits, deletions, and unauthorized modifications.</p><div id="suspiciousTable"></div></div></div>
-        <div id="panel-activity" style="display:none"><div class="card"><div class="card-header"><span class="card-title">User Activity Monitoring</span></div><div id="activityList"></div></div></div>
-        <div id="panel-alerts" style="display:none"><div class="card"><div class="card-header"><span class="card-title">Alert Logs</span></div><div id="alertLogList"></div></div></div>
+        <div id="panel-logs">
+          <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+              <span class="card-title">Transaction Logs</span>
+              <button class="btn-export" onclick="exportAudit()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg> Export CSV</button>
+            </div>
+            <div id="logsTable"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div id="panel-activity" style="display:none">
+          <div class="card">
+            <div class="card-header"><span class="card-title">User Activity Monitoring</span></div>
+            <div id="activityList"></div>
+          </div>
+        </div>
+        <div id="panel-alerts" style="display:none">
+          <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+              <span class="card-title">Alert Logs</span>
+              <span class="badge badge-gray" id="alertCountBadge">0 events</span>
+            </div>
+            <div id="alertLogList"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Backup Tab -->
       <div id="panel-backup" style="display:none">
         <div class="backup-card">
           <div style="margin-bottom:24px">
-            <h2 style="margin-bottom:8px">System Backup & Recovery</h2>
-            <p style="color:var(--gray-600)">Export all system data or restore from a previous backup.</p>
+            <h2 style="margin-bottom:8px">System Backup &amp; Recovery</h2>
+            <p style="color:var(--gray-600)">Export all system data as an organized ZIP archive, or restore from a previous snapshot.</p>
           </div>
           <div class="backup-info" id="backupInfo">
             <div class="backup-stat"><div class="val" style="color:var(--info)" id="statRecords">—</div><div class="lbl">Total Records</div></div>
@@ -198,8 +323,17 @@
           </div>
           <div class="card" style="padding:24px;margin-bottom:20px">
             <h3 style="margin-bottom:12px">Export Backup</h3>
-            <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:16px">Download a complete JSON backup of all sales, inventory, expenses, businesses, users, and audit logs.</p>
-            <button class="btn btn-primary" onclick="downloadBackup()">Download Backup</button>
+            <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:16px">Downloads a <strong>ZIP archive</strong> containing a separate, easy-to-read JSON file for each data collection — sales, inventory, expenses, businesses, users, audit logs and more — plus a manifest describing the contents.</p>
+            <div class="backup-security-note">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+              <span><strong>Protected download:</strong> a one-time verification code (OTP) will be sent to your registered Gmail account. You must enter that code before the backup can be downloaded.</span>
+            </div>
+            <button class="btn btn-primary" onclick="downloadBackup()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download Backup (ZIP)</button>
+          </div>
+          <div class="card" style="padding:24px;margin-bottom:20px">
+            <h3 style="margin-bottom:6px">Recent Snapshots</h3>
+            <p style="font-size:0.82rem;color:var(--gray-600);margin-bottom:10px">Automatic snapshots saved by the system (latest 30 kept). One-click restore overwrites current data.</p>
+            <div id="backupHistoryList"><div class="spinner"></div></div>
           </div>
           <div class="card" style="padding:24px">
             <h3 style="margin-bottom:12px">Restore from Backup</h3>
@@ -216,7 +350,52 @@
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<!-- Backup OTP Verification Modal -->
+<div class="otp-overlay" id="otpModal">
+  <div class="otp-modal">
+    <div class="otp-steps">
+      <div class="otp-step-dot" id="otpDot1"></div>
+      <div class="otp-step-dot" id="otpDot2"></div>
+    </div>
+    <h3>
+      <span style="width:36px;height:36px;border-radius:10px;background:rgba(45,106,46,0.1);color:var(--green);display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      Secure Backup Download
+    </h3>
+
+    <!-- Step 1: request code -->
+    <div id="otpStep1">
+      <p class="otp-sub">For security, downloading the database backup requires identity verification. We'll email a 6-digit one-time code (OTP) to your registered Gmail address.</p>
+      <div class="otp-mail-chip">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span id="otpEmailText">your registered email</span>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1" onclick="closeOtpModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" id="otpSendBtn" onclick="sendBackupOtp()">Send Code</button>
+      </div>
+    </div>
+
+    <!-- Step 2: enter code -->
+    <div id="otpStep2" style="display:none">
+      <p class="otp-sub">Enter the 6-digit code sent to <strong id="otpMaskedEmail">your email</strong>. The code expires in 10 minutes.</p>
+      <div class="otp-inputs" id="otpInputs">
+        <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+        <input type="text" inputmode="numeric" maxlength="1">
+        <input type="text" inputmode="numeric" maxlength="1">
+        <input type="text" inputmode="numeric" maxlength="1">
+        <input type="text" inputmode="numeric" maxlength="1">
+        <input type="text" inputmode="numeric" maxlength="1">
+      </div>
+      <div class="otp-err" id="otpErr"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1" id="otpResendBtn" onclick="sendBackupOtp()">Resend</button>
+        <button class="btn btn-primary" style="flex:1" id="otpVerifyBtn" onclick="verifyBackupOtp()">Verify &amp; Download</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=2"></script>
 <script>
 let auditLogs = [];
 const mockLogs = [
@@ -224,7 +403,7 @@ const mockLogs = [
   { action: 'CREATE', module: 'Sales', details: 'New sale recorded — ₱1,500', userName: 'Juan Dela Cruz', timestamp: new Date(Date.now()-300000).toISOString(), isSuspicious: false, businessId: 'BUSINESS-1' },
   { action: 'EDIT', module: 'Inventory', details: 'Updated stock: PE UNIFORM 100 → 5', userName: 'Juan Dela Cruz', timestamp: new Date(Date.now()-600000).toISOString(), isSuspicious: true, previousValue: '100', newValue: '5' },
   { action: 'DELETE', module: 'Sales', details: 'Deleted sale record #SL-042', userName: 'OBA Administrator', timestamp: new Date(Date.now()-900000).toISOString(), isSuspicious: true },
-  { action: 'CREATE', module: 'Expense', details: 'Recorded expense: Electricity ₱8,500', userName: 'OBA Administrator', timestamp: new Date(Date.now()-1800000).toISOString(), isSuspicious: false, businessId: 'RENTAL-1' },
+  { action: 'CREATE', module: 'Expense', details: 'Recorded expense: Electricity ₱8,500', userName: 'OBA Administrator', timestamp: new Date(Date.now()-1800000).toISOString(), isSuspicious: false, businessId: 'AGRI-1' },
   { action: 'LOGIN', module: 'Auth', details: 'Employee login from new device', userName: 'Maria Santos', timestamp: new Date(Date.now()-3600000).toISOString(), isSuspicious: false },
   { action: 'EDIT', module: 'Users', details: 'Changed role: viewer → employee', userName: 'OBA Administrator', timestamp: new Date(Date.now()-7200000).toISOString(), isSuspicious: false, previousValue: 'viewer', newValue: 'employee' },
   { action: 'BULK_EDIT', module: 'Inventory', details: 'Bulk restock: 15 items updated', userName: 'Juan Dela Cruz', timestamp: new Date(Date.now()-14400000).toISOString(), isSuspicious: true },
@@ -239,14 +418,14 @@ function switchSettingsTab(name, el) {
 }
 
 function switchAudit(name, el) {
-  ['logs','edits','suspicious','activity','alerts'].forEach(n => document.getElementById('panel-' + n).style.display = 'none');
+  ['logs','activity','alerts'].forEach(n => document.getElementById('panel-' + n).style.display = 'none');
   document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + name).style.display = 'block';
   el.classList.add('active');
+  // Filters only apply to transaction logs & user activity — hide on alerts
+  document.getElementById('auditFilters').style.display = (name === 'alerts') ? 'none' : 'flex';
   if (name === 'activity') loadActivity();
   if (name === 'alerts') loadAlerts();
-  if (name === 'edits') renderEdits();
-  if (name === 'suspicious') renderSuspicious();
 }
 
 async function loadData() {
@@ -259,9 +438,20 @@ async function loadData() {
 
 function applyFilters() {
   renderLogs();
-  renderEdits();
-  renderSuspicious();
+  updateAuditStats();
   if (typeof renderActivity === 'function') renderActivity();
+}
+
+function updateAuditStats() {
+  const list = filterLogs(auditLogs);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayCount = list.filter(l => { const d = parseTS(l.timestamp); return d && d >= today; }).length;
+  const loginCount = list.filter(l => l.action === 'LOGIN' || l.action === 'LOGOUT').length;
+  const users = new Set(list.map(l => l.userName).filter(Boolean));
+  document.getElementById('asTotal').textContent = list.length;
+  document.getElementById('asToday').textContent = todayCount;
+  document.getElementById('asLogins').textContent = loginCount;
+  document.getElementById('asUsers').textContent = users.size;
 }
 
 function parseTS(ts) {
@@ -319,12 +509,12 @@ function renderLogs() {
     html += `<div style="margin-bottom:20px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:0 4px"><span style="font-size:0.82rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.5px">${label}</span><span style="font-size:0.72rem;color:var(--gray-400);background:var(--gray-100);padding:1px 8px;border-radius:10px">${items.length}</span><div style="flex:1;height:1px;background:var(--gray-200)"></div></div>`;
     items.forEach(l => {
       const ts = parseTS(l.timestamp);
-      html += `<div class="activity-card" style="${l.isSuspicious?'background:#FFF5F5;border-left:3px solid var(--danger)':''}">
-        <div style="display:flex;align-items:center;gap:12px;flex:1">
+      html += `<div class="activity-card">
+        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
           <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${actionColor(l.action)}18;color:${actionColor(l.action)};flex-shrink:0">${actionIcon(l.action)}</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:0.85rem;font-weight:600;color:var(--gray-800)">${l.details||'—'}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:0.75rem;color:var(--gray-500)"><span style="font-weight:600">${l.userName||'System'}</span><span>·</span><span>${ts ? fmt.datetime(ts) : ''}</span></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:0.75rem;color:var(--gray-500);flex-wrap:wrap"><span style="font-weight:600">${l.userName||'System'}</span><span>·</span><span>${ts ? fmt.datetime(ts) : ''}</span>${l.module?`<span>·</span><span style="background:var(--gray-100);padding:1px 8px;border-radius:10px;font-size:0.7rem;font-weight:600;color:var(--gray-600)">${l.module}</span>`:''}</div>
           </div>
         </div>
         <div style="flex-shrink:0">${actionBadge(l.action)}</div>
@@ -333,20 +523,6 @@ function renderLogs() {
     html += '</div>';
   });
   document.getElementById('logsTable').innerHTML = html;
-}
-
-function renderEdits() {
-  const edits = filterLogs(auditLogs).filter(l => l.previousValue || l.newValue);
-  document.getElementById('editsTable').innerHTML = !edits.length ? '<div class="empty-state"><h3>No edit history</h3></div>' :
-    `<table><thead><tr><th>Details</th><th>Previous</th><th>New</th><th>By</th><th>When</th></tr></thead><tbody>
-    ${edits.map(l => `<tr><td>${l.details||''}</td><td style="color:var(--danger);text-decoration:line-through">${l.previousValue||'—'}</td><td style="color:var(--green);font-weight:700">${l.newValue||'—'}</td><td>${l.userName}</td><td style="font-size:0.82rem">${fmt.datetime(l.timestamp)}</td></tr>`).join('')}</tbody></table>`;
-}
-
-function renderSuspicious() {
-  const sus = filterLogs(auditLogs).filter(l => l.isSuspicious);
-  document.getElementById('suspiciousTable').innerHTML = !sus.length ? '<div class="empty-state"><h3>No suspicious changes detected</h3></div>' :
-    `<table><thead><tr><th>Action</th><th>Details</th><th>User</th><th>Timestamp</th></tr></thead><tbody>
-    ${sus.map(l => `<tr class="suspicious-row"><td>${actionBadge(l.action)}</td><td>${l.details||''}</td><td class="fw-bold">${l.userName}</td><td style="font-size:0.82rem">${fmt.datetime(l.timestamp)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 let activityUsers = [];
@@ -389,6 +565,12 @@ async function loadAlerts() {
   try {
     const res = await API.get('/api/admin/notifications');
     const alerts = res.success ? res.data : [];
+    const countBadge = document.getElementById('alertCountBadge');
+    if (countBadge) countBadge.textContent = alerts.length + (alerts.length === 1 ? ' event' : ' events');
+    if (!alerts.length) {
+      document.getElementById('alertLogList').innerHTML = '<div class="empty-state"><h3>No alerts recorded</h3><p style="font-size:0.8rem;color:var(--gray-500)">System alerts (such as report generation events) will appear here.</p></div>';
+      return;
+    }
     document.getElementById('alertLogList').innerHTML = alerts.map(a => `
       <div class="alert-log-item">
         <div class="alert-icon-sm" style="background:${a.priority==='critical'?'var(--danger-light)':a.priority==='warning'?'var(--yellow-light)':'var(--info-light)'}; color:${a.priority==='critical'?'var(--danger)':a.priority==='warning'?'var(--yellow-dark)':'var(--info)'}">
@@ -410,31 +592,213 @@ async function loadBackupInfo() {
     const res = await API.get('/api/admin/backup/info');
     if (res.success) {
       document.getElementById('statRecords').textContent = res.data.totalRecords || 0;
-      document.getElementById('statLastBackup').textContent = res.data.lastBackup || 'Never';
       document.getElementById('statStatus').textContent = 'Online';
     }
   } catch(e) { console.error(e); }
+  await loadBackupHistory();
 }
 
+// ── Recent snapshots (backupsHistory) ───────────────────────────────
+let backupHistory = [];
+
+async function loadBackupHistory() {
+  const el = document.getElementById('backupHistoryList');
+  try {
+    const res = await API.get('/api/admin/backups/history');
+    backupHistory = res.success ? res.data : [];
+    renderBackupHistory();
+    const latest = backupHistory[0];
+    const d = latest ? parseTS(latest.timestamp) : null;
+    document.getElementById('statLastBackup').textContent = d ? fmt.datetime(d) : 'Never';
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state"><h3>Could not load snapshot history</h3></div>';
+  }
+}
+
+function renderBackupHistory() {
+  const el = document.getElementById('backupHistoryList');
+  if (!backupHistory.length) {
+    el.innerHTML = '<div class="empty-state"><h3>No snapshots yet</h3><p style="font-size:0.8rem;color:var(--gray-500)">Snapshots are created automatically and whenever a backup is downloaded.</p></div>';
+    return;
+  }
+  el.innerHTML = backupHistory.slice(0, 8).map(b => `
+    <div class="backup-history-item">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0">
+        <div style="width:34px;height:34px;border-radius:10px;background:rgba(45,106,46,0.1);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        </div>
+        <div style="min-width:0">
+          <div style="font-size:0.84rem;font-weight:700">${parseTS(b.timestamp) ? fmt.datetime(parseTS(b.timestamp)) : '—'}</div>
+          <div style="font-size:0.74rem;color:var(--gray-500)">${b.triggeredBy || 'System'} · ${b.totalRecords || 0} records · ${b.pathsCount || 0} collections</div>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="padding:6px 14px;font-size:0.78rem" onclick="restoreSnapshot('${b.id}')">Restore</button>
+    </div>`).join('');
+}
+
+// ── Restore notifications ───────────────────────────────────────────
+// The server creates a 'backup_restore' notification (bell + Alert Logs)
+// for every restore attempt. Here we just refresh the bell and, for
+// client-side failures that never reach the server, create the
+// failure notification ourselves so nothing goes unreported.
+function refreshNotifBell() {
+  if (typeof loadNotifications === 'function') loadNotifications();
+}
+
+async function notifyRestoreProblem(message) {
+  try {
+    await API.post('/api/admin/notifications', {
+      type: 'backup_restore',
+      title: 'Backup Restore Failed',
+      message,
+      priority: 'critical',
+    });
+  } catch (_) { /* non-fatal */ }
+  refreshNotifBell();
+}
+
+function restoreSnapshot(backupId) {
+  confirm('Restore this snapshot? This will OVERWRITE all current data with the snapshot data. This action cannot be undone.', async () => {
+    try {
+      const res = await API.post(`/api/admin/restore/${backupId}`, {});
+      if (res.success) {
+        Toast.success(res.message || 'Snapshot restored successfully');
+        refreshNotifBell();
+        loadBackupInfo();
+        loadData();
+      } else {
+        Toast.error(res.message || 'Restore failed');
+        await notifyRestoreProblem(`Snapshot restore (${backupId}) was rejected by the server: ${res.message || 'unknown reason'}.`);
+      }
+    } catch(e) {
+      Toast.error('Restore failed');
+      await notifyRestoreProblem(`Snapshot restore (${backupId}) failed before reaching completion: ${e.message || 'network/client error'}.`);
+      console.error(e);
+    }
+  });
+}
+
+// ── OTP-gated backup download ───────────────────────────────────────
+let backupDownloadToken = null;
+
+function openOtpModal() {
+  document.getElementById('otpModal').classList.add('active');
+  showOtpStep(1);
+}
+
+function closeOtpModal() {
+  document.getElementById('otpModal').classList.remove('active');
+  showOtpStep(1);
+  clearOtpInputs();
+}
+
+function showOtpStep(step) {
+  document.getElementById('otpStep1').style.display = step === 1 ? 'block' : 'none';
+  document.getElementById('otpStep2').style.display = step === 2 ? 'block' : 'none';
+  document.getElementById('otpDot1').classList.toggle('active', step === 1);
+  document.getElementById('otpDot2').classList.toggle('active', step === 2);
+  document.getElementById('otpErr').style.display = 'none';
+}
+
+function clearOtpInputs() {
+  document.querySelectorAll('#otpInputs input').forEach(i => { i.value = ''; });
+}
+
+function otpErr(msg) {
+  const el = document.getElementById('otpErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showOtpError(result) {
+  otpErr(result.message || 'Something went wrong. Please try again.');
+}
+
+function getOtpCode() {
+  return [...document.querySelectorAll('#otpInputs input')].map(i => i.value).join('');
+}
+
+// Entry point from the "Download Backup" button
 async function downloadBackup() {
   try {
-    Toast.info('Generating backup...');
-    const res = await fetch('/api/admin/backup', { credentials: 'same-origin' });
-    const json = await res.json();
-    if (json.success) {
-      const blob = new Blob([JSON.stringify(json.backup, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'oba-backup-' + new Date().toISOString().split('T')[0] + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
-      Toast.success('Backup downloaded successfully');
-    } else {
-      Toast.error(json.message || 'Backup failed');
+    const u = await getCurrentUser();
+    if (u && u.email) {
+      document.getElementById('otpEmailText').textContent = u.email;
+      document.getElementById('otpMaskedEmail').textContent = u.email;
     }
+  } catch (_) { /* non-fatal */ }
+  openOtpModal();
+}
+
+// Step 1 → request the OTP via email (Gmail)
+async function sendBackupOtp() {
+  const btn = document.getElementById('otpSendBtn');
+  const resend = document.getElementById('otpResendBtn');
+  btn.disabled = true;
+  if (resend) resend.disabled = true;
+  try {
+    const res = await API.post('/api/admin/backup/otp/send', {});
+    if (!res.success) { showOtpError(res); return; }
+    if (res.maskedEmail) document.getElementById('otpMaskedEmail').textContent = res.maskedEmail;
+    Toast.success(res.message || 'Verification code sent to your email.');
+    showOtpStep(2);
+    clearOtpInputs();
+    const first = document.querySelector('#otpInputs input');
+    if (first) setTimeout(() => first.focus(), 60);
   } catch(e) {
-    Toast.error('Error generating backup');
+    showOtpError({});
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    if (resend) resend.disabled = false;
+  }
+}
+
+// Step 2 → verify OTP, get one-time token, download the ZIP
+async function verifyBackupOtp() {
+  const code = getOtpCode();
+  if (code.length !== 6) { otpErr('Please enter all 6 digits of the code.'); return; }
+  const btn = document.getElementById('otpVerifyBtn');
+  btn.disabled = true;
+  try {
+    const res = await API.post('/api/admin/backup/otp/verify', { otp: code });
+    if (!res.success) {
+      showOtpError(res);
+      clearOtpInputs();
+      document.querySelector('#otpInputs input').focus();
+      return;
+    }
+    backupDownloadToken = res.token;
+    closeOtpModal();
+    Toast.success('Verified! Generating your backup ZIP…');
+    await startBackupDownload(backupDownloadToken);
+  } catch(e) {
+    showOtpError({});
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function startBackupDownload(token) {
+  try {
+    const res = await fetch('/api/admin/backup/download?token=' + encodeURIComponent(token), { credentials: 'same-origin' });
+    if (!res.ok) {
+      let msg = 'Download failed';
+      try { const j = await res.json(); msg = j.message || msg; } catch(_) {}
+      Toast.error(msg);
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'oba-backup-' + new Date().toISOString().split('T')[0] + '.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+    Toast.success('Backup ZIP downloaded successfully');
+  } catch(e) {
+    Toast.error('Error downloading the backup');
     console.error(e);
   }
 }
@@ -458,12 +822,17 @@ async function restoreBackup() {
       resultEl.style.display = 'block';
       if (json.success) {
         resultEl.innerHTML = '<div class="alert alert-success">' + json.message + '</div>';
+        Toast.success(json.message || 'Backup restored successfully');
+        refreshNotifBell();
         loadBackupInfo();
       } else {
         resultEl.innerHTML = '<div class="alert alert-danger">' + (json.message || 'Restore failed') + '</div>';
+        Toast.error(json.message || 'Restore failed');
+        await notifyRestoreProblem(`Backup file restore ("${file.name}") was rejected by the server: ${json.message || 'unknown reason'}.`);
       }
     } catch(e) {
       Toast.error('Invalid backup file or server error');
+      await notifyRestoreProblem(`Backup file restore ("${fileInput.files[0] ? fileInput.files[0].name : 'unknown file'}") failed before completion: ${e.message || 'invalid file or client error'}.`);
       console.error(e);
     }
   });
@@ -479,7 +848,35 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('sidebarName').textContent = u.name;
       document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
       document.querySelector('.sidebar-avatar').textContent = u.name.charAt(0);
+      if (u.email) {
+        document.getElementById('otpEmailText').textContent = u.email;
+        document.getElementById('otpMaskedEmail').textContent = u.email;
+      }
     }
+  });
+
+  // ── OTP input boxes: auto-advance, backspace, paste ───────────────
+  const otpInputs = [...document.querySelectorAll('#otpInputs input')];
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g, '').slice(0, 1);
+      if (input.value && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) otpInputs[idx - 1].focus();
+      if (e.key === 'Enter' && getOtpCode().length === 6) verifyBackupOtp();
+    });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+      [...text].forEach((ch, i) => { if (otpInputs[i]) otpInputs[i].value = ch; });
+      if (text.length === 6) verifyBackupOtp();
+      else otpInputs[Math.min(text.length, 5)].focus();
+    });
+  });
+  // Close the modal when clicking the backdrop
+  document.getElementById('otpModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('otpModal')) closeOtpModal();
   });
 });
 </script>

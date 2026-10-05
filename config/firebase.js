@@ -3,7 +3,9 @@ const admin = require('firebase-admin');
 
 // Firebase Admin SDK initialization
 // Replace .env values with your actual Firebase service account credentials
-let db = null;
+// NOTE: the Realtime Database was removed from this project. This app is
+// Firestore-only (see config/db.js) and the legacy RTDB instance was empty.
+let firestore = null; // Firestore (primary — Unified Firestore Database per CAPSTONE spec §5.1)
 let auth = null;
 
 try {
@@ -18,28 +20,27 @@ try {
         authUri: process.env.FIREBASE_AUTH_URI,
         tokenUri: process.env.FIREBASE_TOKEN_URI,
       }),
-      databaseURL: process.env.FIREBASE_DATABASE_URL
     });
-    db = admin.database();
+    // Primary store: Firestore (flat collections, see config/db.js + firestore.rules)
+    firestore = admin.firestore();
     auth = admin.auth();
-    console.log('✅ Firebase Admin SDK connected successfully');
+    console.log('Firebase Admin SDK connected successfully (Firestore primary)');
   } else {
-    console.log('⚠️  Firebase credentials not configured. Running in demo/mock mode.');
-    console.log('   → Fill in your .env file with actual Firebase credentials to connect.');
+    console.log('Firebase credentials not configured. Running in demo/mock mode.');
+    console.log('Fill in your .env file with actual Firebase credentials to connect.');
   }
 } catch (err) {
-  console.error('❌ Firebase initialization error:', err.message);
+  console.error('Firebase initialization error:', err.message);
 }
 
 // Firebase Client SDK config (for frontend use)
 const firebaseClientConfig = {
   apiKey: process.env.FIREBASE_API_KEY || 'PLACEHOLDER',
   authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'PLACEHOLDER',
-  databaseURL: process.env.FIREBASE_DATABASE_URL || 'PLACEHOLDER',
   projectId: process.env.FIREBASE_PROJECT_ID || 'PLACEHOLDER',
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'PLACEHOLDER',
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || 'PLACEHOLDER',
   appId: process.env.FIREBASE_APP_ID || 'PLACEHOLDER',
 };
 
-module.exports = { db, auth, admin, firebaseClientConfig };
+module.exports = { firestore, auth, admin, firebaseClientConfig };

@@ -8,83 +8,372 @@
   <link rel="stylesheet" href="/css/print.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    .welcome-card {
-      background: linear-gradient(135deg, #163618 0%, #0c1f0d 100%);
-      color: var(--white);
-      border-radius: var(--radius);
-      padding: 32px 36px;
+
+    /* ── Modern Filter Bar (Image 1) ───────────────────────────── */
+    .filters-bar-modern {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 16px 22px;
       margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      border: 1px solid #edf2f7;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 170px;
+      flex: 1;
+    }
+    .filter-label-modern {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .filter-control-modern {
+      padding: 9px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-family: var(--font-main);
+      outline: none;
+      transition: var(--transition);
+      background: #ffffff;
+      color: var(--black);
+      height: 42px;
+      width: 100%;
+    }
+    .filter-control-modern:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    }
+    .btn-apply-filter {
+      background: linear-gradient(135deg, #f59e0b 0%, #eab308 100%);
+      color: #1e293b;
       border: none;
+      height: 42px;
+      padding: 0 22px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+      white-space: nowrap;
+    }
+    .btn-apply-filter:hover {
+      background: linear-gradient(135deg, #d97706 0%, #ca8a04 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    }
+
+    /* ── 6 KPI Metric Cards Grid (Image 1) ─────────────────────── */
+    .kpi-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+    .metric-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 16px 14px 16px;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(22, 54, 24, 0.2);
+      border-left: 4px solid var(--border-accent, #10b981);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-    .welcome-card::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -20%;
-      width: 300px;
-      height: 300px;
+    .metric-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+    .metric-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .metric-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .metric-icon-circle {
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(245, 197, 24, 0.15) 0%, rgba(245, 197, 24, 0) 70%);
-      pointer-events: none;
-    }
-    .welcome-card::before {
-      content: '';
-      position: absolute;
-      bottom: -40%;
-      right: 10%;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0) 70%);
-      pointer-events: none;
-    }
-    .welcome-card h2 {
-      font-size: 1.65rem;
-      font-weight: 800;
-      margin-bottom: 6px;
-      color: #fff;
-      letter-spacing: -0.025em;
-    }
-    .welcome-card p {
-      font-size: 0.92rem;
-      color: rgba(255, 255, 255, 0.85);
-      margin: 0;
-    }
-    .kpi-card .kpi-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
-      position: absolute;
-      top: 20px;
-      right: 20px;
+      flex-shrink: 0;
+      color: #ffffff;
+    }
+    .metric-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .metric-pill {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .metric-pill-green { background: #ecfdf5; color: #10b981; }
+    .metric-pill-blue  { background: #eff6ff; color: #3b82f6; }
+    .metric-pill-red   { background: #fef2f2; color: #ef4444; }
+
+    .metric-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .metric-sub {
+      font-size: 0.74rem;
+      color: #64748b;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Accent color variants */
+    .metric-revenue { --border-accent: #10b981; }
+    .metric-revenue .metric-icon-circle { background: #10b981; }
+    
+    .metric-topbiz { --border-accent: #f59e0b; }
+    .metric-topbiz .metric-icon-circle { background: #f59e0b; }
+    .metric-topbiz .metric-value { color: #d97706; }
+
+    .metric-lowest { --border-accent: #3b82f6; }
+    .metric-lowest .metric-icon-circle { background: #3b82f6; }
+
+    .metric-lowstock { --border-accent: #ef4444; }
+    .metric-lowstock .metric-icon-circle { background: #ef4444; }
+    .metric-lowstock .metric-value { color: #ef4444; }
+
+    .metric-profit { --border-accent: #059669; }
+    .metric-profit .metric-icon-circle { background: #059669; }
+    .metric-profit .metric-value { color: #059669; }
+
+    .metric-inventory { --border-accent: #2563eb; }
+    .metric-inventory .metric-icon-circle { background: #2563eb; }
+
+    /* ── Business Categories Section (Image 1) ─────────────────── */
+    .section-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-icon-flower {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #16a34a;
+    }
+    .section-title-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+    .section-link-all {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #15803d;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .section-link-all:hover {
+      color: #166534;
+      transform: translateX(2px);
+    }
+
+    .biz-cards-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .biz-cat-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 22px 24px;
+      border: 1px solid #edf2f7;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+    }
+    .biz-cat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+      border-color: #cbd5e1;
+    }
+    .biz-cat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .biz-cat-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .biz-cat-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .biz-cat-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .biz-cat-count {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 3px;
+    }
+    .biz-cat-chevron {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: var(--transition);
     }
-    .kpi-card:hover .kpi-icon-box {
-      transform: scale(1.1);
+    .biz-cat-card:hover .biz-cat-chevron {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: translateX(2px);
     }
-    .kpi-card .kpi-sub { font-size: 0.78rem; color: var(--gray-400); margin-top: 4px; }
-    .kpi-card.yellow .kpi-icon-box { background: var(--yellow-light); color: var(--yellow-dark); }
-    .kpi-card.green .kpi-icon-box { background: var(--green-light); color: var(--green); }
-    .kpi-card.danger .kpi-icon-box { background: var(--danger-light); color: var(--danger); }
-    .kpi-card.black .kpi-icon-box { background: var(--gray-100); color: var(--black); }
-    .chart-section { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; margin-bottom: 24px; }
-    .low-stock-list { max-height: 300px; overflow-y: auto; padding-right: 4px; }
+    .biz-cat-bottom {
+      position: relative;
+      z-index: 2;
+    }
+    .biz-cat-revenue {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .biz-cat-tax {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .biz-cat-watermark {
+      position: absolute;
+      right: 12px;
+      bottom: 4px;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.2;
+    }
+
+    /* ── Charts & Tables Modern Styling ────────────────────────── */
+    .chart-section {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .bottom-section {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .card-modern {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 22px 24px;
+      border: 1px solid #edf2f7;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+    .card-modern .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .card-modern .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .low-stock-list { max-height: 280px; overflow-y: auto; padding-right: 4px; }
     .low-stock-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 12px 0;
-      border-bottom: 1px solid var(--gray-100);
+      border-bottom: 1px solid #f1f5f9;
     }
     .low-stock-item:last-child { border-bottom: none; }
-    .low-stock-name { font-size: 0.9rem; font-weight: 600; color: var(--black); }
+    .low-stock-name { font-size: 0.88rem; font-weight: 600; color: var(--black); }
     .low-stock-badge {
       padding: 4px 10px;
       border-radius: 20px;
@@ -93,55 +382,123 @@
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
-    .low-stock-badge.low { background: var(--yellow-light); color: var(--yellow-dark); }
+    .low-stock-badge.low { background: #fef3c7; color: #92400e; }
     .low-stock-badge.critical { background: #fee2e2; color: #ef4444; }
-    .low-stock-badge.out { background: var(--danger-light); color: var(--danger); }
+    .low-stock-badge.out { background: #fee2e2; color: #991b1b; }
+
     .top-product-item {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--gray-100);
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
     }
     .top-product-item:last-child { border-bottom: none; }
     .top-product-rank {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 800;
       flex-shrink: 0;
     }
     .top-product-rank.gold { background: #fef08a; color: #a16207; }
     .top-product-rank.silver { background: #e2e8f0; color: #475569; }
     .top-product-rank.bronze { background: #ffedd5; color: #c2410c; }
-    .top-product-rank.default { background: var(--gray-100); color: var(--gray-500); }
-    .bottom-section { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; }
-    .biz-compare-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
-    .biz-compare-item:last-child { border-bottom: none; }
-    .biz-compare-bar { height: 8px; border-radius: 4px; flex: 1; background: var(--gray-100); overflow: hidden; }
-    .biz-compare-bar .fill { height: 100%; border-radius: 4px; }
-    .tax-income-card .biz-cat-card { cursor: default; }
-    @media (max-width: 1024px) { .chart-section, .bottom-section, #taxIncomeGrid { grid-template-columns: 1fr; } }
+    .top-product-rank.default { background: #f1f5f9; color: #64748b; }
+
+    /* ── Business Performance Ranking ─────────────────────────── */
+    .biz-rank-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .biz-rank-item:last-child { border-bottom: none; }
+    .biz-rank-info { flex: 1; min-width: 0; }
+    .biz-rank-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .biz-rank-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .biz-rank-sub { font-size: 0.74rem; color: #64748b; font-weight: 500; margin-left: auto; }
+    .biz-rank-bar {
+      height: 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      overflow: hidden;
+    }
+    .biz-rank-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.6s ease;
+    }
+    .biz-rank-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      flex-shrink: 0;
+      min-width: 170px;
+    }
+    .biz-rank-revenue { font-weight: 800; font-size: 0.95rem; color: #0f172a; }
+    .biz-rank-detail { font-size: 0.74rem; color: #64748b; }
+    .biz-rank-detail b.profit-pos { color: #059669; }
+    .biz-rank-detail b.profit-neg { color: #dc2626; }
+    .biz-rank-select {
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #334155;
+      background: #f8fafc;
+      cursor: pointer;
+      outline: none;
+    }
+
+    @media (max-width: 1280px) {
+      .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 992px) {
+      .biz-cards-grid-3 { grid-template-columns: 1fr; }
+      .chart-section, .bottom-section { grid-template-columns: 1fr; }
+      .kpi-grid-6 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .kpi-grid-6 { grid-template-columns: 1fr; }
+      .filters-bar-modern { flex-direction: column; align-items: stretch; }
+    }
   </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item active" href="/admin/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
       <a class="nav-item" href="/admin/business"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg></span> Business</a>
       <a class="nav-item" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" href="/admin/all-inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> Business Inventory</a>
       <a class="nav-item" href="/admin/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
       <a class="nav-item" href="/admin/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-      <a class="nav-item" href="/admin/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
       <a class="nav-item" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Users</a>
       <a class="nav-item" href="/admin/settings"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</a>
       <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
@@ -158,163 +515,355 @@
   </aside>
 
   <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+          <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+        </svg>
         <span class="topbar-title">Dashboard</span>
+        <span class="topbar-sub-header">Office of Business Affairs &mdash; Overview &amp; Analytics</span>
       </div>
-      <div class="topbar-actions" style="display:flex;align-items:center;gap:12px">
-        <!-- Notification Bell -->
+      <div class="topbar-actions">
         <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
           <span class="notif-count" id="notifCount" style="display:none">0</span>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
+        <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
     </div>
 
-    <div class="page-content">
-      <!-- Welcome -->
-      <div class="welcome-card">
-        <h2>Welcome back!</h2>
-        <p>Centralized Monitoring View — All 5 Business Categories</p>
+    <div class="page-content" style="padding: 24px 32px;">
+      <!-- Hidden greeting elements to retain compatibility with updateGreeting() -->
+      <span id="welcomeGreeting" style="display:none"></span>
+      <span id="welcomeRole" style="display:none"></span>
+      <span id="welcomeDate" style="display:none"></span>
+
+      <!-- Modern Filter Bar -->
+      <div class="filters-bar-modern" style="margin-bottom: 20px;">
+        <div class="filter-group">
+          <label class="filter-label-modern">Date From</label>
+          <input type="date" id="fDateFrom" class="filter-control-modern">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label-modern">Date To</label>
+          <input type="date" id="fDateTo" class="filter-control-modern">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label-modern">Business Unit</label>
+          <select id="fBizUnit" class="filter-control-modern">
+            <option value="">All Categories</option>
+            <option value="AGRI">Agriculture</option>
+            <option value="NON_AGRI">Non-Agriculture</option>
+            <option value="MAIN">Main</option>
+          </select>
+        </div>
+        <button class="btn-apply-filter" onclick="loadKPI()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Apply Filter
+        </button>
       </div>
 
-      <!-- Date Range Filter -->
-      <div class="filters-bar">
-        <div class="filter-item"><div class="filter-label">Date From</div><input type="date" id="fDateFrom" class="filter-control"></div>
-        <div class="filter-item"><div class="filter-label">Date To</div><input type="date" id="fDateTo" class="filter-control"></div>
-        <div class="filter-item"><div class="filter-label">Business Unit</div>
-          <select id="fBizUnit" class="filter-control"><option value="">All Categories</option><option value="RENTAL">Rental</option><option value="BUSINESS">Business</option><option value="AGRI">Agriculture</option><option value="NON_AGRI">Non-Agriculture</option><option value="MAIN">Main</option></select>
-        </div>
-        <button class="btn btn-primary btn-sm" style="height: 42px;" onclick="loadKPI()">Apply Filter</button>
-      </div>
-
-      <!-- KPI Cards -->
-      <div class="kpi-grid" id="kpiGrid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;">
-        <div class="kpi-card yellow">
-          <div class="kpi-label">Total Revenue</div>
-          <div class="kpi-value" id="totalRevenue">₱0</div>
-          <div class="kpi-sub">All Categories Combined</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">Top Performing</div>
-          <div class="kpi-value" id="topBiz" style="font-size:1.3rem;color:#2d6a2e">—</div>
-          <div class="kpi-sub" id="topBizRev">No data yet</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-        </div>
-        <div class="kpi-card" style="border-color:var(--gray-300);">
-          <div class="kpi-label">Lowest Selling Product</div>
-          <div class="kpi-value" id="lowSellProd" style="font-size:1rem;color:var(--gray-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
-          <div class="kpi-sub" id="lowSellQty">0 sold</div>
-          <div class="kpi-icon-box" style="background:var(--gray-100);color:var(--gray-500)"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
-        </div>
-        <div class="kpi-card danger">
-          <div class="kpi-label">Low Stock Items</div>
-          <div class="kpi-value" id="lowStockCount" style="color:var(--danger)">0</div>
-          <div class="kpi-sub">Across All Businesses</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        </div>
-        <div class="kpi-card black">
-          <div class="kpi-label">Total Net Profit</div>
-          <div class="kpi-value" id="netProfit">₱0</div>
-          <div class="kpi-sub">0.0% Margin</div>
-          <div class="kpi-icon-box"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-        </div>
-      </div>
-
-      <!-- Business Category Performance Cards -->
-      <div class="biz-cat-grid" id="bizCatGrid">
-        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=RENTAL'">
-          <div class="cat-stripe" style="background:#6B3FA0"></div>
-          <div class="biz-cat-name">Rental</div>
-          <div class="biz-cat-count">0 business units</div>
-          <div class="biz-cat-revenue" style="color:#6B3FA0">₱0</div>
-          <div class="biz-cat-tax" style="font-size:0.75rem;color:var(--gray-400);margin-top:4px">Tax: <span id="tax_RENTAL">—</span></div>
-        </div>
-        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=BUSINESS'">
-          <div class="cat-stripe" style="background:#2d6a2e"></div>
-          <div class="biz-cat-name">Business</div>
-          <div class="biz-cat-count">0 business units</div>
-          <div class="biz-cat-revenue" style="color:#2d6a2e">₱0</div>
-          <div class="biz-cat-tax" style="font-size:0.75rem;color:var(--gray-400);margin-top:4px">Tax: <span id="tax_BUSINESS">—</span></div>
-        </div>
-        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=AGRI'">
-          <div class="cat-stripe" style="background:#D4A915"></div>
-          <div class="biz-cat-name">Agriculture</div>
-          <div class="biz-cat-count">0 business units</div>
-          <div class="biz-cat-revenue" style="color:#D4A915">₱0</div>
-          <div class="biz-cat-tax" style="font-size:0.75rem;color:var(--gray-400);margin-top:4px">Tax: <span id="tax_AGRI">—</span></div>
-        </div>
-        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=NON_AGRI'">
-          <div class="cat-stripe" style="background:#1A1A1A"></div>
-          <div class="biz-cat-name">Non-Agriculture</div>
-          <div class="biz-cat-count">0 business units</div>
-          <div class="biz-cat-revenue" style="color:#1A1A1A">₱0</div>
-          <div class="biz-cat-tax" style="font-size:0.75rem;color:var(--gray-400);margin-top:4px">Tax: <span id="tax_NON_AGRI">—</span></div>
-        </div>
-        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=MAIN'">
-          <div class="cat-stripe" style="background:#0D6EFD"></div>
-          <div class="biz-cat-name">Main</div>
-          <div class="biz-cat-count">0 business units</div>
-          <div class="biz-cat-revenue" style="color:#0D6EFD">₱0</div>
-          <div class="biz-cat-tax" style="font-size:0.75rem;color:var(--gray-400);margin-top:4px">Tax: <span id="tax_MAIN">—</span></div>
-        </div>
-      </div>
-
-      <!-- Charts + Low Stock Alerts -->
-      <div class="chart-section">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Revenue by Category</span>
-            <select class="filter-control" id="chartPeriod" onchange="loadKPI()" style="font-size:0.8rem;padding:5px 10px">
-              <option value="week" selected>This Week</option><option value="month">This Month</option><option value="year">This Year</option>
-            </select>
+      <!-- 7 Pastel KPI Metric Wave Sparkline Cards Grid -->
+      <div class="kpi-grid-7">
+        <!-- Card 1: Total Revenue (Green) -->
+        <div class="pastel-kpi-card pastel-green">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-green">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <span class="kpi-title-text">TOTAL REVENUE</span>
+            </div>
+            <span class="kpi-pill-badge pill-green"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
           </div>
-          <div style="position: relative; height: 250px; width: 100%;">
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="totalRevenue">&#8369;0.00</div>
+            <div class="kpi-sub-label">All Categories Combined</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#16a34a">
+            <path d="M0 35 C20 30, 40 38, 60 22 C80 8, 100 24, 120 12 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 35 C20 30, 40 38, 60 22 C80 8, 100 24, 120 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 2: Total Expenses (Blue) -->
+        <div class="pastel-kpi-card pastel-blue">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-blue">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <span class="kpi-title-text">TOTAL EXPENSES</span>
+            </div>
+            <span class="kpi-pill-badge pill-blue"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="totalExpenses" style="color:#1e3a8a">&#8369;0.00</div>
+            <div class="kpi-sub-label">All Categories Combined</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#2563eb">
+            <path d="M0 30 C20 36, 40 18, 60 28 C80 38, 100 16, 120 22 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 30 C20 36, 40 18, 60 28 C80 38, 100 16, 120 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 3: Top Performing (Amber) -->
+        <div class="pastel-kpi-card pastel-amber">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-amber">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <span class="kpi-title-text">TOP PERFORMING</span>
+            </div>
+            <span class="kpi-pill-badge pill-amber"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="topBiz">—</div>
+            <div class="kpi-sub-label" id="topBizRev">No data yet</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#d97706">
+            <path d="M0 38 C25 35, 45 15, 70 25 C95 32, 105 10, 120 6 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 38 C25 35, 45 15, 70 25 C95 32, 105 10, 120 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 4: Lowest Selling (Purple) -->
+        <div class="pastel-kpi-card pastel-purple">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-purple">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+              </div>
+              <span class="kpi-title-text">LOWEST SELLING</span>
+            </div>
+            <span class="kpi-pill-badge pill-purple"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="lowSellProd" style="font-size:1.1rem">—</div>
+            <div class="kpi-sub-label" id="lowSellQty">0 sold</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#7c3aed">
+            <path d="M0 15 C20 18, 45 32, 70 26 C90 22, 105 38, 120 40 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 15 C20 18, 45 32, 70 26 C90 22, 105 38, 120 40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 5: Low Stock Items (Red) -->
+        <div class="pastel-kpi-card pastel-red">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-red">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <span class="kpi-title-text">LOW STOCK ITEMS</span>
+            </div>
+            <span class="kpi-pill-badge pill-red"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="lowStockCount" style="color:#b91c1c">0</div>
+            <div class="kpi-sub-label">Across All Businesses</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#dc2626">
+            <path d="M0 25 C25 22, 45 38, 70 28 C95 18, 105 30, 120 20 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 25 C25 22, 45 38, 70 28 C95 18, 105 30, 120 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 6: Total Net Profit (Emerald) -->
+        <div class="pastel-kpi-card pastel-emerald">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-emerald">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <span class="kpi-title-text">TOTAL NET PROFIT</span>
+            </div>
+            <span class="kpi-pill-badge pill-green"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="netProfit">&#8369;0.00</div>
+            <div class="kpi-sub-label" id="netProfitMargin">0.0% Margin</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#059669">
+            <path d="M0 32 C30 35, 50 15, 80 20 C100 24, 110 8, 120 5 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 32 C30 35, 50 15, 80 20 C100 24, 110 8, 120 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Card 7: Inventory Value (Cyan) -->
+        <div class="pastel-kpi-card pastel-cyan">
+          <div class="kpi-head-row">
+            <div class="kpi-head-left">
+              <div class="kpi-icon-circle icon-bg-cyan">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              </div>
+              <span class="kpi-title-text">INVENTORY VALUE</span>
+            </div>
+            <span class="kpi-pill-badge pill-blue"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></span>
+          </div>
+          <div class="kpi-body-row">
+            <div class="kpi-main-number" id="invValue">&#8369;0.00</div>
+            <div class="kpi-sub-label" id="invValueSub">0 products at cost</div>
+          </div>
+          <svg class="kpi-wave-svg" viewBox="0 0 120 45" fill="none" preserveAspectRatio="none" style="color:#0284c7">
+            <path d="M0 28 C25 24, 45 36, 75 18 C95 8, 110 20, 120 14 L120 45 L0 45 Z" fill="currentColor" opacity="0.12"/>
+            <path d="M0 28 C25 24, 45 36, 75 18 C95 8, 110 20, 120 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Business Categories Section -->
+      <div class="section-title-bar" style="margin-bottom: 16px;">
+        <div class="section-title-group">
+          <span class="section-icon-flower"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <span class="section-title-text">Business Categories</span>
+        </div>
+        <a class="section-link-all" href="/admin/business">View Details &rarr;</a>
+      </div>
+
+      <div class="biz-cards-grid-3" id="bizCatGrid">
+        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=AGRI'">
+          <div class="biz-cat-top">
+            <div class="biz-cat-info">
+              <div class="biz-cat-icon-box" style="background:#dcfce7;color:#16a34a">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <div class="biz-cat-name">Agriculture</div>
+                <div class="biz-cat-count">0 products</div>
+              </div>
+            </div>
+            <div class="biz-cat-chevron"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
+          <div class="biz-cat-bottom">
+            <div class="biz-cat-revenue">&#8369;0.00</div>
+            <div class="biz-cat-tax">Tax: <span id="tax_AGRI">&mdash;</span></div>
+          </div>
+        </div>
+
+        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=NON_AGRI'">
+          <div class="biz-cat-top">
+            <div class="biz-cat-info">
+              <div class="biz-cat-icon-box" style="background:#dbeafe;color:#2563eb">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              </div>
+              <div>
+                <div class="biz-cat-name">Non-Agriculture</div>
+                <div class="biz-cat-count">0 products</div>
+              </div>
+            </div>
+            <div class="biz-cat-chevron"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
+          <div class="biz-cat-bottom">
+            <div class="biz-cat-revenue">&#8369;0.00</div>
+            <div class="biz-cat-tax">Tax: <span id="tax_NON_AGRI">&mdash;</span></div>
+          </div>
+        </div>
+
+        <div class="biz-cat-card" onclick="location.href='/admin/business?cat=MAIN'">
+          <div class="biz-cat-top">
+            <div class="biz-cat-info">
+              <div class="biz-cat-icon-box" style="background:#f3e8ff;color:#7c3aed">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div>
+                <div class="biz-cat-name">Main</div>
+                <div class="biz-cat-count">0 products</div>
+              </div>
+            </div>
+            <div class="biz-cat-chevron"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
+          <div class="biz-cat-bottom">
+            <div class="biz-cat-revenue">&#8369;0.00</div>
+            <div class="biz-cat-tax">Tax: <span id="tax_MAIN">&mdash;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Charts Grid (Revenue by Category + Sales Share Donut) -->
+      <div class="dashboard-charts-grid">
+        <div class="card-modern">
+          <div class="card-modern-header">
+            <div class="card-header-left">
+              <span class="card-modern-title">Revenue by Category</span>
+            </div>
+          </div>
+          <div style="position: relative; height: 260px; width: 100%;">
             <canvas id="salesChart"></canvas>
           </div>
         </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Low Stock Alert</span>
+
+        <div class="card-modern">
+          <div class="card-modern-header">
+            <div class="card-header-left">
+              <span class="card-modern-title">Sales Share by Category</span>
+            </div>
           </div>
-          <div class="low-stock-list" id="lowStockList"></div>
+          <div class="donut-wrapper-flex">
+            <div class="donut-canvas-relative">
+              <canvas id="categoryPieChart"></canvas>
+              <div class="donut-center-info">
+                <div class="donut-center-val" id="donutTopPercent">0%</div>
+                <div class="donut-center-name" id="donutTopName">No Sales</div>
+              </div>
+            </div>
+            <div class="donut-legend-custom" id="donutLegendList">
+              <div class="donut-legend-row">
+                <div class="donut-legend-left">
+                  <span class="donut-dot" style="background:#D4A915"></span>
+                  <span>Agriculture</span>
+                </div>
+                <span class="donut-legend-percent" id="share_AGRI">0%</span>
+              </div>
+              <div class="donut-legend-row">
+                <div class="donut-legend-left">
+                  <span class="donut-dot" style="background:#1A1A1A"></span>
+                  <span>Non-Agriculture</span>
+                </div>
+                <span class="donut-legend-percent" id="share_NON_AGRI">0%</span>
+              </div>
+              <div class="donut-legend-row">
+                <div class="donut-legend-left">
+                  <span class="donut-dot" style="background:#0D6EFD"></span>
+                  <span>Main</span>
+                </div>
+                <span class="donut-legend-percent" id="share_MAIN">0%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Financial Comparison + Top Products -->
+      <!-- Financial Comparison + Business Performance Ranking -->
       <div class="bottom-section">
-        <div class="card">
+        <div class="card-modern">
           <div class="card-header"><span class="card-title">Financial Comparison Across Businesses</span></div>
           <div class="table-wrap">
             <table><thead><tr><th>Category</th><th>Revenue</th><th>Expenses</th><th>Profit</th><th>Margin</th></tr></thead>
             <tbody id="comparisonBody"></tbody></table>
           </div>
         </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Top Selling Products</span></div>
-          <div id="topProductsList"></div>
-        </div>
-      </div>
-
-      <!-- Bottom Selling Products -->
-      <div class="bottom-section" style="margin-top:20px">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Lowest Selling Products</span></div>
-          <div id="lowProductsList"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Product Innovation Suggestions</span></div>
-          <div id="innovationList"></div>
+        <div class="card-modern">
+          <div class="card-header">
+            <span class="card-title">Business Performance Ranking</span>
+            <select id="rankMetric" class="biz-rank-select" onchange="renderBizRanking()">
+              <option value="profit">Rank by: Net Profit</option>
+              <option value="revenue">Rank by: Revenue</option>
+              <option value="margin">Rank by: Margin %</option>
+              <option value="units">Rank by: Units Sold</option>
+            </select>
+          </div>
+          <div id="bizRankingList"></div>
         </div>
       </div>
 
       <!-- Tax Income Section -->
-      <div class="card" style="margin-top:20px" id="taxIncomeCard">
+      <div class="card-modern" style="margin-bottom:24px" id="taxIncomeCard">
         <div class="card-header">
           <span class="card-title">Tax Income Collected</span>
           <button class="btn btn-outline btn-sm" onclick="printTaxIncome()">
@@ -322,7 +871,7 @@
             Print
           </button>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:16px" id="taxIncomeGrid"></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px" id="taxIncomeGrid"></div>
         <div style="text-align:right;font-size:1.1rem;font-weight:800;padding-top:12px;border-top:2px solid var(--gray-200)">
           Total Tax Collected: <span id="totalTaxIncome" style="color:var(--green)">₱0.00</span>
         </div>
@@ -331,14 +880,26 @@
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
-const CATS = ['RENTAL','BUSINESS','AGRI','NON_AGRI','MAIN'];
-const CAT_NAMES = { RENTAL:'Rental', BUSINESS:'Business', AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main' };
-const CAT_COLORS = { RENTAL:'#6B3FA0', BUSINESS:'#2d6a2e', AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD' };
-const CAT_COLORS_LIGHT = { RENTAL:'#B39DDB', BUSINESS:'#81C784', AGRI:'#FFE082', NON_AGRI:'#757575', MAIN:'#90CDF4' };
+const CATS = ['AGRI','NON_AGRI','MAIN'];
+const CAT_NAMES = { AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main' };
+const CAT_COLORS = { AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD' };
+const CAT_COLORS_LIGHT = { AGRI:'#FFE082', NON_AGRI:'#757575', MAIN:'#90CDF4' };
 let salesChart;
+let categoryPieChart;
 let allData = { sales:{}, expenses:{}, inventory:{} };
+
+// Dynamic greeting
+function updateGreeting() {
+  if (typeof updateHeaderGreeting === 'function') {
+    updateHeaderGreeting('SYSTEM ADMINISTRATOR');
+  } else {
+    const h = new Date().getHours();
+    const el = document.getElementById('welcomeGreeting');
+    if (el) el.textContent = h < 12 ? 'GOOD MORNING,' : h < 18 ? 'GOOD AFTERNOON,' : 'GOOD EVENING,';
+  }
+}
 
 async function fetchAllData() {
   const filter = document.getElementById('fBizUnit').value;
@@ -374,24 +935,45 @@ function filterByDate(list) {
     return keep;
   });
 }
+// ── Income/Expense entry helpers ──────────────────────────────────
+// Tolerant of legacy / manually-seeded data shapes: `type` may be
+// "Expense"/"EXPENSE", `amount` may be a formatted string like "₱1,500.00".
+function entryTypeOf(e) {
+  return String((e && (e.type || e.entryType)) || '').trim().toLowerCase();
+}
+function parseMoney(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
+  const n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.\-]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+function sumEntriesOfType(list, type) {
+  return (list || [])
+    .filter(e => entryTypeOf(e) === type)
+    .reduce((a, e) => a + parseMoney(e.amount != null ? e.amount : e.total), 0);
+}
 
 function computeKPIs() {
   const filter = document.getElementById('fBizUnit').value;
   const cats = filter ? [filter] : CATS;
-  let totalRevenue = 0, totalExpenses = 0, lowStockCount = 0;
+  let totalRevenue = 0, totalExpenses = 0, lowStockCount = 0, invValue = 0, invCount = 0;
   const catRevenue = {};
 
   cats.forEach(cat => {
     const fSales = filterByDate(allData.sales[cat]||[]);
     const fExpenses = filterByDate(allData.expenses[cat]||[]);
     const salesRev = fSales.reduce((a,s) => a + ((parseFloat(s.total)||0) - (parseFloat(s.taxAmount)||0)), 0);
-    const incomeRev = fExpenses.filter(e => e.type==='income').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
-    const expTotal = fExpenses.filter(e => e.type==='expense').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
+    const incomeRev = sumEntriesOfType(fExpenses, 'income');
+    const expTotal = sumEntriesOfType(fExpenses, 'expense');
     const inv = allData.inventory[cat]||[];
     const low = inv.filter(p => {
       const qty = parseInt(p.quantity||p.stock||0);
       const reorder = parseInt(p.reorderLevel||10);
       return qty <= reorder;
+    });
+    inv.forEach(p => {
+      if (p.isArchived) return;
+      invValue += (parseFloat(p.unitCost) || 0) * (parseInt(p.quantity) || 0);
+      invCount++;
     });
     catRevenue[cat] = salesRev + incomeRev;
     totalRevenue += salesRev + incomeRev;
@@ -403,21 +985,32 @@ function computeKPIs() {
   const margin = totalRevenue > 0 ? ((netProfit/totalRevenue)*100).toFixed(1) : '0.0';
 
   document.getElementById('totalRevenue').innerHTML = '&#8369;' + totalRevenue.toLocaleString('en',{minimumFractionDigits:2});
+  const expEl = document.getElementById('totalExpenses');
+  if (expEl) expEl.innerHTML = '&#8369;' + totalExpenses.toLocaleString('en',{minimumFractionDigits:2});
   document.getElementById('lowStockCount').textContent = lowStockCount;
   document.getElementById('netProfit').innerHTML = '&#8369;' + netProfit.toLocaleString('en',{minimumFractionDigits:2});
-  document.getElementById('netProfit').style.color = netProfit >= 0 ? 'var(--green)' : 'var(--danger)';
-  document.querySelector('#netProfit + .kpi-sub').textContent = margin + '% Margin';
+  document.getElementById('netProfit').style.color = netProfit >= 0 ? '#059669' : 'var(--danger)';
+  
+  const marginEl = document.getElementById('netProfitMargin') || document.querySelector('#netProfit + .metric-sub');
+  if (marginEl) marginEl.textContent = margin + '% Margin';
+
+  const invEl = document.getElementById('invValue');
+  if (invEl) {
+    invEl.innerHTML = '&#8369;' + invValue.toLocaleString('en',{minimumFractionDigits:2});
+    const sub = document.getElementById('invValueSub');
+    if (sub) sub.textContent = invCount + ' products at cost';
+  }
 
   // Top performing category
   let topCat = null, topVal = 0;
   Object.entries(catRevenue).forEach(([cat, val]) => { if(val > topVal) { topVal = val; topCat = cat; } });
   document.getElementById('topBiz').textContent = topCat ? CAT_NAMES[topCat] : '—';
-  document.getElementById('topBizRev').textContent = topCat ? '&#8369;' + topVal.toLocaleString('en',{minimumFractionDigits:2}) : 'No data yet';
+  document.getElementById('topBizRev').innerHTML = topCat ? '&#8369;' + topVal.toLocaleString('en',{minimumFractionDigits:2}) : 'No data yet';
   if(topCat) document.getElementById('topBiz').style.color = CAT_COLORS[topCat];
 
   // Update category cards
   CATS.forEach(cat => {
-    const cards = document.querySelectorAll('.biz-cat-card');
+    const cards = document.querySelectorAll('#bizCatGrid .biz-cat-card');
     const idx = CATS.indexOf(cat);
     if(cards[idx]) {
       const rev = catRevenue[cat] || 0;
@@ -452,27 +1045,28 @@ function computeKPIs() {
   
   if (lowestProd) {
     document.getElementById('lowSellProd').textContent = lowestProd;
-    document.getElementById('lowSellQty').textContent = `Only ${lowestQty} units sold`;
+    document.getElementById('lowSellQty').textContent = lowestQty === 0 ? '0 sold' : 'Only ' + lowestQty + ' units sold';
   } else {
     document.getElementById('lowSellProd').textContent = '—';
-    document.getElementById('lowSellQty').textContent = 'No sales data';
+    document.getElementById('lowSellQty').textContent = '0 sold';
   }
 }
 
 function renderTaxIncome() {
   const grid = document.getElementById('taxIncomeGrid');
+  if (!grid) return;
   const cats = document.getElementById('fBizUnit').value ? [document.getElementById('fBizUnit').value] : CATS;
   let totalTax = 0;
-  const rows = cats.map(cat => {
+  const rows = [];
+  cats.forEach(cat => {
     const fSales = filterByDate(allData.sales[cat]||[]);
     const taxCollected = fSales.reduce((a,s) => a + (parseFloat(s.taxAmount)||0), 0);
     totalTax += taxCollected;
-    return `<div class="biz-cat-card" style="cursor:default">
-      <div class="cat-stripe" style="background:${CAT_COLORS[cat]}"></div>
+    rows.push(`<div class="biz-cat-card" style="cursor:default">
       <div class="biz-cat-name">${CAT_NAMES[cat]}</div>
       <div class="biz-cat-revenue" style="color:${CAT_COLORS[cat]};font-size:1.2rem">&#8369;${taxCollected.toLocaleString('en',{minimumFractionDigits:2})}</div>
       <div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">Tax Collected</div>
-    </div>`;
+    </div>`);
   });
   grid.innerHTML = rows.join('');
   document.getElementById('totalTaxIncome').innerHTML = '&#8369;' + totalTax.toLocaleString('en',{minimumFractionDigits:2});
@@ -502,89 +1096,72 @@ function printTaxIncome() {
   setTimeout(() => w.print(), 500);
 }
 
-function renderLowStock() {
-  const el = document.getElementById('lowStockList');
-  const items = [];
-  CATS.forEach(cat => {
-    (allData.inventory[cat]||[]).forEach(p => {
-      const qty = parseInt(p.quantity||p.stock||0);
-      const reorder = parseInt(p.reorderLevel||10);
-      if(qty <= reorder) {
-        let status='low', badge='Low Stock';
-        if(qty === 0) { status='out'; badge='Out of Stock'; }
-        else if(qty <= Math.floor(reorder/2)) { status='critical'; badge='Critical'; }
-        items.push({ name: p.name, biz: CAT_NAMES[cat], status, badge, qty });
-      }
-    });
+// ── Business Performance Ranking ─────────────────────────────────
+// Ranks all business categories against each other. Metric is
+// selectable (net profit / revenue / margin % / units sold) and all
+// figures respect the dashboard's date + business-unit filters.
+function renderBizRanking() {
+  const el = document.getElementById('bizRankingList');
+  if (!el) return;
+  const metricEl = document.getElementById('rankMetric');
+  const metric = metricEl ? metricEl.value : 'profit';
+  const filter = document.getElementById('fBizUnit').value;
+  const cats = filter ? [filter] : CATS;
+
+  const stats = cats.map(cat => {
+    const fSales = filterByDate(allData.sales[cat] || []);
+    const fExpenses = filterByDate(allData.expenses[cat] || []);
+    const revenue = fSales.reduce((a, s) => a + ((parseFloat(s.total) || 0) - (parseFloat(s.taxAmount) || 0)), 0)
+      + sumEntriesOfType(fExpenses, 'income');
+    const expenses = sumEntriesOfType(fExpenses, 'expense');
+    const profit = revenue - expenses;
+    const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+    let units = 0;
+    fSales.forEach(s => (s.items || []).forEach(i => { units += parseInt(i.quantity || i.qty || 1) || 0; }));
+    return { cat, revenue, expenses, profit, margin, units };
   });
-  if(!items.length) {
-    el.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No alerts</h3><p>All stock levels are healthy</p></div>';
+
+  // Sort descending by the chosen metric (margin can be negative)
+  stats.sort((a, b) => b[metric] - a[metric]);
+
+  const hasData = stats.some(s => s.revenue !== 0 || s.expenses !== 0 || s.units > 0);
+  if (!stats.length || !hasData) {
+    el.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No performance data yet</h3><p>Start recording sales to see how your businesses rank</p></div>';
     return;
   }
-  el.innerHTML = items.map(item => `
-    <div class="low-stock-item">
-      <div><span class="low-stock-name">${item.name}</span><br><small style="color:var(--gray-400)">${item.biz} — Qty: ${item.qty}</small></div>
-      <span class="low-stock-badge ${item.status}">${item.badge}</span>
-    </div>`).join('');
-}
 
-function renderTopProducts() {
-  const el = document.getElementById('topProductsList');
-  const productMap = {};
-  CATS.forEach(cat => {
-    const fSales = filterByDate(allData.sales[cat]||[]);
-    fSales.forEach(s => {
-      (s.items||[]).forEach(i => {
-        const key = i.name||'Unknown';
-        if(!productMap[key]) productMap[key] = { name:key, qty:0, revenue:0 };
-        productMap[key].qty += parseInt(i.quantity||i.qty||1);
-        productMap[key].revenue += parseFloat(i.subtotal||i.unitPrice||0);
-      });
-    });
-  });
-  const sorted = Object.values(productMap).sort((a,b) => b.revenue - a.revenue).slice(0,5);
-  if(!sorted.length) {
-    el.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No sales yet</h3><p>Start recording sales to see top products</p></div>';
-    return;
-  }
-  const rankColors = ['gold','silver','bronze','default','default'];
-  el.innerHTML = sorted.map((p,i) => `
-    <div class="top-product-item">
-      <div class="top-product-rank ${rankColors[i]}">${i+1}</div>
-      <div style="flex:1"><div style="font-weight:600;font-size:0.9rem">${p.name}</div><small style="color:var(--gray-400)">${p.qty} sold</small></div>
-      <div style="font-weight:700;font-size:0.88rem">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
-    </div>`).join('');
+  const maxVal = Math.max(...stats.map(s => Math.max(s[metric], 0)), 0);
+  const rankColors = ['gold', 'silver', 'bronze', 'default', 'default'];
+  const fmt = n => '&#8369;' + n.toLocaleString('en', { minimumFractionDigits: 2 });
 
-  // Render Bottom 5 Low Selling Products
-  renderLowProducts(productMap);
-}
-
-function renderLowProducts(productMap) {
-  const el = document.getElementById('lowProductsList');
-  const innovEl = document.getElementById('innovationList');
-  const products = Object.values(productMap || {});
-  const bottom5 = products.sort((a,b) => a.qty - b.qty).slice(0,5);
-  if(!bottom5.length) {
-    el.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No data</h3><p>Start recording sales to see underperforming products</p></div>';
-    innovEl.innerHTML = '<div class="empty-state" style="padding:30px 10px"><h3>No suggestions yet</h3><p>Data needed to generate innovation insights</p></div>';
-    return;
-  }
-  el.innerHTML = bottom5.map((p,i) => `
-    <div class="top-product-item">
-      <div class="top-product-rank" style="background:var(--danger-light);color:var(--danger)">${i+1}</div>
-      <div style="flex:1"><div style="font-weight:600;font-size:0.9rem">${p.name}</div><small style="color:var(--gray-400)">Only ${p.qty} sold</small></div>
-      <div style="font-weight:700;font-size:0.82rem;color:var(--danger)">&#8369;${p.revenue.toLocaleString('en',{minimumFractionDigits:2})}</div>
-    </div>`).join('');
-
-  // Innovation suggestions based on low selling
-  innovEl.innerHTML = bottom5.map(p => `
-    <div style="display:flex;align-items:start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-200)">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--yellow-light);color:var(--yellow-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem">💡</div>
-      <div style="flex:1">
-        <div style="font-weight:600;font-size:0.85rem">${p.name}</div>
-        <div style="font-size:0.78rem;color:var(--gray-500);line-height:1.4">Only ${p.qty} unit(s) sold. Consider: price adjustment, bundling with top sellers, promotional campaigns, or product re-evaluation.</div>
+  el.innerHTML = stats.map((s, i) => {
+    const name = CAT_NAMES[s.cat] || s.cat;
+    const color = CAT_COLORS[s.cat] || '#64748b';
+    const metricLabel = { profit: 'Net Profit', revenue: 'Revenue', margin: 'Margin', units: 'Units Sold' }[metric];
+    const metricText = metric === 'units'
+      ? s.units.toLocaleString() + ' units'
+      : metric === 'margin'
+        ? s.margin.toFixed(1) + '%'
+        : fmt(s[metric]);
+    const barPct = maxVal > 0 ? Math.max((Math.max(s[metric], 0) / maxVal) * 100, 2) : 0;
+    const profitCls = s.profit >= 0 ? 'profit-pos' : 'profit-neg';
+    return `
+    <div class="biz-rank-item">
+      <div class="top-product-rank ${rankColors[i] || 'default'}">${i + 1}</div>
+      <div class="biz-rank-info">
+        <div class="biz-rank-name">
+          <span class="biz-rank-dot" style="background:${color}"></span>
+          ${name}
+          <span class="biz-rank-sub">${metricLabel}: <b style="color:${color}">${metricText}</b></span>
+        </div>
+        <div class="biz-rank-bar"><div class="biz-rank-bar-fill" style="width:${barPct}%;background:${color}"></div></div>
       </div>
-    </div>`).join('');
+      <div class="biz-rank-stats">
+        <div class="biz-rank-revenue">${fmt(s.revenue)}</div>
+        <div class="biz-rank-detail">Profit <b class="${profitCls}">${fmt(s.profit)}</b> &middot; ${s.margin.toFixed(1)}% margin</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderComparison() {
@@ -595,8 +1172,8 @@ function renderComparison() {
     const fSales = filterByDate(allData.sales[cat]||[]);
     const fExpenses = filterByDate(allData.expenses[cat]||[]);
     const salesRev = fSales.reduce((a,s) => a + ((parseFloat(s.total)||0) - (parseFloat(s.taxAmount)||0)), 0);
-    const incomeRev = fExpenses.filter(e => e.type==='income').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
-    const expTotal = fExpenses.filter(e => e.type==='expense').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
+    const incomeRev = sumEntriesOfType(fExpenses, 'income');
+    const expTotal = sumEntriesOfType(fExpenses, 'expense');
     const rev = salesRev + incomeRev;
     const profit = rev - expTotal;
     const margin = rev > 0 ? ((profit/rev)*100).toFixed(1)+'%' : '0.0%';
@@ -616,29 +1193,112 @@ function renderComparison() {
 
 function renderSalesChart() {
   const ctx = document.getElementById('salesChart');
+  if (!ctx) return;
   if (salesChart) salesChart.destroy();
   const revData = CATS.map(cat => {
     const fSales = filterByDate(allData.sales[cat]||[]);
     const fExpenses = filterByDate(allData.expenses[cat]||[]);
     const salesRev = fSales.reduce((a,s) => a + ((parseFloat(s.total)||0) - (parseFloat(s.taxAmount)||0)), 0);
-    const incomeRev = fExpenses.filter(e => e.type==='income').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
+    const incomeRev = sumEntriesOfType(fExpenses, 'income');
     return salesRev + incomeRev;
   });
   const expData = CATS.map(cat => {
     const fExpenses = filterByDate(allData.expenses[cat]||[]);
-    return fExpenses.filter(e => e.type==='expense').reduce((a,e) => a + (parseFloat(e.amount)||0), 0);
+    return sumEntriesOfType(fExpenses, 'expense');
   });
+  const profitData = revData.map((r, i) => r - (expData[i] || 0));
   salesChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: CATS.map(c => CAT_NAMES[c]),
       datasets: [
-        { label: 'Revenue', data: revData, backgroundColor: Object.values(CAT_COLORS), borderRadius: 6 },
-        { label: 'Expenses', data: expData, backgroundColor: Object.values(CAT_COLORS_LIGHT), borderRadius: 6 },
+        { label: 'Revenue', data: revData, backgroundColor: '#1e7e45', borderRadius: 6, barPercentage: 0.55, order: 2 },
+        { label: 'Net Profit (trend)', data: profitData, type: 'line', borderColor: '#064e3b', backgroundColor: '#064e3b', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#ffffff', pointBorderWidth: 2, tension: 0.35, order: 1 },
       ]
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } },
-      scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', align: 'end', sort: (a, b) => a.datasetIndex - b.datasetIndex, labels: { boxWidth: 12, usePointStyle: true, font: { size: 11, family: 'Inter' } } }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => '₱' + Number(v).toLocaleString() } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderCategoryPie() {
+  const ctx = document.getElementById('categoryPieChart');
+  if (!ctx) return;
+  if (categoryPieChart) categoryPieChart.destroy();
+  const filter = document.getElementById('fBizUnit').value;
+  const cats = filter ? [filter] : CATS;
+  const shareData = cats.map(cat => {
+    const fSales = filterByDate(allData.sales[cat]||[]);
+    const fExpenses = filterByDate(allData.expenses[cat]||[]);
+    const salesRev = fSales.reduce((a,s) => a + ((parseFloat(s.total)||0) - (parseFloat(s.taxAmount)||0)), 0);
+    const incomeRev = sumEntriesOfType(fExpenses, 'income');
+    return salesRev + incomeRev;
+  });
+  const totalShare = shareData.reduce((a, b) => a + b, 0);
+
+  // Find top category for center text
+  let maxIdx = 0, maxVal = -1;
+  shareData.forEach((val, idx) => {
+    if (val > maxVal) { maxVal = val; maxIdx = idx; }
+  });
+  const topPercent = totalShare > 0 ? ((maxVal / totalShare) * 100).toFixed(1) + '%' : '0%';
+  const topName = totalShare > 0 ? CAT_NAMES[cats[maxIdx]] : 'No Sales';
+  const cPercent = document.getElementById('donutTopPercent');
+  const cName = document.getElementById('donutTopName');
+  if (cPercent) cPercent.textContent = topPercent;
+  if (cName) cName.textContent = topName;
+
+  // Update legend items
+  CATS.forEach(cat => {
+    const el = document.getElementById('share_' + cat);
+    if (el) {
+      const catIdx = cats.indexOf(cat);
+      if (catIdx >= 0 && totalShare > 0) {
+        el.textContent = ((shareData[catIdx] / totalShare) * 100).toFixed(1) + '%';
+      } else {
+        el.textContent = '0%';
+      }
+    }
+  });
+
+  const chartColors = cats.map(cat => CAT_COLORS[cat]);
+  categoryPieChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: cats.map(cat => CAT_NAMES[cat]),
+      datasets: [{
+        data: totalShare > 0 ? shareData : [1],
+        backgroundColor: totalShare > 0 ? chartColors : ['#e2e8f0'],
+        borderWidth: 3,
+        borderColor: '#ffffff',
+        cutout: '72%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: totalShare > 0,
+          callbacks: {
+            label: function(context) {
+              const val = context.raw || 0;
+              const pct = totalShare > 0 ? ((val / totalShare) * 100).toFixed(1) + '%' : '0%';
+              return ` ${context.label}: ₱${val.toLocaleString('en', {minimumFractionDigits:2})} (${pct})`;
+            }
+          }
+        }
+      }
     }
   });
 }
@@ -646,10 +1306,10 @@ function renderSalesChart() {
 async function loadKPI() {
   await fetchAllData();
   computeKPIs();
-  renderLowStock();
-  renderTopProducts();
+  renderBizRanking();
   renderComparison();
   renderSalesChart();
+  renderCategoryPie();
   renderTaxIncome();
 }
 
@@ -666,14 +1326,21 @@ async function loadTaxRates() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateGreeting();
   loadKPI();
   loadTaxRates();
+  // Module 4.2: real-time refresh — poll the Firestore-backed API every 30s
+  // so the KPI dashboard reflects new transactions without a manual reload.
+  // Skips while the tab is hidden to save resources.
+  setInterval(() => {
+    if (document.hidden) return;
+    loadKPI();
+  }, 30000);
   getCurrentUser().then(user => {
     if (user) {
       document.getElementById('sidebarName').textContent = user.name;
       document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(user.role);
       document.getElementById('sidebarAvatar').textContent = user.name.charAt(0).toUpperCase();
-      // Viewer role enforcement — only show Dashboard, Business (Inventory), Sales, Logout
       if (user.role === 'viewer') {
         document.querySelectorAll('.sidebar-nav a').forEach(a => {
           const href = a.getAttribute('href') || '';
@@ -682,7 +1349,6 @@ document.addEventListener('DOMContentLoaded', () => {
             a.style.display = 'none';
           }
         });
-        // Hide action buttons, disable form submissions for view-only
         document.querySelectorAll('.btn-primary, .btn-success, .btn-danger').forEach(btn => {
           if (!btn.classList.contains('btn-sm')) return; // keep filter button
         });
@@ -691,7 +1357,8 @@ document.addEventListener('DOMContentLoaded', () => {
           const badge = document.createElement('span');
           badge.textContent = 'VIEW ONLY';
           badge.style.cssText = 'background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.5px;margin-left:12px';
-          topbar.querySelector('.flex-c').appendChild(badge);
+          const flexC = topbar.querySelector('.flex-c');
+          if (flexC) flexC.appendChild(badge);
         }
       }
     }

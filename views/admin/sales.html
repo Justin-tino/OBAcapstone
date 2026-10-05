@@ -7,15 +7,6 @@
   <title>Sales — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/print.css">
-  <style>
-    .is-viewer .btn-record-sale {
-      display: none !important;
-    }
-
-    .is-viewer .btn-save-sale {
-      display: none !important;
-    }
-  </style>
 </head>
 
 <body>
@@ -51,6 +42,7 @@
               <path d="M8 14h.01" />
             </svg></span> Business</a>
         <a class="nav-item" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none"
+        <a class="nav-item" href="/admin/all-inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> Business Inventory</a>
               stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path
                 d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -105,27 +97,31 @@
     </aside>
 
     <div class="main-content">
-      <div class="topbar" style="background-color: var(--primary)">
-        <div class="flex-c gap-12">
-
-          <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />
-              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-            </svg></button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+            <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+            <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+          </svg>
           <span class="topbar-title">Sales Management</span>
         </div>
         <div class="topbar-actions">
           <select id="bizSelector" class="filter-control" onchange="changeBiz()">
-            <option value="RENTAL">Rental</option>
-            <option value="BUSINESS">Business</option>
             <option value="AGRI">Agriculture</option>
             <option value="NON_AGRI">Non-Agriculture</option>
             <option value="MAIN">Main</option>
           </select>
-          <button class="btn btn-primary btn-sm btn-record-sale" onclick="openModal('addSaleModal')">+ Record
-            Sale</button>
+          <!-- Admins cannot record sales (Module 2.2) — only sales staff record
+               sales via their own POS/Sales page. Category selector is kept
+               directly next to the notification bell. -->
+          <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-dot" id="notifDot"></span>
+            <span class="notif-count" id="notifCount" style="display:none">0</span>
+            <div class="notif-dropdown" id="notifDropdown"></div>
+          </div>
+          <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
       </div>
 
@@ -242,77 +238,6 @@
     </div>
   </div>
 
-  <!-- Add Sale Modal -->
-  <div class="modal-overlay" id="addSaleModal">
-    <div class="modal" style="max-width:640px">
-      <div class="modal-header">
-        <span class="modal-title"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-          </svg> Record New Sale</span>
-        <button class="btn btn-outline btn-sm" onclick="closeModal('addSaleModal')">Cancel</button>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Customer Name (optional)</label>
-          <input type="text" id="s_customer" class="form-control" placeholder="Walk-in Customer">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Payment Method</label>
-          <select id="s_payment" class="form-control">
-            <option value="cash">Cash</option>
-            <option value="gcash">GCash</option>
-            <option value="credit">Credit</option>
-            <option value="check">Check</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Items -->
-      <div class="form-group">
-        <label class="form-label">Items Sold <small style="color:var(--gray-400);font-weight:400">(Barcode Scanner
-            Ready)</small></label>
-        <div id="itemsContainer"></div>
-        <button class="btn btn-outline btn-sm mt-8" onclick="addItem()">+ Add Item</button>
-      </div>
-
-      <!-- Totals -->
-      <div style="background: var(--gray-100); border-radius: var(--radius-sm); padding: 14px; margin: 16px 0;">
-        <div class="flex-b mb-8"><span>Subtotal:</span><strong id="subtotalDisplay">₱0.00</strong></div>
-        <div class="flex-b mb-8"><span>Tax (<span id="taxRateDisplay">0</span>%):</span><strong
-            id="taxDisplay">₱0.00</strong></div>
-        <div class="flex-b mb-8" style="font-size:1.05rem;border-top:1px dashed #ccc;padding-top:8px"><span
-            class="fw-bold">Total:</span><strong id="totalDisplay" style="color:var(--primary)">₱0.00</strong></div>
-        <div class="flex-b mb-8">
-          <span>Amount Paid:</span>
-          <input type="number" id="s_paid" class="form-control" style="width:140px" placeholder="0.00"
-            oninput="calcChange()">
-        </div>
-        <div class="flex-b" style="font-size:1.1rem;">
-          <span class="fw-bold">Change:</span>
-          <strong id="changeDisplay" style="color: var(--green)">₱0.00</strong>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <input type="text" id="s_notes" class="form-control" placeholder="Optional notes...">
-      </div>
-
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button class="btn btn-primary btn-save-sale" onclick="submitSale()"><svg width="14" height="14" fill="none"
-            stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg> Save Transaction</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Receipt Modal -->
   <div class="modal-overlay" id="receiptModal">
     <div class="modal" style="max-width:420px">
@@ -343,14 +268,12 @@
     </div>
   </div>
 
-  <script src="/js/app.js"></script>
+  <script src="/js/app.js?v=2"></script>
   <script>
     let currentBiz = getBizId();
     let allSales = [];
-    let saleItems = [];
     let currentPage = 1;
     const PER_PAGE = 10;
-    let taxRates = {};
 
     function changeBiz() {
       currentBiz = document.getElementById('bizSelector').value;
@@ -358,7 +281,6 @@
       const sel = document.getElementById('bizSelector');
       document.getElementById('salesTitle').textContent = `Sales — ${sel.options[sel.selectedIndex].text}`;
       loadSales();
-      calcTotal();
     }
 
     async function loadSales() {
@@ -431,105 +353,9 @@
       renderTable();
     }
 
-    async function loadTaxRates() {
-      try {
-        const res = await API.get('/api/admin/taxes');
-        if (res.success) taxRates = res.data || {};
-      } catch (e) { console.error('Failed to load tax rates:', e); }
-    }
-
-    // Add Item row
-    function addItem() {
-      const id = Date.now();
-      saleItems.push(id);
-      const row = document.createElement('div');
-      row.id = `item_${id}`;
-      row.className = 'form-row mt-8';
-      row.style.alignItems = 'flex-end';
-      row.innerHTML = `
-    <div class="form-group" style="margin:0">
-      <input type="text" class="form-control" placeholder="Item name" id="iName_${id}" oninput="calcTotal()">
-    </div>
-    <div class="form-group" style="margin:0;max-width:90px">
-      <input type="number" class="form-control" placeholder="Qty" id="iQty_${id}" value="1" oninput="calcTotal()">
-    </div>
-    <div class="form-group" style="margin:0;max-width:130px">
-      <input type="number" class="form-control" placeholder="Unit Price" id="iPrice_${id}" oninput="calcTotal()">
-    </div>
-    <button class="btn btn-danger btn-sm btn-icon" onclick="removeItem(${id})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-  `;
-      document.getElementById('itemsContainer').appendChild(row);
-    }
-
-    function removeItem(id) {
-      document.getElementById(`item_${id}`).remove();
-      saleItems = saleItems.filter(i => i !== id);
-      calcTotal();
-    }
-
-    function calcTotal() {
-      let subtotal = 0;
-      saleItems.forEach(id => {
-        const qty = parseFloat(document.getElementById(`iQty_${id}`)?.value) || 0;
-        const price = parseFloat(document.getElementById(`iPrice_${id}`)?.value) || 0;
-        subtotal += qty * price;
-      });
-      const rate = taxRates[currentBiz] || 0;
-      const total = subtotal; // subtotal var holds total price * qty
-      const tax = total * (rate / 100);
-      const netSubtotal = total - tax;
-      document.getElementById('subtotalDisplay').textContent = fmt.currency(netSubtotal);
-      document.getElementById('taxRateDisplay').textContent = rate;
-      document.getElementById('taxDisplay').textContent = fmt.currency(tax);
-      document.getElementById('totalDisplay').textContent = fmt.currency(total);
-      calcChange();
-      return subtotal;
-    }
-
-    function calcChange() {
-      const total = parseFloat(document.getElementById('totalDisplay').textContent.replace('₱', '').replace(',', '')) || 0;
-      const paid = parseFloat(document.getElementById('s_paid').value) || 0;
-      document.getElementById('changeDisplay').textContent = fmt.currency(paid - total);
-      document.getElementById('changeDisplay').style.color = paid < total ? 'var(--danger)' : 'var(--green)';
-    }
-
-    async function submitSale() {
-      const items = saleItems.map(id => ({
-        name: document.getElementById(`iName_${id}`)?.value || 'Item',
-        quantity: parseInt(document.getElementById(`iQty_${id}`)?.value) || 1,
-        unitPrice: parseFloat(document.getElementById(`iPrice_${id}`)?.value) || 0,
-      })).filter(i => i.unitPrice > 0);
-      if (!items.length) { Toast.warning('Add at least one item.'); return; }
-
-      const total = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-      const rate = taxRates[currentBiz] || 0;
-      const taxAmount = total * (rate / 100);
-      const subtotal = total - taxAmount;
-
-      const data = {
-        items,
-        subtotal,
-        taxRate: rate,
-        taxAmount,
-        total,
-        paymentMethod: document.getElementById('s_payment').value,
-        amountPaid: parseFloat(document.getElementById('s_paid').value) || 0,
-        customerName: document.getElementById('s_customer').value,
-        notes: document.getElementById('s_notes').value,
-        businessCategory: currentBiz
-      };
-      try {
-        const res = await API.post(`/api/sales`, data);
-        if (res.success) {
-          Toast.success('Sale recorded successfully!');
-          closeModal('addSaleModal');
-          showReceipt(res.data);
-          loadSales();
-          saleItems = [];
-          document.getElementById('itemsContainer').innerHTML = '';
-        } else { Toast.error(res.message); }
-      } catch (e) { Toast.error('Failed to save sale.'); }
-    }
+    // NOTE: Sale recording was removed for admins — only sales staff record
+    // sales via their own POS/Sales page (POST /api/sales also rejects
+    // admin roles server-side). This page is read/report-only plus receipts.
 
     function showReceipt(sale) {
       const items = Array.isArray(sale.items) ? sale.items : [];
@@ -566,12 +392,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await loadTaxRates();
       document.getElementById('bizSelector').value = currentBiz;
       const sel = document.getElementById('bizSelector');
       document.getElementById('salesTitle').textContent = `Sales — ${sel.options[sel.selectedIndex].text}`;
-      addItem();
-      calcTotal();
       loadSales();
       getCurrentUser().then(u => {
         if (u) {

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Inventory — OBA System</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .tool-ribbon {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #FFF8E1;
+      border: 1px solid #F5C518;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      margin-bottom: 18px;
+      font-size: 0.83rem;
+      color: #795548;
+    }
+    .tool-ribbon strong { color: var(--yellow-dark); }
+
+    .inv-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 1024px) { .inv-layout { grid-template-columns: 1fr; } }
+
+    .biz-panel { position: sticky; top: 16px; max-height: calc(100vh - 130px); overflow-y: auto; }
+    .biz-group-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase;
+      padding: 12px 14px 6px; color: var(--gray-500);
+      position: sticky; top: 0; background: var(--white); z-index: 1;
+    }
+    .biz-group-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .biz-list-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 10px 14px; cursor: pointer; border-left: 3px solid transparent;
+      transition: var(--transition);
+    }
+    .biz-list-item:hover { background: var(--gray-50); }
+    .biz-list-item.active { background: #FFF8E1; border-left-color: var(--yellow); }
+    .biz-list-name { font-weight: 700; font-size: 0.86rem; color: var(--black); }
+    .biz-list-meta { font-size: 0.72rem; color: var(--gray-500); }
+    .biz-count-pill {
+      background: var(--gray-100); color: var(--gray-600); border-radius: 12px;
+      padding: 1px 8px; font-size: 0.7rem; font-weight: 800; flex-shrink: 0;
+    }
+    .biz-list-item.active .biz-count-pill { background: var(--yellow); color: var(--yellow-dark); }
+
+    .stock-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+    .stock-badge.in-stock { background: var(--green-light); color: var(--green); }
+    .stock-badge.low-stock { background: var(--yellow-light); color: var(--yellow-dark); }
+    .stock-badge.out { background: var(--danger-light); color: var(--danger); }
+    .archived-pill { background: var(--gray-200); color: var(--gray-600); border-radius: 10px; padding: 1px 7px; font-size: 0.68rem; font-weight: 700; }
+
+    .busy-note { font-size: 0.8rem; color: var(--gray-500); display: flex; align-items: center; gap: 8px; }
+    .bulk-preview { max-height: 240px; overflow-y: auto; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); }
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo-area">
+        <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
+        <div class="org-name">Office of Business Affairs</div>
+      </div>
+      <nav class="sidebar-nav" id="adminNav"></nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+          <div><div class="sidebar-user-name" id="sidebarName">Loading...</div>
+            <div class="sidebar-user-role">Logged in as:</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z"
+              fill="#1b5e20" />
+            <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round"
+              opacity="0.75" />
+            <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z"
+              fill="#22c55e" />
+          </svg>
+          <span class="topbar-title">Business Inventory</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="profile-btn">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg> Profile
+          </button>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <div class="tool-ribbon">
+          <svg width="16" height="16" fill="none" stroke="current(--yellow-dark)" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span><strong>Local loading tool.</strong> Add products for any business below without logging in as that business. Access is limited to System Administrators on localhost.</span>
+        </div>
+
+        <div class="inv-layout">
+          <!-- Business list, grouped by category -->
+          <div class="card biz-panel">
+            <div class="card-header" style="flex-direction:column;align-items:stretch;gap:10px">
+              <span class="card-title">Businesses</span>
+              <input id="bizSearch" class="form-control" placeholder="Search businesses..." oninput="renderBizList()">
+              <label style="font-size:0.78rem;color:var(--gray-600);display:flex;align-items:center;gap:6px">
+                <input type="checkbox" id="showArchived" onchange="loadData()"> Show archived products
+              </label>
+            </div>
+            <div id="bizList"></div>
+          </div>
+
+          <!-- Products for the selected business -->
+          <div class="card">
+            <div class="card-header" style="flex-wrap:wrap;gap:12px">
+              <div>
+                <h3 class="card-title" id="panelTitle">Select a business</h3>
+                <div style="font-size:0.82rem;color:var(--gray-600);margin-top:4px" id="panelSubtitle">
+                  Pick a business on the left to view or add its products.
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" id="btnBulk" disabled onclick="openBulk()">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg> Bulk Add
+                </button>
+                <button class="btn btn-primary btn-sm" id="btnAdd" disabled onclick="openAdd()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg> Add Product
+                </button>
+              </div>
+            </div>
+            <div id="invTable">
+              <div class="empty-state">
+                <h3>Select a business to begin</h3>
+                <p style="color:var(--gray-500);font-size:0.88rem;margin:0">Every product you add here appears in that business's POS and reports right away.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Product Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Product</h3>
+        <button class="modal-close" onclick="closeModal('productModal')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <input type="hidden" id="p_id">
+      <div style="background:#F8F9FA;border:1px solid var(--gray-200);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+        <span style="font-size:0.78rem;color:var(--gray-600)">Saving into</span>
+        <div style="font-weight:700;font-size:0.9rem" id="p_target">—</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Name *</label>
+        <input id="p_name" class="form-control" placeholder="Product name">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Category</label>
+          <input id="p_category" class="form-control" placeholder="e.g. Fresh Produce">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Unit</label>
+          <input id="p_unit" class="form-control" placeholder="pcs, kg, box">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Quantity *</label>
+          <input id="p_qty" type="number" class="form-control" min="0" placeholder="0">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Reorder Level</label>
+          <input id="p_reorder" type="number" class="form-control" min="0" placeholder="10">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Unit Cost (&#8369;)</label>
+          <input id="p_cost" type="number" class="form-control" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Selling Price * (&#8369;)</label>
+          <input id="p_price" type="number" class="form-control" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Supplier</label>
+        <input id="p_supplier" class="form-control" placeholder="Supplier name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="p_description" class="form-control" rows="2" placeholder="Variations, sizes, notes..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Add Modal -->
+  <div class="modal-overlay" id="bulkModal">
+    <div class="modal" style="max-width:720px">
+      <div class="modal-header">
+        <h3>Bulk Add Products</h3>
+        <button class="modal-close" onclick="closeModal('bulkModal')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:10px">
+        One product per line, in this order:
+        <code style="background:var(--gray-100);padding:2px 6px;border-radius:4px">name | category | qty | unitCost | sellingPrice | unit | reorderLevel | supplier</code>
+        Only <strong>name</strong>, <strong>qty</strong> and <strong>sellingPrice</strong> are required — the rest can be left blank or omitted from the end.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Products</label>
+        <textarea id="bulk_lines" class="form-control" rows="9" placeholder="Kwek-kwek | Frozen Foods | 50 | 12.50 | 15.00 | tray | 10&#10;Hotdog Cheese | Frozen Foods | 40 | 22.00 | 28.00 | pack | 10"></textarea>
+      </div>
+      <div class="busy-note" id="bulkCount" style="margin-bottom:10px">0 products ready</div>
+      <div class="bulk-preview" id="bulkPreview"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('bulkModal')">Cancel</button>
+        <button class="btn btn-primary" id="bulkSaveBtn" onclick="saveBulk()">Add Products</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copy To Other Businesses Modal -->
+  <div class="modal-overlay" id="copyModal">
+    <div class="modal" style="max-width:620px">
+      <div class="modal-header">
+        <h3>Copy Product To Other Businesses</h3>
+        <button class="modal-close" onclick="closeModal('copyModal')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:12px" id="copySource"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="btn btn-outline btn-sm" onclick="toggleAllCopyTargets(true)">Select all</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleAllCopyTargets(false)">Clear</button>
+      </div>
+      <div id="copyTargets" style="max-height:320px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:8px"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('copyModal')">Cancel</button>
+        <button class="btn btn-primary" id="copySaveBtn" onclick="saveCopy()">Copy Product</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js?v=2"></script>
+  <script>
+    const CAT_ORDER = ['AGRI', 'NON_AGRI', 'MAIN'];
+    const CAT_META = {
+      AGRI: { name: 'Agriculture', color: '#D4A915' },
+      NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A' },
+      MAIN: { name: 'Main', color: '#0D6EFD' },
+    };
+
+    let businesses = [];
+    let products = [];
+    let selectedId = null;
+    let copySourceId = null;
+
+    const BASE = '/api/admin-inventory';
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function buildNav() {
+      document.getElementById('adminNav').innerHTML = `
+        <a class="nav-item" href="/admin/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+        <a class="nav-item" href="/admin/business"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg></span> Business</a>
+        <a class="nav-item active" href="/admin/all-inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> Business Inventory</a>
+        <a class="nav-item" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Movement Logs</a>
+        <a class="nav-item" href="/admin/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
+        <a class="nav-item" href="/admin/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
+        <a class="nav-item" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Users</a>
+        <a class="nav-item" href="/admin/settings"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</a>
+        <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+      `;
+    }
+
+    function selectedBusiness() {
+      return businesses.find(b => b.id === selectedId) || null;
+    }
+
+    function productsFor(entityId) {
+      return products
+        .filter(p => (p.entityId || '') === (entityId || ''))
+        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+    }
+
+    // ── Data ────────────────────────────────────────────────────────────────
+    async function loadData(keepSelection = true) {
+      try {
+        const res = await API.get(BASE + '/overview', {
+          includeArchived: document.getElementById('showArchived').checked ? 'true' : 'false',
+        });
+        if (!res.success) {
+          document.getElementById('invTable').innerHTML =
+            '<div class="empty-state"><h3>' + esc(res.message || 'Unable to load inventory') + '</h3></div>';
+          return;
+        }
+        businesses = res.businesses || [];
+        products = res.products || [];
+        if (!keepSelection || !businesses.some(b => b.id === selectedId)) {
+          selectedId = businesses.length ? businesses[0].id : null;
+        }
+        renderBizList();
+        renderProducts();
+      } catch (e) {
+        Toast.error('Could not load inventory: ' + e.message);
+      }
+    }
+
+    // ── Business list (grouped by category) ──────────────────────────────────
+    function renderBizList() {
+      const q = (document.getElementById('bizSearch').value || '').toLowerCase();
+      const el = document.getElementById('bizList');
+      if (!businesses.length) {
+        el.innerHTML = '<div class="empty-state" style="padding:28px 12px"><h3>No businesses</h3></div>';
+        return;
+      }
+      let html = '';
+      CAT_ORDER.forEach(cat => {
+        const list = businesses.filter(b =>
+          (b.categoryId === cat) &&
+          (!q || String(b.name).toLowerCase().includes(q) || String(b.location || '').toLowerCase().includes(q))
+        );
+        if (!list.length) return;
+        const meta = CAT_META[cat];
+        html += `<div class="biz-group-title"><span class="biz-group-dot" style="background:${meta.color}"></span>${meta.name} (${list.length})</div>`;
+        html += list.map(b => `
+          <div class="biz-list-item ${b.id === selectedId ? 'active' : ''}" onclick="selectBusiness('${b.id}')">
+            <div style="min-width:0">
+              <div class="biz-list-name">${esc(b.name)}</div>
+              <div class="biz-list-meta">${esc(b.location || b.manager || b.id)}</div>
+            </div>
+            <span class="biz-count-pill">${productsFor(b.id).length}</span>
+          </div>`).join('');
+      });
+      // Products that belong to no registered business (legacy/imported data)
+      const orphan = businesses.filter(b => b.isOrphan && (!q || String(b.name).toLowerCase().includes(q)));
+      if (orphan.length) {
+        html += `<div class="biz-group-title"><span class="biz-group-dot" style="background:var(--gray-400)"></span>Unregistered (${orphan.length})</div>`;
+        html += orphan.map(b => `
+          <div class="biz-list-item ${b.id === selectedId ? 'active' : ''}" onclick="selectBusiness('${b.id}')">
+            <div style="min-width:0">
+              <div class="biz-list-name">${esc(b.name)}</div>
+              <div class="biz-list-meta">${esc(b.id)}</div>
+            </div>
+            <span class="biz-count-pill">${productsFor(b.id).length}</span>
+          </div>`).join('');
+      }
+      el.innerHTML = html;
+    }
+
+    function selectBusiness(id) {
+      selectedId = id;
+      renderBizList();
+      renderProducts();
+    }
+
+    // ── Products panel ──────────────────────────────────────────────────────
+    function renderProducts() {
+      const el = document.getElementById('invTable');
+      const biz = selectedBusiness();
+      const has = Boolean(biz);
+      document.getElementById('btnAdd').disabled = !has;
+      document.getElementById('btnBulk').disabled = !has;
+
+      if (!has) {
+        document.getElementById('panelTitle').textContent = 'Select a business';
+        document.getElementById('panelSubtitle').textContent = 'Pick a business on the left to view or add its products.';
+        el.innerHTML = '<div class="empty-state"><h3>Select a business to begin</h3></div>';
+        return;
+      }
+
+      const meta = CAT_META[biz.categoryId] || CAT_META.AGRI;
+      document.getElementById('panelTitle').textContent = biz.name;
+      document.getElementById('panelSubtitle').innerHTML =
+        `<span style="display:inline-flex;align-items:center;gap:6px">` +
+        `<span style="width:8px;height:8px;border-radius:50%;background:${meta.color};display:inline-block"></span>` +
+        `${meta.name}${biz.location ? ' • ' + esc(biz.location) : ''}</span>`;
+
+      const list = productsFor(biz.id);
+      if (!list.length) {
+        el.innerHTML = `<div class="empty-state"><h3>No products for ${esc(biz.name)} yet</h3>
+          <p style="color:var(--gray-500);font-size:0.88rem;margin:0 0 14px">Use “Add Product” for one item or “Bulk Add” to paste a whole list at once.</p>
+          <button class="btn btn-primary btn-sm" onclick="openBulk()">Bulk Add Products</button></div>`;
+        return;
+      }
+
+      el.innerHTML = `<div class="table-wrap"><table>
+        <thead><tr>
+          <th>Product</th><th>Category</th><th>Qty</th><th>Unit Cost</th><th>Selling Price</th><th>Stock Value</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody>${list.map(p => {
+          const qty = parseInt(p.quantity, 10) || 0;
+          const reorder = parseInt(p.reorderLevel, 10) || 0;
+          const status = qty === 0 ? ['Out of Stock', 'out'] : (qty <= reorder ? ['Low Stock', 'low-stock'] : ['In Stock', 'in-stock']);
+          const cost = parseFloat(p.unitCost) || 0;
+          const price = parseFloat(p.sellingPrice) || 0;
+          return `<tr${p.isArchived ? ' style="opacity:.6"' : ''}>
+            <td class="fw-bold">${esc(p.name)}${p.isArchived ? ' <span class="archived-pill">ARCHIVED</span>' : ''}
+              ${p.supplier ? `<div style="font-size:0.74rem;color:var(--gray-500);font-weight:400">Supplier: ${esc(p.supplier)}</div>` : ''}
+            </td>
+            <td>${esc(p.category || '—')}</td>
+            <td><strong>${qty}</strong> ${esc(p.unit || 'pcs')}</td>
+            <td>&#8369;${cost.toFixed(2)}</td>
+            <td>&#8369;${price.toFixed(2)}</td>
+            <td>&#8369;${(cost * qty).toFixed(2)}</td>
+            <td><span class="stock-badge ${status[1]}">${status[0]}</span></td>
+            <td class="table-actions" style="white-space:nowrap">
+              <button class="btn btn-outline btn-sm" title="Edit" onclick="editProduct('${p.id}')">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn btn-outline btn-sm" title="Copy to other businesses" onclick="openCopy('${p.id}')">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+              <button class="btn btn-outline btn-sm" title="${p.isArchived ? 'Restore' : 'Archive'}" style="color:var(--danger);border-color:var(--danger)" onclick="archiveProduct('${p.id}', ${p.isArchived ? 'true' : 'false'})">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </td>
+          </tr>`;
+        }).join('')}</tbody></table></div>`;
+    }
+
+    // ── Add / Edit ──────────────────────────────────────────────────────────
+    function openAdd() {
+      const biz = selectedBusiness();
+      if (!biz) return;
+      document.getElementById('modalTitle').textContent = 'Add Product';
+      document.getElementById('p_id').value = '';
+      document.getElementById('p_target').textContent = biz.name + ' — ' + (CAT_META[biz.categoryId] || {}).name;
+      ['p_name', 'p_category', 'p_unit', 'p_qty', 'p_reorder', 'p_cost', 'p_price', 'p_supplier', 'p_description']
+        .forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('p_reorder').value = 10;
+      openModal('productModal');
+    }
+
+    function editProduct(id) {
+      const p = products.find(x => x.id === id);
+      const biz = selectedBusiness();
+      if (!p || !biz) return;
+      document.getElementById('modalTitle').textContent = 'Edit Product';
+      document.getElementById('p_id').value = p.id;
+      document.getElementById('p_target').textContent = biz.name;
+      document.getElementById('p_name').value = p.name || '';
+      document.getElementById('p_category').value = p.category || '';
+      document.getElementById('p_unit').value = p.unit || '';
+      document.getElementById('p_qty').value = p.quantity || 0;
+      document.getElementById('p_reorder').value = p.reorderLevel || 10;
+      document.getElementById('p_cost').value = p.unitCost || '';
+      document.getElementById('p_price').value = p.sellingPrice || '';
+      document.getElementById('p_supplier').value = p.supplier || '';
+      document.getElementById('p_description').value = p.description || '';
+      openModal('productModal');
+    }
+
+    let saving = false;
+    async function saveProduct() {
+      if (saving) return;
+      const biz = selectedBusiness();
+      if (!biz) return;
+      const id = document.getElementById('p_id').value;
+      const name = document.getElementById('p_name').value.trim();
+      const qtyRaw = document.getElementById('p_qty').value.trim();
+      const priceRaw = document.getElementById('p_price').value.trim();
+      if (!name) return Toast.warning('Product name is required.');
+      if (qtyRaw === '' || isNaN(parseInt(qtyRaw, 10)) || parseInt(qtyRaw, 10) < 0) return Toast.warning('Enter a valid quantity (0 or more).');
+      if (priceRaw === '' || isNaN(parseFloat(priceRaw)) || parseFloat(priceRaw) < 0) return Toast.warning('Enter a valid selling price.');
+
+      const payload = {
+        businessId: biz.id,
+        businessCategory: biz.categoryId,
+        name,
+        category: document.getElementById('p_category').value.trim(),
+        unit: document.getElementById('p_unit').value.trim() || 'pcs',
+        quantity: parseInt(qtyRaw, 10),
+        reorderLevel: parseInt(document.getElementById('p_reorder').value, 10) || 0,
+        unitCost: parseFloat(document.getElementById('p_cost').value) || 0,
+        sellingPrice: parseFloat(priceRaw),
+        supplier: document.getElementById('p_supplier').value.trim(),
+        description: document.getElementById('p_description').value.trim(),
+      };
+
+      const btn = document.getElementById('saveProductBtn');
+      saving = true;
+      btn.disabled = true;
+      try {
+        const res = id
+          ? await API.put(BASE + '/products/' + encodeURIComponent(id), payload)
+          : await API.post(BASE + '/products', payload);
+        if (res.success) {
+          Toast.success(id ? 'Product updated' : '“' + name + '” added to ' + biz.name);
+          closeModal('productModal');
+          loadData();
+        } else {
+          Toast.error(res.message || 'Save failed');
+        }
+      } catch (e) {
+        Toast.error('Save failed: ' + e.message);
+      } finally {
+        saving = false;
+        btn.disabled = false;
+      }
+    }
+
+    async function archiveProduct(id, isArchived) {
+      const restore = isArchived === 'true';
+      const p = products.find(x => x.id === id);
+      const label = p ? p.name : id;
+      if (!restore) {
+        confirm('Archive “' + label + '”? It will be hidden from POS and reports but can be restored.', async () => {
+          try {
+            const res = await API.del(BASE + '/products/' + encodeURIComponent(id));
+            if (res.success) { Toast.success('Product archived'); loadData(); }
+            else Toast.error(res.message || 'Archive failed');
+          } catch (e) { Toast.error('Archive failed: ' + e.message); }
+        });
+        return;
+      }
+      try {
+        const res = await API.put(BASE + '/products/' + encodeURIComponent(id), { isArchived: false });
+        if (res.success) { Toast.success('Product restored'); loadData(); }
+        else Toast.error(res.message || 'Restore failed');
+      } catch (e) { Toast.error('Restore failed: ' + e.message); }
+    }
+
+    // ── Bulk add ────────────────────────────────────────────────────────────
+    const BULK_FIELDS = ['name', 'category', 'quantity', 'unitCost', 'sellingPrice', 'unit', 'reorderLevel', 'supplier'];
+
+    function parseBulkLines() {
+      return (document.getElementById('bulk_lines').value || '')
+        .split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+        .map(line => {
+          const parts = line.split(/\s*\|\s*|\t+/).map(s => s.trim());
+          if (parts.length < 2 || !parts[0]) return null;
+          const obj = {};
+          BULK_FIELDS.forEach((f, i) => { if (parts[i] !== undefined && parts[i] !== '') obj[f] = parts[i]; });
+          return obj;
+        }).filter(Boolean);
+    }
+
+    function openBulk() {
+      const biz = selectedBusiness();
+      if (!biz) return;
+      document.getElementById('bulk_lines').value = '';
+      openModal('bulkModal');
+      previewBulk();
+    }
+
+    function previewBulk() {
+      const rows = parseBulkLines();
+      document.getElementById('bulkCount').textContent = rows.length + ' product' + (rows.length === 1 ? '' : 's') + ' ready';
+      const el = document.getElementById('bulkPreview');
+      if (!rows.length) { el.innerHTML = '<div style="padding:14px;font-size:0.82rem;color:var(--gray-500)">Nothing to preview yet.</div>'; return; }
+      el.innerHTML = `<table><thead><tr><th>#</th><th>Name</th><th>Category</th><th>Qty</th><th>Cost</th><th>Price</th></tr></thead><tbody>
+        ${rows.map((r, i) => `<tr><td>${i + 1}</td><td class="fw-bold">${esc(r.name)}</td><td>${esc(r.category || '—')}</td>
+          <td>${esc(r.quantity || '0')}</td><td>${r.unitCost ? '&#8369;' + esc(r.unitCost) : '—'}</td>
+          <td>${r.sellingPrice ? '&#8369;' + esc(r.sellingPrice) : '—'}</td></tr>`).join('')}
+      </tbody></table>`;
+    }
+
+    let savingBulk = false;
+    async function saveBulk() {
+      if (savingBulk) return;
+      const biz = selectedBusiness();
+      if (!biz) return;
+      const lines = document.getElementById('bulk_lines').value;
+      const rows = parseBulkLines();
+      if (!rows.length) return Toast.warning('Paste at least one product line.');
+
+      const btn = document.getElementById('bulkSaveBtn');
+      savingBulk = true;
+      btn.disabled = true;
+      btn.textContent = 'Adding...';
+      try {
+        const res = await API.post(BASE + '/products/bulk', {
+          businessId: biz.id,
+          businessCategory: biz.categoryId,
+          lines,
+        });
+        if (res.success) {
+          Toast.success(res.added + ' product(s) added to ' + biz.name);
+          closeModal('bulkModal');
+          loadData();
+        } else {
+          Toast.error(res.message || 'Bulk add failed');
+        }
+      } catch (e) {
+        Toast.error('Bulk add failed: ' + e.message);
+      } finally {
+        savingBulk = false;
+        btn.disabled = false;
+        btn.textContent = 'Add Products';
+      }
+    }
+
+    // ── Copy to other businesses ────────────────────────────────────────────
+    function openCopy(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) return;
+      copySourceId = id;
+      document.getElementById('copySource').innerHTML =
+        `Copying <strong>${esc(p.name)}</strong> (Qty ${parseInt(p.quantity, 10) || 0} ${esc(p.unit || 'pcs')}, price &#8369;${(parseFloat(p.sellingPrice) || 0).toFixed(2)}).`;
+      const others = businesses.filter(b => b.id !== selectedId);
+      document.getElementById('copyTargets').innerHTML = others.length
+        ? others.map(b => `<label style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-bottom:1px solid var(--gray-100);cursor:pointer">
+            <input type="checkbox" class="copy-cb" value="${esc(b.id)}" data-cat="${esc(b.categoryId)}">
+            <span style="font-weight:600">${esc(b.name)}</span>
+            <span style="color:var(--gray-500);font-size:0.76rem">${(CAT_META[b.categoryId] || {}).name || b.categoryId}</span>
+          </label>`).join('')
+        : '<div style="padding:14px;font-size:0.82rem;color:var(--gray-500)">No other businesses available.</div>';
+      openModal('copyModal');
+    }
+
+    function toggleAllCopyTargets(on) {
+      document.querySelectorAll('.copy-cb').forEach(cb => { cb.checked = on; });
+    }
+
+    async function saveCopy() {
+      const btn = document.getElementById('copySaveBtn');
+      const targets = Array.from(document.querySelectorAll('.copy-cb:checked')).map(cb => ({
+        id: cb.value, businessCategory: cb.dataset.cat,
+      }));
+      if (!targets.length) return Toast.warning('Select at least one business.');
+      btn.disabled = true;
+      try {
+        const res = await API.post(BASE + '/products/' + encodeURIComponent(copySourceId) + '/copy', { targets });
+        if (res.success) {
+          Toast.success('Copied into ' + res.copied + ' business(es)');
+          closeModal('copyModal');
+          loadData();
+        } else {
+          Toast.error(res.message || 'Copy failed');
+        }
+      } catch (e) {
+        Toast.error('Copy failed: ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Boot ────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      buildNav();
+      getCurrentUser().then(u => {
+        if (u) {
+          const user = u.user || u;
+          document.getElementById('sidebarName').textContent = user.name;
+          document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(user.role);
+          document.getElementById('sidebarAvatar').textContent = String(user.name || 'A').charAt(0).toUpperCase();
+        }
+      });
+      document.getElementById('bulk_lines').addEventListener('input', previewBulk);
+      loadData(false);
+    });
+  </script>
+</body>
+
+</html>

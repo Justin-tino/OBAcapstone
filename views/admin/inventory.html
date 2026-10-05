@@ -32,31 +32,37 @@
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
-    .biz-tag.RENTAL { background: rgba(107, 63, 160, 0.15); color: #6b3fa0; border: 1px solid rgba(107, 63, 160, 0.3); }
-    .biz-tag.BUSINESS { background: var(--green-light); color: var(--green); border: 1px solid rgba(46,125,50, 0.3); }
     .biz-tag.AGRI { background: var(--yellow-light); color: var(--yellow-dark); border: 1px solid rgba(245, 197, 24, 0.3); }
     .biz-tag.NON_AGRI { background: var(--gray-100); color: var(--black-soft); border: 1px solid var(--gray-300); }
     .biz-tag.MAIN { background: var(--info-light); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.3); }
-    .kpi-grid { grid-template-columns: repeat(5, 1fr); }
-    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-    .is-viewer .btn-add-product { display: none !important; }
-    .is-viewer .action-cell { display: none !important; }
+    .view-only-note {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      margin-left: 12px;
+    }
   </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item" href="/admin/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
       <a class="nav-item" href="/admin/business"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg></span> Business</a>
       <a class="nav-item active" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" href="/admin/all-inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> Business Inventory</a>
       <a class="nav-item" href="/admin/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
       <a class="nav-item" href="/admin/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-      <a class="nav-item" href="/admin/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
       <a class="nav-item" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Users</a>
       <a class="nav-item" href="/admin/settings"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</a>
       <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
@@ -70,258 +76,164 @@
   </aside>
 
   <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
-        <span class="topbar-title">All Inventory</span>
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+          <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+        </svg>
+        <span class="topbar-title">All Inventory <span class="view-only-note">VIEW ONLY</span></span>
       </div>
       <div class="topbar-actions">
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
+        <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
+          <span class="notif-count" id="notifCount" style="display:none">0</span>
+          <div class="notif-dropdown" id="notifDropdown"></div>
+        </div>
+        <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
     </div>
 
     <div class="page-content">
-      <div class="kpi-grid" style="margin-bottom: 20px;">
-        <div class="kpi-card yellow"><div class="kpi-label">Total Products</div><div class="kpi-value" id="kpiTotal">0</div></div>
-        <div class="kpi-card green"><div class="kpi-label">In Stock</div><div class="kpi-value" id="kpiInStock" style="color:var(--green)">0</div></div>
-        <div class="kpi-card danger"><div class="kpi-label">Low Stock</div><div class="kpi-value" id="kpiLow" style="color:var(--danger)">0</div></div>
-        <div class="kpi-card black"><div class="kpi-label">Out of Stock</div><div class="kpi-value" id="kpiOut">0</div></div>
-        <div class="kpi-card" style="border-color:var(--gray-300)"><div class="kpi-label">Unique Employees</div><div class="kpi-value" id="kpiEmployees" style="color:var(--info)">0</div></div>
-      </div>
-
-      <div class="card">
-        <div class="inv-toolbar">
-          <div class="search-box">
-            <input id="fSearch" class="form-control" placeholder="Search products..." oninput="renderTable()">
-          </div>
-          <div>
-            <select id="fBiz" class="form-control" onchange="loadData()" style="width:auto;display:inline-block;margin-right:8px">
-              <option value="">All Categories</option>
-              <option value="RENTAL">Rental</option>
-              <option value="BUSINESS">Business</option>
-              <option value="AGRI">Agriculture</option>
-              <option value="NON_AGRI">Non-Agriculture</option>
-              <option value="MAIN">Main</option>
-            </select>
-            <button class="btn btn-primary btn-add-product" onclick="openAdd()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Product</button>
-          </div>
-        </div>
-        <div id="invTable">
-          <div class="empty-state"><h3>No products yet</h3></div>
+  <!-- Movements Audit Trail Panel (view-only inspection) -->
+  <div class="card" id="panelMovements">
+  <div class="inv-toolbar" style="gap:12px; flex-wrap:wrap;">
+  <div class="search-box">
+  <input id="mSearch" class="form-control" placeholder="Search product or notes..." oninput="renderMovementsTable()">
+  </div>
+  <select id="mBiz" class="form-control" onchange="loadMovementsData()" style="width:auto;">
+  <option value="">All Categories</option>  <option value="AGRI">Agriculture</option>
+  <option value="NON_AGRI">Non-Agriculture</option>
+  <option value="MAIN">Main</option>
+  </select>
+  <select id="mType" class="form-control" onchange="renderMovementsTable()" style="width:auto;">
+  <option value="">All Movement Types</option>
+  <option value="SALE_DEDUCTION">Sale Deduction</option>
+  <option value="RESTOCK">Restock</option>
+  <option value="MANUAL_ADJUSTMENT">Manual Adjustment</option>
+  <option value="INITIAL">Initial Stock</option>
+  <option value="RETURN">Return / Refund</option>
+  </select>
+  <input type="date" id="mStart" class="form-control" style="width:auto;" onchange="renderMovementsTable()">
+  <input type="date" id="mEnd" class="form-control" style="width:auto;" onchange="renderMovementsTable()">
+  <button class="btn btn-outline btn-sm" onclick="clearMovementFilters()">Clear Filters</button>
+  </div>
+  <div id="movementsTable">
+  <div class="empty-state"><h3>No movement logs found</h3></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Add/Edit Product Modal -->
-<div class="modal-overlay" id="productModal">
-  <div class="modal" style="max-width:500px">
-    <div class="modal-header"><h3 id="modalTitle">Add Product</h3><button class="modal-close" onclick="closeModal('productModal')">&times;</button></div>
-    <input type="hidden" id="p_id">
-    <input type="hidden" id="p_oldBiz">
-    <div class="form-group"><label class="form-label">Product Name *</label><input id="p_name" class="form-control" placeholder="Product name"></div>
-    <div class="form-row">
-      <div class="form-group" style="flex:1"><label class="form-label">Business Category *</label>
-        <select id="p_biz" class="form-control"><option value="RENTAL">Rental</option><option value="BUSINESS">Business</option><option value="AGRI">Agriculture</option><option value="NON_AGRI">Non-Agriculture</option><option value="MAIN">Main</option></select>
-      </div>
-      <div class="form-group" style="flex:1"><label class="form-label">Category</label><input id="p_category" class="form-control" placeholder="e.g. Supplies"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Unit</label><input id="p_unit" class="form-control" placeholder="e.g. pcs, kg, box"></div>
-      <div class="form-group"><label class="form-label">Quantity *</label><input id="p_qty" type="number" class="form-control" placeholder="0" min="0"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Unit Cost (&#8369;)</label><input id="p_cost" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Selling Price * (&#8369;)</label><input id="p_price" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Supplier</label><input id="p_supplier" class="form-control" placeholder="Supplier name"></div>
-    <div class="form-group"><label class="form-label">Description</label><textarea id="p_description" class="form-control" placeholder="Product description (e.g. sizes, variations)..." rows="3"></textarea></div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
-    </div>
-  </div>
-</div>
-
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
-const CATS = ['RENTAL','BUSINESS','AGRI','NON_AGRI','MAIN'];
-const CAT_NAMES = { RENTAL:'Rental', BUSINESS:'Business', AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main' };
-const CAT_COLORS = { RENTAL:'#6B3FA0', BUSINESS:'#2d6a2e', AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD' };
-let products = [];
+const CAT_NAMES = { AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main' };
 
-async function loadData() {
-  const biz = document.getElementById('fBiz').value;
-  const cats = biz ? [biz] : CATS;
-  let all = [];
-  for (const cat of cats) {
-    try {
-      const res = await API.get('/api/inventory?biz=' + cat);
-      if (res.success) {
-        (res.data || []).forEach(p => { p._biz = cat; all.push(p); });
-      }
-    } catch(e) { /* skip */ }
-  }
-  products = all;
-  renderTable();
-  updateKPIs();
-}
+// ═══════════════════════════════════════════════════════════════════
+// INVENTORY MOVEMENT HISTORY AUDIT TRAIL LOGIC (view-only inspection)
+// ═══════════════════════════════════════════════════════════════════
+let movements = [];
 
-function updateKPIs() {
-  const inStock = products.filter(p => (p.quantity || 0) > (p.reorderLevel || 10)).length;
-  const low = products.filter(p => (p.quantity || 0) > 0 && (p.quantity || 0) <= (p.reorderLevel || 10)).length;
-  const out = products.filter(p => (p.quantity || 0) === 0).length;
-  const empCount = new Set(products.map(p => p.createdBy).filter(Boolean)).size;
-  document.getElementById('kpiTotal').textContent = products.length;
-  document.getElementById('kpiInStock').textContent = inStock;
-  document.getElementById('kpiLow').textContent = low;
-  document.getElementById('kpiOut').textContent = out;
-  document.getElementById('kpiEmployees').textContent = empCount;
-}
-
-function renderTable() {
-  const search = document.getElementById('fSearch').value.toLowerCase();
-  let list = products;
-  if (search) list = list.filter(p => (p.name||'').toLowerCase().includes(search) || (p.category||'').toLowerCase().includes(search) || (p.description||'').toLowerCase().includes(search) || (p.createdBy||'').toLowerCase().includes(search));
-
-  const el = document.getElementById('invTable');
-  if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No products found</h3></div>'; return; }
-
-  el.innerHTML = `<table><thead><tr><th>Product</th><th>Description</th><th>Category</th><th>Biz Unit</th><th>Qty</th><th>Price</th><th>Status</th><th>Added By</th><th class="action-cell">Actions</th></tr></thead><tbody>
-    ${list.map(p => {
-      const qty = p.quantity || 0;
-      const reorder = p.reorderLevel || 10;
-      let status, cls;
-      if (qty === 0) { status = 'Out of Stock'; cls = 'out'; }
-      else if (qty <= reorder) { status = 'Low Stock'; cls = 'low-stock'; }
-      else { status = 'In Stock'; cls = 'in-stock'; }
-      const biz = p._biz || p.businessCategory || 'RENTAL';
-      const desc = p.description || '';
-      const descShort = desc.length > 45 ? desc.substring(0,45)+'...' : desc;
-      return `<tr>
-        <td class="fw-bold">${p.name}</td>
-        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${desc.replace(/"/g,'&quot;')}">${desc ? descShort : '—'}</td>
-        <td>${p.category || '—'}</td>
-        <td><span class="biz-tag ${biz}">${CAT_NAMES[biz] || biz}</span></td>
-        <td>${qty}</td>
-        <td>&#8369;${parseFloat(p.sellingPrice || 0).toLocaleString('en',{minimumFractionDigits:2})}</td>
-        <td><span class="stock-badge ${cls}">${status}</span></td>
-        <td style="font-size:0.82rem">${p.createdBy || '—'}</td>
-        <td class="table-actions action-cell">
-          <button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}','${biz}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-          <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="deleteProduct('${p.id}','${biz}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-        </td>
-      </tr>`;
-    }).join('')}
-  </tbody></table>`;
-}
-
-function openAdd() {
-  document.getElementById('modalTitle').textContent = 'Add Product';
-  document.getElementById('p_id').value = '';
-  document.getElementById('p_oldBiz').value = '';
-  document.getElementById('p_name').value = '';
-  document.getElementById('p_biz').value = document.getElementById('fBiz').value || 'RENTAL';
-  document.getElementById('p_category').value = '';
-  document.getElementById('p_unit').value = '';
-  document.getElementById('p_qty').value = '';
-  document.getElementById('p_cost').value = '';
-  document.getElementById('p_price').value = '';
-  document.getElementById('p_supplier').value = '';
-  document.getElementById('p_description').value = '';
-  openModal('productModal');
-}
-
-function editProduct(id, biz) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('modalTitle').textContent = 'Edit Product';
-  document.getElementById('p_id').value = p.id;
-  document.getElementById('p_oldBiz').value = biz;
-  document.getElementById('p_name').value = p.name || '';
-  document.getElementById('p_biz').value = biz;
-  document.getElementById('p_category').value = p.category || '';
-  document.getElementById('p_unit').value = p.unit || '';
-  document.getElementById('p_qty').value = p.quantity || 0;
-  document.getElementById('p_cost').value = p.unitCost || '';
-  document.getElementById('p_price').value = p.sellingPrice || '';
-  document.getElementById('p_supplier').value = p.supplier || '';
-  document.getElementById('p_description').value = p.description || '';
-  openModal('productModal');
-}
-
-async function saveProduct() {
-  const id = document.getElementById('p_id').value;
-  const biz = document.getElementById('p_biz').value;
-  const oldBiz = document.getElementById('p_oldBiz').value;
-  const data = {
-    name: document.getElementById('p_name').value,
-    category: document.getElementById('p_category').value,
-    unit: document.getElementById('p_unit').value,
-    quantity: parseInt(document.getElementById('p_qty').value) || 0,
-    unitCost: parseFloat(document.getElementById('p_cost').value) || 0,
-    sellingPrice: parseFloat(document.getElementById('p_price').value) || 0,
-    supplier: document.getElementById('p_supplier').value,
-    description: document.getElementById('p_description').value,
-    businessCategory: biz,
-  };
-  if (!data.name) { Toast.warning('Product name is required'); return; }
-  if (document.getElementById('p_qty').value.trim() === '' || isNaN(data.quantity) || data.quantity < 0) { Toast.warning('Valid Quantity is required'); return; }
-  if (document.getElementById('p_price').value.trim() === '' || isNaN(data.sellingPrice) || data.sellingPrice <= 0) { Toast.warning('Valid Selling Price is required'); return; }
-
+async function loadMovementsData() {
+  const biz = document.getElementById('mBiz').value;
   try {
-    let res;
-    if (id) {
-      res = await API.put('/api/inventory/' + id + '?biz=' + oldBiz, data);
-    } else {
-      res = await API.post('/api/inventory', data);
-    }
-    if (res.success) {
-      Toast.success(id ? 'Product updated' : 'Product added');
-      closeModal('productModal');
-      loadData();
-    } else {
-      Toast.error(res.message || 'Unknown server error');
-    }
-  } catch(e) { Toast.error('Save failed: ' + e.message); }
+  const res = await API.get('/api/inventory/movements' + (biz ? '?biz=' + biz : ''));
+  if (res.success) {
+  movements = res.data || [];
+  renderMovementsTable();
+  }
+  } catch(e) {
+  document.getElementById('movementsTable').innerHTML = '<div class="empty-state"><h3>Error loading movement logs</h3></div>';
+  }
 }
 
-function deleteProduct(id, biz) {
-  confirm('Delete this product?', async () => {
-    try {
-      const res = await API.del('/api/inventory/' + id + '?biz=' + biz);
-      if (res.success) { Toast.success('Product deleted'); loadData(); }
-      else { Toast.error(res.message); }
-    } catch(e) { Toast.error('Error deleting'); }
+function renderMovementsTable() {
+  const search = (document.getElementById('mSearch').value || '').toLowerCase();
+  const type = document.getElementById('mType').value;
+  const startD = document.getElementById('mStart').value;
+  const endD = document.getElementById('mEnd').value;
+
+  let list = movements;
+  if (search) {
+  list = list.filter(m =>
+  (m.productName || '').toLowerCase().includes(search) ||
+  (m.notes || '').toLowerCase().includes(search) ||
+  (m.createdBy || '').toLowerCase().includes(search)
+  );
+  }
+  if (type) list = list.filter(m => m.type === type);
+  if (startD) list = list.filter(m => (m.createdAt || '') >= startD);
+  if (endD) list = list.filter(m => (m.createdAt || '') <= endD + 'T23:59:59.999Z');
+
+  const el = document.getElementById('movementsTable');
+  if (!list.length) {
+  el.innerHTML = '<div class="empty-state"><h3>No inventory movement logs found</h3></div>';
+  return;
+  }
+
+  const badgeMap = {
+  SALE_DEDUCTION: '<span class="stock-badge out">Sale Deduction</span>',
+  RESTOCK: '<span class="stock-badge in-stock">Restock</span>',
+  MANUAL_ADJUSTMENT: '<span class="stock-badge low-stock">Manual Adjustment</span>',
+  INITIAL: '<span class="stock-badge in-stock">Initial Stock</span>',
+  RETURN: '<span class="stock-badge in-stock">Return / Refund</span>'
+  };
+
+  el.innerHTML = `<table>
+  <thead>
+  <tr>
+  <th>Date & Time</th>
+  <th>Product</th>
+  <th>Category</th>
+  <th>Type</th>
+  <th>Qty Change</th>
+  <th>Stock Shift</th>
+  <th>Performed By</th>
+  <th>Notes / Reason</th>
+  </tr>
+  </thead>
+  <tbody>
+  ${list.map(m => {
+  const changeStr = m.quantityChange > 0 ? `+${m.quantityChange}` : `${m.quantityChange}`;
+  const changeCls = m.quantityChange > 0 ? 'text-green fw-bold' : 'color:var(--danger);font-weight:bold';
+  const dStr = m.createdAt ? new Date(m.createdAt).toLocaleString('en-PH') : '—';
+  return `<tr>
+  <td style="font-size:0.8rem">${dStr}</td>
+  <td class="fw-bold">${m.productName || m.productId || '—'}</td>
+  <td><span class="biz-tag ${m.businessCategory}">${CAT_NAMES[m.businessCategory] || m.businessCategory}</span></td>
+  <td>${badgeMap[m.type] || `<span class="stock-badge">${m.type}</span>`}</td>
+  <td style="${changeCls}">${changeStr}</td>
+  <td>${m.previousStock !== undefined ? `${m.previousStock} → ${m.newStock}` : '—'}</td>
+  <td style="font-size:0.82rem">${m.createdBy || '—'}</td>
+  <td style="font-size:0.82rem; max-width:220px">${m.notes || '—'}</td>
+  </tr>`;
+  }).join('')}
+  </tbody>
+  </table>`;
+}
+
+function clearMovementFilters() {
+  ['mSearch', 'mType', 'mStart', 'mEnd'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.value = '';
   });
+  // Reset the category dropdown too, and re-fetch data since the biz
+  // filter is applied server-side (movements array is fetched by category)
+  const bizSel = document.getElementById('mBiz');
+  if (bizSel) bizSel.value = '';
+  loadMovementsData();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadData();
+  loadMovementsData();
   getCurrentUser().then(u => {
     if (u) {
       document.getElementById('sidebarName').textContent = u.name;
       document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
       document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
-      // Viewer role enforcement
-      if (u.role === 'viewer') {
-        document.querySelectorAll('.sidebar-nav a').forEach(a => {
-          const href = a.getAttribute('href') || '';
-          if (href.includes('/notifications') || href.includes('/users') || href.includes('/settings')) {
-            a.style.display = 'none';
-          }
-        });
-        document.querySelectorAll('.notif-bell, .notif-dropdown').forEach(el => el.remove());
-        const topbar = document.querySelector('.topbar');
-        if (topbar) {
-          const badge = document.createElement('span');
-          badge.textContent = 'VIEW ONLY';
-          badge.style.cssText = 'background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.5px;margin-left:12px';
-          topbar.querySelector('.flex-c').appendChild(badge);
-        }
-      }
     }
   });
 });

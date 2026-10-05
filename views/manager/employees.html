@@ -3,126 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Employees — OBA System</title>
-  <link rel="stylesheet" href="/css/main.css">
-  <style>
-    .sidebar-logo-area { display: flex; flex-direction: column; align-items: center; padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .sidebar-logo-area .org-name { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; line-height: 1.4; }
-    .sidebar-nav .nav-item.active { background: linear-gradient(90deg, #3a8c3b, #2d6a2e); color: var(--white); border-left-color: var(--white); }
-    .topbar-green { background: linear-gradient(90deg, #2d6a2e, #3a8c3b); color: var(--white); }
-    .topbar-green .topbar-title { color: var(--white); }
-    .profile-btn { background: rgba(255,255,255,0.15); border: none; color: var(--white); padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: var(--font-main); }
-    .emp-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-    .biz-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; color: #fff; }
-    .biz-badge.RENTAL { background: #6B3FA0; }
-    .biz-badge.BUSINESS { background: #2d6a2e; }
-    .biz-badge.AGRI { background: #D4A915; color: #1A1A1A; }
-    .biz-badge.NON_AGRI { background: #1A1A1A; }
-    .biz-badge.MAIN { background: #0D6EFD; }
-    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
-    .status-dot.active { background: var(--green); }
-    .status-dot.pending { background: var(--yellow-dark); }
-    .status-dot.inactive { background: var(--gray-400); }
-    .emp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-    .emp-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px; padding: 16px; transition: all 0.2s; }
-    .emp-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #d0d0d0; }
-    .emp-card .card-top { display: flex; align-items: start; gap: 12px; }
-    .emp-card .avatar { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #fff; flex-shrink: 0; }
-    .emp-card .info { flex: 1; min-width: 0; }
-    .emp-card .name { font-weight: 700; font-size: 0.9rem; }
-    .emp-card .email { font-size: 0.78rem; color: var(--gray-500); }
-    .emp-card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
-    .emp-card .actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gray-100); }
-    .is-viewer .btn-add-emp { display: none !important; }
-    .is-viewer .emp-actions { display: none !important; }
-  </style>
+  <title>Redirecting… — OBA System</title>
+  <script>window.location.replace('/manager/dashboard');</script>
 </head>
 <body>
-<div class="app-layout">
-  <aside class="sidebar">
-    <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-      <div class="org-name">Office of Business Affairs</div>
-    </div>
-    <nav class="sidebar-nav" id="mgrNav"></nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-avatar" id="sidebarAvatar">M</div>
-        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Logged in as:</div></div>
-      </div>
-    </div>
-  </aside>
-
-  <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
-        <span class="topbar-title">Manage Employees</span>
-      </div>
-      <div class="topbar-actions">
-        <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="notif-count" id="notifCount" style="display:none">0</span>
-          <div class="notif-dropdown" id="notifDropdown"></div>
-        </div>
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
-      </div>
-    </div>
-
-    <div class="page-content">
-      <div class="kpi-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom:20px">
-        <div class="kpi-card yellow"><div class="kpi-label">Total Employees</div><div class="kpi-value" id="kpiTotal">0</div></div>
-        <div class="kpi-card green"><div class="kpi-label">Active</div><div class="kpi-value" id="kpiActive" style="color:var(--green)">0</div></div>
-        <div class="kpi-card danger"><div class="kpi-label">Business Category</div><div class="kpi-value" id="kpiBiz" style="font-size:0.95rem">—</div></div>
-      </div>
-
-      <div class="card">
-        <div class="emp-toolbar">
-          <div class="search-box" style="flex:1;max-width:300px">
-            <input id="fSearch" class="form-control" placeholder="Search employees..." oninput="renderEmployees()">
-          </div>
-          <button class="btn btn-primary btn-add-emp" onclick="openAdd()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Employee</button>
-        </div>
-        <div id="empContainer">
-          <div class="empty-state"><h3>No employees found</h3></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="empModal">
-  <div class="modal" style="max-width:450px">
-    <div class="modal-header"><h3 id="modalTitle">Add Employee</h3><button class="modal-close" onclick="closeModal('empModal')">&times;</button></div>
-    <input type="hidden" id="e_uid">
-    <div class="form-group"><label class="form-label">Full Name *</label><input id="e_name" class="form-control" placeholder="Employee name"></div>
-    <div class="form-group"><label class="form-label">Email *</label><input id="e_email" type="email" class="form-control" placeholder="email@psau.edu.ph"></div>
-    <div class="form-group"><label class="form-label">Password</label><input id="e_password" type="password" class="form-control" placeholder="Min 6 chars (leave blank to keep current)"><small class="form-help">Required for new employees. Leave blank when editing.</small></div>
-    <div class="form-group"><label class="form-label">Business Category</label><input id="e_biz" class="form-control" readonly style="background:var(--gray-100);cursor:not-allowed"></div>
-    <div class="form-group"><label class="form-label">Status</label>
-      <select id="e_status" class="form-control"><option value="active">Active</option><option value="inactive">Inactive</option></select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('empModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEmployee()">Save Employee</button>
-    </div>
-  </div>
-</div>
-
-<script src="/js/app.js"></script>
-<script>
+  <p style="font-family:sans-serif;padding:24px">The View Employee page has been removed. Redirecting to the <a href="/manager/dashboard">Dashboard</a>…</p>
+</body>
+</html>
 let employees = [];
-let BIZ = 'RENTAL';
+let BIZ = 'AGRI';
 
 function buildNav() {
   document.getElementById('mgrNav').innerHTML = `
     <a class="nav-item" href="/manager/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
     <a class="nav-item" href="/manager/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item active" href="/manager/employees"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Employees</a>
-    <a class="nav-item" href="/manager/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
+    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+    <a class="nav-item" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Generate Reports</a>
+    <a class="nav-item active" href="/manager/employees"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> View Employee</a>
+    <a class="nav-item" href="/manager/performing-rank"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span> Performing Rank</a>
     <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
   `;
 }
@@ -138,26 +36,100 @@ async function loadEmployees() {
   } catch(e) { Toast.error('Failed to load employees'); }
 }
 
+// ── Activity tracking helpers (active/inactive for hours or days) ──
+let empFilter = 'all';
+
+function setFilter(f) {
+  empFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === f));
+  renderEmployees();
+}
+
+function parseDate(v) {
+  if (!v || v === 'Never') return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// "2h ago", "3d ago", "just now"
+function timeAgo(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + (mins === 1 ? ' min ago' : ' mins ago');
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+  const days = Math.floor(hrs / 24);
+  return days + (days === 1 ? ' day ago' : ' days ago');
+}
+
+// A session counts as active only if flagged online and the login stamp is fresh (< 24h).
+// This prevents accounts stuck as online when a browser is closed without logging out.
+function isSessionActive(e) {
+  const last = parseDate(e.lastLoginAt);
+  if (!e.isOnline || !last) return false;
+  return (Date.now() - last.getTime()) < 24 * 60 * 60 * 1000;
+}
+
+function fmtStamp(date) {
+  return date.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// Builds the activity line for a card:
+//  - account disabled -> "Inactive · last seen Xh/d ago"
+//  - online session   -> "Active now · logged in Xh ago"
+//  - otherwise        -> "Inactive · last seen Xh/d ago"
+function activityInfo(e) {
+  const lastLogin = parseDate(e.lastLoginAt);
+  const lastSeen = parseDate(e.lastActiveAt) || lastLogin;
+
+  if ((e.status || 'active') === 'inactive') {
+    return {
+      dot: 'inactive',
+      cls: 'never',
+      label: lastSeen ? 'Deactivated · last seen ' + timeAgo(lastSeen) : 'Deactivated · never logged in',
+      lastLoginLine: lastLogin ? 'Last login: ' + fmtStamp(lastLogin) : 'Last login: Never',
+    };
+  }
+  if (isSessionActive(e)) {
+    return {
+      dot: 'online',
+      cls: 'online',
+      label: 'Active now · logged in ' + timeAgo(lastLogin),
+      lastLoginLine: 'Last login: ' + fmtStamp(lastLogin),
+    };
+  }
+  return {
+    dot: 'offline',
+    cls: 'offline',
+    label: lastSeen ? 'Inactive for ' + timeAgo(lastSeen).replace(' ago', '') : 'Inactive · never logged in',
+    lastLoginLine: lastLogin ? 'Last login: ' + fmtStamp(lastLogin) : 'Last login: Never',
+  };
+}
+
 function updateKPIs() {
   const total = employees.length;
-  const active = employees.filter(e => e.status === 'active').length;
+  const active = employees.filter(isSessionActive).length;
   document.getElementById('kpiTotal').textContent = total;
   document.getElementById('kpiActive').textContent = active;
+  document.getElementById('kpiInactive').textContent = total - active;
 }
 
 function renderEmployees() {
   const search = document.getElementById('fSearch').value.toLowerCase();
   let list = employees;
   if (search) list = list.filter(e => (e.name||'').toLowerCase().includes(search) || (e.email||'').toLowerCase().includes(search));
+  if (empFilter === 'active') list = list.filter(isSessionActive);
+  if (empFilter === 'inactive') list = list.filter(e => !isSessionActive(e));
 
   const el = document.getElementById('empContainer');
   if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No employees found</h3></div>'; return; }
 
   const colors = ['#6B3FA0','#2d6a2e','#D4A915','#1A1A1A','#c0392b','#2980b9','#8e44ad','#d35400'];
   el.innerHTML = `<div class="emp-grid">${list.map(e => {
-    const biz = (e.businesses && e.businesses[0]) || 'RENTAL';
+    const biz = (e.businesses && e.businesses[0]) || 'AGRI';
     const color = colors[(biz.length + e.name.length) % colors.length];
-    const statusClass = (e.status === 'active' ? 'active' : e.status === 'pending' ? 'pending' : 'inactive');
+    const act = activityInfo(e);
     return `<div class="emp-card">
       <div class="card-top">
         <div class="avatar" style="background:${color}">${(e.name||'?').charAt(0).toUpperCase()}</div>
@@ -166,9 +138,10 @@ function renderEmployees() {
           <div class="email">${e.email}</div>
           <div class="meta">
             <span class="biz-badge ${biz}">${biz}</span>
-            <span><span class="status-dot ${statusClass}"></span>${e.status || 'active'}</span>
+            <span><span class="status-dot ${act.dot}"></span>${e.status || 'active'}</span>
           </div>
-          <div class="last-login" style="font-size:0.7rem;color:var(--gray-400);margin-top:4px">Last login: ${e.lastLogin || 'Never'}</div>
+          <div class="activity-line ${act.cls}">${act.label}</div>
+          <div class="last-login" style="font-size:0.7rem;color:var(--gray-400);margin-top:2px">${act.lastLoginLine}</div>
         </div>
       </div>
       <div class="actions emp-actions">
@@ -244,13 +217,15 @@ async function initPage() {
   const u = await getCurrentUser();
   if (u) {
     const bizAccess = u.businessAccess || [];
-    BIZ = bizAccess.includes('all') ? 'RENTAL' : (bizAccess[0] || 'RENTAL');
+    BIZ = bizAccess.includes('all') ? 'AGRI' : (bizAccess[0] || 'AGRI');
     document.getElementById('sidebarName').textContent = u.name;
     document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
     document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
     document.getElementById('kpiBiz').textContent = BIZ;
   }
   loadEmployees();
+  // Refresh activity durations (Active/Inactive for hours/days) every minute
+  setInterval(() => { if (employees.length) { updateKPIs(); renderEmployees(); } }, 60000);
 }
 
 document.addEventListener('DOMContentLoaded', initPage);

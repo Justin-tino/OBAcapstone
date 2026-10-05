@@ -8,7 +8,7 @@
   .sidebar, .topbar, .topbar-actions, .page-header-actions,
   .btn:not(.btn-print-show), .filters-bar, .modal-overlay,
   .toast-container, .table-actions, .nav-item,
-  .sidebar-footer, .biz-card-alert, no-print { display: none !important; }
+  .sidebar-footer, .biz-card-alert, .no-print { display: none !important; }
 
   /* Page setup */
   @page {

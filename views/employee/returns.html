@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Return History — OBA System</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .returns-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .returns-toolbar .search-box { flex: 1; max-width: 320px; }
+    .return-detail-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.88rem; border-bottom: 1px dashed var(--gray-200); }
+    @media print {
+      .no-print { display: none !important; }
+      .main-content { margin: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar no-print" id="sidebar">
+    <div class="sidebar-logo-area">
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
+      <div class="org-name">Office of Business Affairs</div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a class="nav-item" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+      <a class="nav-item" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+      <a class="nav-item active" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+      <a class="nav-item" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+      <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7 16 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+          <div class="sidebar-user-role">Logged in as:</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar topbar-green no-print">
+      <div class="flex-c gap-12">
+        <span class="topbar-title">Return History</span>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card danger">
+          <div class="kpi-label">Total Returns</div>
+          <div class="kpi-value" id="kpiCount" style="color:var(--danger)">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Refunded</div>
+          <div class="kpi-value" id="kpiRefunded">&#8369;0.00</div>
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">Refunds Today</div>
+          <div class="kpi-value" id="kpiToday">0</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">This Week</div>
+          <div class="kpi-value" id="kpiWeek" style="color:var(--green)">&#8369;0.00</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:20px">
+        <div class="returns-toolbar">
+          <div class="search-box">
+            <input id="fSearch" class="form-control" placeholder="Search return ID, TXN, item, customer..." oninput="renderTable()">
+          </div>
+          <div class="flex-c gap-8" style="flex-wrap:wrap">
+            <select id="fRestock" class="form-control" style="width:auto" onchange="renderTable()">
+              <option value="">All Returns</option>
+              <option value="restocked">Restocked Only</option>
+              <option value="notrestocked">Not Restocked</option>
+            </select>
+            <input type="date" id="fDateFrom" class="form-control" style="max-width:150px" onchange="renderTable()">
+            <input type="date" id="fDateTo" class="form-control" style="max-width:150px" onchange="renderTable()">
+            <button class="btn btn-outline btn-sm" onclick="exportReturnsCsv()">Export CSV</button>
+          </div>
+        </div>
+        <div id="returnsTable"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="returnDetailModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <span class="modal-title">Return Details</span>
+      <button class="modal-close" onclick="closeModal('returnDetailModal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="returnDetailBody" style="padding:20px;font-size:0.88rem"></div>
+    <div class="modal-footer no-print" style="justify-content:center">
+      <button class="btn btn-primary" onclick="printSection('returnDetailBody')">Print</button>
+      <button class="btn btn-outline" onclick="closeModal('returnDetailModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=2"></script>
+<script>
+let currentBiz = 'AGRI';
+let returns = [];
+
+function getEntityId() {
+  const p = new URLSearchParams(window.location.search);
+  return p.get('entity') || '';
+}
+
+function withinDay(iso, ref) {
+  if (!iso) return false;
+  const d = new Date(iso), r = new Date(ref);
+  return d.getFullYear() === r.getFullYear() && d.getMonth() === r.getMonth() && d.getDate() === r.getDate();
+}
+
+async function loadReturns() {
+  const el = document.getElementById('returnsTable');
+  el.innerHTML = '<div class="empty-state"><h3>Loading returns...</h3></div>';
+  try {
+    const res = await API.get(`/api/sales/returns?biz=${encodeURIComponent(currentBiz)}`);
+    returns = (res.success && res.data) ? res.data : [];
+  } catch (e) {
+    console.error('Failed to load returns:', e);
+    returns = [];
+  }
+  renderKpis();
+  renderTable();
+}
+
+function filteredReturns() {
+  const q = (document.getElementById('fSearch').value || '').trim().toLowerCase();
+  const from = document.getElementById('fDateFrom').value;
+  const to = document.getElementById('fDateTo').value;
+  const restockFilter = document.getElementById('fRestock').value;
+  return returns.filter(r => {
+    const hay = [r.returnId, r.originalTransactionId, r.customerName, r.reason, r.processedByName,
+      ...(r.items || []).map(i => i.name)].join(' ').toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    if (restockFilter === 'restocked' && !r.restocked) return false;
+    if (restockFilter === 'notrestocked' && r.restocked) return false;
+    const d = (r.createdAt || r.date || '').substring(0, 10);
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  });
+}
+
+function renderKpis() {
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const totalRefund = returns.reduce((a, r) => a + (parseFloat(r.refundTotal) || 0), 0);
+  const todayCount = returns.filter(r => withinDay(r.createdAt || r.date, now)).length;
+  const weekRefund = returns.filter(r => new Date(r.createdAt || r.date) >= weekAgo)
+    .reduce((a, r) => a + (parseFloat(r.refundTotal) || 0), 0);
+  document.getElementById('kpiCount').textContent = returns.length;
+  document.getElementById('kpiRefunded').innerHTML = '&#8369;' + totalRefund.toLocaleString('en', { minimumFractionDigits: 2 });
+  document.getElementById('kpiToday').textContent = todayCount;
+  document.getElementById('kpiWeek').innerHTML = '&#8369;' + weekRefund.toLocaleString('en', { minimumFractionDigits: 2 });
+}
+
+function renderTable() {
+  const el = document.getElementById('returnsTable');
+  const list = filteredReturns();
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><h3>No returns found</h3><p>Processed returns and refunds from the POS will appear here.</p></div>';
+    return;
+  }
+  el.innerHTML = `<table><thead><tr>
+      <th>Return ID</th><th>Date &amp; Time</th><th>Original TXN</th><th>Items</th>
+      <th>Refund Total</th><th>Restocked</th><th>Processed By</th><th>Actions</th>
+    </tr></thead><tbody>
+    ${list.map(r => {
+      const itemCount = (r.items || []).reduce((a, i) => a + (parseInt(i.quantity) || 0), 0);
+      const itemNames = (r.items || []).map(i => escapeHtml(i.name)).join(', ');
+      return `<tr>
+        <td><strong>${escapeHtml(r.returnId || '')}</strong></td>
+        <td>${fmt.datetime(r.createdAt || r.date)}</td>
+        <td>${escapeHtml(r.originalTransactionId || '—')}</td>
+        <td title="${itemNames}">${itemCount} item(s) — ${itemNames.length > 40 ? itemNames.substring(0, 40) + '…' : itemNames}</td>
+        <td style="color:var(--danger);font-weight:700">&#8369;${(parseFloat(r.refundTotal) || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
+        <td>${r.restocked ? '<span class="stock-badge in-stock">Yes</span>' : '<span class="stock-badge out">No</span>'}</td>
+        <td>${escapeHtml(r.processedByName || '—')}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="viewReturn('${r.id}')">View</button></td>
+      </tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+
+function viewReturn(id) {
+  const r = returns.find(x => x.id === id);
+  if (!r) return;
+  const itemsHtml = (r.items || []).map(it =>
+    `<div class="return-detail-row"><span>${escapeHtml(it.name)} &times; ${it.quantity}</span><span>&#8369;${(parseFloat(it.subtotal) || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</span></div>`
+  ).join('');
+  document.getElementById('returnDetailBody').innerHTML = `
+    <div style="text-align:center;margin-bottom:14px">
+      <strong style="font-size:1.05rem">Return ${escapeHtml(r.returnId || '')}</strong><br>
+      <small style="color:var(--gray-500)">${fmt.datetime(r.createdAt || r.date)}</small>
+    </div>
+    <div class="return-detail-row"><span>Original Transaction</span><strong>${escapeHtml(r.originalTransactionId || '—')}</strong></div>
+    <div class="return-detail-row"><span>Customer</span><span>${escapeHtml(r.customerName || 'Walk-in')}</span></div>
+    <div class="return-detail-row"><span>Original Payment</span><span>${escapeHtml(String(r.paymentMethod || '').toUpperCase())}</span></div>
+    <div class="return-detail-row"><span>Processed By</span><span>${escapeHtml(r.processedByName || '—')}</span></div>
+    <div class="return-detail-row"><span>Restocked</span><span>${r.restocked ? 'Yes' : 'No'}</span></div>
+    <div style="margin:12px 0 6px;font-weight:700">Returned Items</div>
+    ${itemsHtml}
+    <div class="return-detail-row" style="margin-top:8px;font-weight:800;border-bottom:none"><span>Refund Total</span><span style="color:var(--danger)">&#8369;${(parseFloat(r.refundTotal) || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</span></div>
+    ${r.reason ? `<div style="margin-top:10px;padding:10px;background:var(--gray-100);border-radius:8px;font-size:0.82rem"><strong>Reason:</strong> ${escapeHtml(r.reason)}</div>` : ''}`;
+  openModal('returnDetailModal');
+}
+
+function exportReturnsCsv() {
+  const list = filteredReturns();
+  if (!list.length) { Toast.warning('Nothing to export'); return; }
+  const rows = [['Return ID', 'Date', 'Original TXN', 'Items', 'Qty', 'Refund Total', 'Restocked', 'Reason', 'Processed By', 'Customer']];
+  list.forEach(r => rows.push([
+    r.returnId || '', r.createdAt || r.date || '', r.originalTransactionId || '',
+    (r.items || []).map(i => `${i.name} x${i.quantity}`).join('; '),
+    (r.items || []).reduce((a, i) => a + (parseInt(i.quantity) || 0), 0),
+    (parseFloat(r.refundTotal) || 0).toFixed(2),
+    r.restocked ? 'Yes' : 'No', r.reason || '', r.processedByName || '', r.customerName || ''
+  ]));
+  const csv = rows.map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `return-history-${currentBiz}-${new Date().toISOString().substring(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  currentBiz = getBizId() || 'AGRI';
+  // Sync workspace query params onto the sidebar links
+  const _ent = getEntityId();
+  const bizParam = `?biz=${currentBiz}` + (_ent ? `&entity=${encodeURIComponent(_ent)}` : '');
+  document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+    a.href = a.getAttribute('data-page') + bizParam;
+  });
+  getCurrentUser().then(u => {
+    if (u) {
+      document.getElementById('sidebarName').textContent = u.name;
+      document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
+      document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
+    }
+  });
+  await loadReturns();
+});
+</script>
+</body>
+</html>

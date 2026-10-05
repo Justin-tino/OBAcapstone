@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reports — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/print.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     .report-tabs { display: flex; gap: 0; margin-bottom: 20px; background: var(--white); border-radius: 10px; border: 1px solid var(--gray-200); overflow: hidden; }
@@ -20,7 +21,7 @@
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav" id="mgrNav"></nav>
@@ -66,6 +67,7 @@
         <div class="report-tab" onclick="switchTab('income',this)">Income Statement</div>
         <div class="report-tab" onclick="switchTab('cashflow',this)">Cash Flow</div>
         <div class="report-tab" onclick="switchTab('balance',this)">Balance Summary</div>
+        <div class="report-tab" onclick="switchTab('generator',this)">Report Generator</div>
       </div>
 
       <div id="tab-summary" class="tab-panel">
@@ -95,11 +97,54 @@
         <div class="card"><div class="card-header"><span class="card-title">Balance Summary</span></div>
         <div style="padding:20px;max-width:500px"><table class="fs-table" id="balanceTable"></table></div></div>
       </div>
+
+      <!-- ═══════════ Report Generator (same generator as Sales Staff / Admin) ═══════════ -->
+      <div id="tab-generator" class="tab-panel" style="display:none">
+        <div class="card" style="padding:20px;margin-bottom:20px">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+            <div>
+              <label class="form-label" style="font-size:0.78rem">Report Type</label>
+              <select id="genType" class="form-control" style="width:260px">
+                <option value="dailysales">Daily Sales Report</option>
+                <option value="weeklyrevenue">Weekly Revenue Summary</option>
+                <option value="monthlystatement">Monthly Financial Statement</option>
+                <option value="transactionhistory">Transaction History Report</option>
+                <option value="expensereport">Expense Report</option>
+                <option value="profitloss">Profit &amp; Loss Statement</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" style="font-size:0.78rem">Business</label>
+              <select id="genBiz" class="form-control" style="width:250px">
+                <option value="all">All businesses in my scope</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" style="font-size:0.78rem">Period</label>
+              <select id="genPeriod" class="form-control" onchange="mgrGenToggleDates()">
+                <option value="day">Daily (Today)</option>
+                <option value="week">Weekly (Last 7 days)</option>
+                <option value="month" selected>Monthly</option>
+                <option value="year">Annually</option>
+                <option value="custom">Custom Date Range</option>
+              </select>
+            </div>
+            <div id="genDates" style="display:none;gap:10px">
+              <div><label class="form-label" style="font-size:0.78rem">Start</label><input type="date" id="genStart" class="form-control"></div>
+              <div><label class="form-label" style="font-size:0.78rem">End</label><input type="date" id="genEnd" class="form-control"></div>
+            </div>
+            <button class="btn btn-green btn-sm" onclick="mgrRunGenerator()">Generate Report</button>
+            <button class="btn btn-outline btn-sm" style="border-color:var(--green);color:var(--green)" onclick="mgrPrintGenerator()">Print</button>
+          </div>
+          <p style="font-size:0.75rem;color:var(--gray-400);margin:12px 0 0">Reports include trend indicators (up/down) comparing the selected period to the previous period. Scope is limited to your assigned categories and businesses.</p>
+        </div>
+        <div id="genOutput"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
 let BIZ = 'RENTAL';
 let reportData = {};
@@ -108,17 +153,65 @@ let revExpChart, expBreakChart;
 function buildNav() {
   document.getElementById('mgrNav').innerHTML = `
     <a class="nav-item" href="/manager/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
     <a class="nav-item" href="/manager/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item active" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="/manager/employees"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Employees</a>
-    <a class="nav-item" href="/manager/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
+    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+    <a class="nav-item active" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Generate Reports</a>
+    <a class="nav-item" href="/manager/performing-rank"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span> Performing Rank</a>
     <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
   `;
 }
 
 function fmtCurrency(n) { return '&#8369;' + parseFloat(n||0).toLocaleString('en',{minimumFractionDigits:2}); }
 function pct(n) { return parseFloat(n||0).toFixed(1) + '%'; }
+
+// ═══════════ Report Generator (accountant / manager scope) ═══════════
+const GEN_CAT_NAMES = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'Main' };
+let mgrBizList = [], mgrScopeBizIds = null; // null = unrestricted
+function mgrCatName(c) { return GEN_CAT_NAMES[c] || c; }
+
+function mgrInitGenerator() {
+  getCurrentUser().then(u => {
+    if (u) {
+      const access = u.businessAccess || u.businesses || [];
+      if (access.includes('all')) mgrScopeBizIds = null; // unrestricted
+      else mgrScopeBizIds = access.filter(a => a && a !== 'all');
+    }
+    mgrLoadBizOptions();
+  }).catch(() => mgrLoadBizOptions());
+}
+
+async function mgrLoadBizOptions() {
+  const sel = document.getElementById('genBiz');
+  if (!sel || sel.options.length > 1) return;
+  try {
+    const res = await API.get('/api/admin/businesses');
+    mgrBizList = (res.success && Array.isArray(res.data)) ? res.data : [];
+  } catch (_) { mgrBizList = []; }
+  const relevant = mgrBizList.filter(b => {
+    if (!mgrScopeBizIds) return true;
+    return mgrScopeBizIds.includes(b.id) || mgrScopeBizIds.includes(b.categoryId);
+  });
+  relevant.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = (b.name || b.id) + (b.categoryId ? ' — ' + mgrCatName(b.categoryId) : '');
+    sel.appendChild(opt);
+  });
+}
+
+function mgrGenToggleDates() {
+  document.getElementById('genDates').style.display = document.getElementById('genPeriod').value === 'custom' ? 'flex' : 'none';
+}
+
+function mgrTrendBadge(t, invert) {
+  if (!t) return '';
+  const isUp = t.direction === 'up';
+  const good = invert ? !isUp : isUp;
+  const cls = t.percent === 0 ? 'flat' : (good ? 'up' : 'down');
+  const color = cls === 'up' ? 'var(--green)' : (cls === 'down' ? 'var(--danger)' : 'var(--gray-400)');
+  const arrow = t.percent === 0 ? '•' : (isUp ? '▲' : '▼');
+  return `<span style="font-size:0.75rem;font-weight:700;color:${color}">${arrow} ${Math.abs(t.percent).toFixed(1)}%</span>`;
+}
 
 async function loadReports() {
   const period = document.getElementById('fPeriod').value;
@@ -255,8 +348,136 @@ function exportReportCSV() {
   URL.revokeObjectURL(url);
 }
 
+async function mgrRunGenerator() {
+  const bizSel = document.getElementById('genBiz').value || 'all';
+  const cats = mgrScopeBizIds
+    ? (mgrScopeBizIds.filter(a => GEN_CAT_NAMES[a]).join(',') || 'all')
+    : (BIZ && GEN_CAT_NAMES[BIZ] ? BIZ : 'all');
+  const period = document.getElementById('genPeriod').value;
+  let url = `/api/reports/generate?type=${document.getElementById('genType').value}` +
+    `&categories=${cats}&businesses=${encodeURIComponent(bizSel)}&period=${period}`;
+  if (period === 'custom') {
+    const s = document.getElementById('genStart').value, e = document.getElementById('genEnd').value;
+    if (!s || !e) { Toast.warning('Select both start and end dates for a custom range.'); return; }
+    url += `&startDate=${s}&endDate=${e}`;
+  }
+
+  const out = document.getElementById('genOutput');
+  out.innerHTML = '<div class="empty-state"><div class="spinner"></div><p style="margin-top:12px">Generating report…</p></div>';
+  try {
+    const res = await API.get(url);
+    if (!res.success) {
+      out.innerHTML = `<div class="empty-state"><h3>Unable to generate report</h3><p>${res.message || 'Please try again.'}</p></div>`;
+      return;
+    }
+    mgrRender(res.data);
+  } catch (err) {
+    out.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${err.message || 'Failed to reach the report service.'}</p></div>`;
+  }
+}
+
+function mgrTable(header, rowsHtml) {
+  return `<div class="table-wrap"><table><thead><tr>${header.map(h => `<th${h.right ? ' style="text-align:right"' : ''}>${h.t}</th>`).join('')}</tr></thead><tbody>${rowsHtml || ''}</tbody></table></div>`;
+}
+
+function buildNav() {
+  const el = document.getElementById('mgrNav');
+  if (!el) return;
+  el.innerHTML = `
+    <a class="nav-item" href="/manager/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+    <a class="nav-item" href="/manager/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
+    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+    <a class="nav-item active" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Generate Reports</a>
+    <a class="nav-item" href="/manager/performing-rank"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span> Performing Rank</a>
+    <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+  `;
+}
+
+function mgrRender(d) {
+  const bizLabel = d.scope.businesses === 'all' ? 'All businesses in my scope'
+    : ((d.scope.businesses || []).map(b => b.name).join(', ') || '—');
+  let html = `
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="card-title">${d.reportTitle}</span>
+      <span class="badge badge-gray">${d.period.label}</span>
+    </div>
+    <div style="padding:12px 20px 0;font-size:0.8rem;color:var(--gray-500)">Scope: <strong>${(d.scope.categoryNames || []).join(' · ') || 'All categories'}</strong> — ${bizLabel}</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));padding:16px 20px">`;
+  (d.kpis || []).forEach(k => {
+    const invert = /expense|tax|cogs/i.test(k.label);
+    html += `<div class="kpi-card ${/profit|margin/i.test(k.label) ? 'green' : (invert ? 'danger' : 'yellow')}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.currency ? fmtCurrency(k.value) : k.value}</div>
+      <div style="margin-top:4px">${mgrTrendBadge(k.trend, invert)}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (d.lines && d.lines.length) {
+    html += `<div style="padding:0 20px 20px"><div class="card-title" style="margin-bottom:8px">Details</div>` +
+      mgrTable([{ t: 'Item' }, { t: 'Amount', right: true }, { t: 'vs Previous', right: true }],
+        d.lines.map(l => `<tr><td style="${l.negative ? 'color:var(--danger)' : (/(total|net income|net profit|gross profit)/i.test(l.label) ? 'font-weight:700' : '')}">${l.label}</td>
+          <td style="text-align:right;${l.negative ? 'color:var(--danger)' : ''}">${fmtCurrency(l.amount)}</td>
+          <td style="text-align:right">${mgrTrendBadge(l.trend, l.negative)}</td></tr>`).join('')) + `</div>`;
+  }
+  html += `</div>`;
+
+  if (d.businessBreakdown && d.businessBreakdown.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Breakdown by Business</span></div>` +
+      mgrTable([{ t: 'Business' }, { t: 'Revenue', right: true }, { t: 'Expenses', right: true }, { t: 'Net', right: true }, { t: 'Txns', right: true }, { t: 'vs Previous', right: true }],
+        d.businessBreakdown.map(b => `<tr><td style="font-weight:600">${b.name}</td>
+          <td style="text-align:right;font-weight:700">${fmtCurrency(b.revenue)}</td>
+          <td style="text-align:right;color:var(--danger)">${fmtCurrency(b.expenses)}</td>
+          <td style="text-align:right;color:${b.net >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmtCurrency(b.net)}</td>
+          <td style="text-align:right">${b.transactions}</td>
+          <td style="text-align:right">${mgrTrendBadge(b.trend)}</td></tr>`).join('')) + `</div>`;
+  }
+
+  if (d.expenseBreakdown && d.expenseBreakdown.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Expenses by Category</span></div>` +
+      mgrTable([{ t: 'Category' }, { t: 'Amount', right: true }, { t: 'vs Previous', right: true }],
+        d.expenseBreakdown.map(x => `<tr><td style="font-weight:600">${x.name}</td>
+          <td style="text-align:right;font-weight:700">${fmtCurrency(x.amount)}</td>
+          <td style="text-align:right">${mgrTrendBadge(x.trend, true)}</td></tr>`).join('')) + `</div>`;
+  }
+
+  if (d.dailyBreakdown) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Revenue by Day</span></div>` +
+      mgrTable([{ t: 'Day' }, { t: 'Revenue', right: true }, { t: 'Transactions', right: true }],
+        d.dailyBreakdown.map(x => `<tr><td>${x.day}</td><td style="text-align:right">${fmtCurrency(x.revenue)}</td><td style="text-align:right">${x.salesCount}</td></tr>`).join('')) + `</div>`;
+  }
+
+  if (d.transactions && d.transactions.length) {
+    html += `<div class="card" style="margin-bottom:20px"><div class="card-header"><span class="card-title">Transactions (${d.transactions.length})</span></div>` +
+      mgrTable([{ t: 'Date' }, { t: 'Txn ID' }, { t: 'Business' }, { t: 'Products' }, { t: 'Total', right: true }, { t: 'Payment' }, { t: 'Sold By' }],
+        d.transactions.map(t => `<tr>
+          <td style="font-size:0.78rem">${(t.date || '').slice(0, 10)} ${t.time || ''}</td>
+          <td><code style="font-size:0.72rem">${t.id || '—'}</code></td>
+          <td style="font-size:0.8rem">${t.business}</td>
+          <td style="font-size:0.78rem">${(t.items || []).map(i => `${i.name} ×${i.quantity || i.qty || 1}`).join('<br>')}</td>
+          <td style="text-align:right;font-weight:700">${fmtCurrency(t.total)}</td>
+          <td><span class="badge badge-gray" style="font-size:0.65rem">${t.paymentMethod}</span></td>
+          <td style="font-size:0.75rem">${t.soldBy}</td></tr>`).join('')) + `</div>`;
+  } else if (d.reportType === 'transactionhistory') {
+    html += `<div class="empty-state"><h3>No transactions found</h3><p>No transactions were recorded for the selected scope and period.</p></div>`;
+  }
+
+  document.getElementById('genOutput').innerHTML = html;
+}
+
+function mgrPrintGenerator() {
+  const out = document.getElementById('genOutput');
+  if (!out.innerHTML.trim()) { Toast.warning('Generate a report first.'); return; }
+  let pa = document.getElementById('genPrintArea');
+  if (!pa) { pa = document.createElement('div'); pa.id = 'genPrintArea'; document.body.appendChild(pa); }
+  pa.innerHTML = out.innerHTML;
+  printSection('genPrintArea');
+}
+
 async function initPage() {
   buildNav();
+  mgrInitGenerator();
   const u = await getCurrentUser();
   if (u) {
     const bizAccess = u.businessAccess || [];

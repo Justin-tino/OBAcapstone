@@ -18,7 +18,7 @@
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav" id="mgrNav"></nav>
@@ -47,10 +47,16 @@
     </div>
 
     <div class="page-content">
-      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
-        <div class="kpi-card yellow"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="kpiRevenue">&#8369;0</div></div>
-        <div class="kpi-card green"><div class="kpi-label">Total Transactions</div><div class="kpi-value" id="kpiTransactions">0</div></div>
-        <div class="kpi-card black"><div class="kpi-label">Average per Sale</div><div class="kpi-value" id="kpiAvg">&#8369;0</div></div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card yellow"><div class="kpi-label">Today's Sales</div><div class="kpi-value" id="kpiToday">&#8369;0</div></div>
+        <div class="kpi-card green"><div class="kpi-label">This Week</div><div class="kpi-value" id="kpiWeek">&#8369;0</div></div>
+        <div class="kpi-card black"><div class="kpi-label">This Month</div><div class="kpi-value" id="kpiMonth">&#8369;0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Transactions (filtered)</div><div class="kpi-value" id="kpiTransactions">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Average per Sale</div><div class="kpi-value" id="kpiAvg">&#8369;0</div></div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
+        <div class="kpi-card"><div class="kpi-label">Filtered Revenue</div><div class="kpi-value" id="kpiRevenue">&#8369;0</div><div style="font-size:0.75rem;color:var(--gray-400)" id="kpiRevenueSub">All records</div></div>
+        <div class="kpi-card"><div class="kpi-label">Top Seller (filtered)</div><div class="kpi-value" id="kpiTop" style="font-size:1rem">—</div><div style="font-size:0.75rem;color:var(--gray-400)" id="kpiTopSub">No data</div></div>
       </div>
 
       <div class="card">
@@ -59,12 +65,50 @@
             <div class="search-box">
               <input id="fSearch" class="form-control" placeholder="Search by product name..." oninput="renderSales()">
             </div>
-            <input id="fDate" type="date" class="form-control" style="width:160px" onchange="renderSales()">
+  <input id="fCategory" class="form-control" style="width:150px" placeholder="Category..." oninput="renderSales()" title="Product category">
+  <input id="fStart" type="date" class="form-control" style="width:150px" onchange="renderSales()" title="Start date">
+  <input id="fEnd" type="date" class="form-control" style="width:150px" onchange="renderSales()" title="End date">
+  <select id="fPreset" class="form-control" style="width:130px" onchange="applyPreset(this.value)" title="Day/Week/Month preset">
+  <option value="">All time</option>
+  <option value="today">Today</option>
+  <option value="week">This week</option>
+  <option value="month">This month</option>
+  </select>
+  <select id="fPayment" class="form-control" style="width:130px" onchange="renderSales()">
+  <option value="">All payments</option>
+  <option value="cash">Cash</option>
+  <option value="gcash">GCash</option>
+  <option value="credit">Credit</option>
+  <option value="check">Check</option>
+  <option value="card">Card</option>
+  </select>
+  <select id="fStaff" class="form-control" style="width:150px" onchange="renderSales()"><option value="">All staff</option></select>
           </div>
           <button class="btn btn-primary no-print" onclick="openModal('saleModal')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Record Sale</button>
+  <div style="display:flex;gap:8px">
+  <button class="btn btn-outline no-print" onclick="clearMgrFilters()">Clear</button>
+  <button class="btn btn-outline no-print" onclick="exportMgrCSV()">Export CSV</button>
+  <button class="btn btn-outline no-print" onclick="printSales()">Print Report</button>
         </div>
+  </div>
+  <div id="salesPrintArea">
+  <div id="printHeader" style="display:none;text-align:center;border-bottom:2px solid #1A1A1A;padding-bottom:12px;margin-bottom:12px">
+  <div style="font-weight:800;font-size:1.1rem">Office of Business Affairs — PSAU</div>
+  <div style="font-size:0.82rem;color:#555">Sales Monitoring Report | <span id="printBizName"></span></div>
+  <div style="font-size:0.78rem;color:#777"><span id="printReportTitle">Sales Report</span> | <span id="printPeriod"></span></div>
+  <div style="font-size:0.75rem;color:#777">Prepared by: <span id="preparedByNameTop"></span> | Printed: <span id="printedAtTop"></span></div>
+  </div>
         <div id="salesTable">
           <div class="empty-state"><h3>No sales recorded</h3></div>
+  </div>
+  <div id="salesSignatures" style="display:none;margin-top:24px;font-size:0.82rem">
+  <div style="display:flex;justify-content:space-between;max-width:640px">
+  <div>Prepared by:<br><br>_________________________<br><span id="preparedByName"></span></div>
+  <div>Checked by:<br><br>_________________________</div>
+  <div>Noted by:<br><br>_________________________</div>
+  </div>
+  <div style="margin-top:8px;color:#666">Printed: <span id="printedAt"></span></div>
+  </div>
         </div>
       </div>
     </div>
@@ -84,7 +128,11 @@
       <div class="form-group"><label class="form-label">Unit Price (&#8369;)</label><input id="s_price" type="number" class="form-control" step="0.01"></div>
     </div>
     <div class="form-group"><label class="form-label">Payment Method</label>
-      <select id="s_payment" class="form-control"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="card">Card</option></select>
+  <select id="s_payment" class="form-control"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="credit">Credit</option><option value="check">Check</option><option value="card">Card</option><option value="other">Other</option></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Customer Name</label><input id="s_customer" class="form-control" placeholder="Walk-in" value="Walk-in"></div>
+      <div class="form-group"><label class="form-label">Amount Paid (₱)</label><input id="s_paid" type="number" class="form-control" step="0.01" min="0" placeholder="0.00"></div>
     </div>
     <div class="form-group"><label class="form-label">Notes</label><input id="s_notes" class="form-control" placeholder="Optional notes"></div>
     <div class="modal-footer">
@@ -94,9 +142,20 @@
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><h3>Billing Receipt</h3><button class="modal-close" onclick="closeModal('receiptModal')">&times;</button></div>
+    <div id="receiptContent" style="font-family:monospace;font-size:0.85rem;line-height:1.7"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('receiptModal')">Close</button>
+      <button class="btn btn-primary" onclick="printReceiptOnly()">Print Receipt</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=2"></script>
 <script>
-let BIZ = 'RENTAL';
+let BIZ = 'AGRI';
 let sales = [];
 let taxRates = {};
 
@@ -110,11 +169,10 @@ async function loadTaxRates() {
 function buildNav() {
   document.getElementById('mgrNav').innerHTML = `
     <a class="nav-item" href="/manager/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
     <a class="nav-item active" href="/manager/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="/manager/employees"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Employees</a>
-    <a class="nav-item" href="/manager/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
+    <a class="nav-item" href="/manager/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+    <a class="nav-item" href="/manager/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Generate Reports</a>
+    <a class="nav-item" href="/manager/performing-rank"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span> Performing Rank</a>
     <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
   `;
 }
@@ -130,40 +188,134 @@ async function loadData() {
   } catch(e) { /* skip */ }
 }
 
+function saleDateOnly(s) {
+  const d = s.date || s.createdAt || '';
+  return d.slice(0, 10);
+}
+
 function updateKPIs() {
-  const total = sales.reduce((a,s) => a + (parseFloat(s.total)||0), 0);
-  document.getElementById('kpiRevenue').innerHTML = '&#8369;' + total.toLocaleString('en',{minimumFractionDigits:2});
-  document.getElementById('kpiTransactions').textContent = sales.length;
-  const avg = sales.length > 0 ? total / sales.length : 0;
-  document.getElementById('kpiAvg').innerHTML = '&#8369;' + avg.toLocaleString('en',{minimumFractionDigits:2});
+  // Module 2.1: day / week / month overview (always from full dataset)
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const monthStart = todayStr.slice(0, 7) + '-01';
+  const sum = (list) => list.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
+  const t = sum(sales.filter(s => saleDateOnly(s) === todayStr));
+  const w = sum(sales.filter(s => saleDateOnly(s) >= weekAgo));
+  const m = sum(sales.filter(s => saleDateOnly(s) >= monthStart));
+  document.getElementById('kpiToday').innerHTML = '&#8369;' + t.toLocaleString('en', { minimumFractionDigits: 2 });
+  document.getElementById('kpiWeek').innerHTML = '&#8369;' + w.toLocaleString('en', { minimumFractionDigits: 2 });
+  document.getElementById('kpiMonth').innerHTML = '&#8369;' + m.toLocaleString('en', { minimumFractionDigits: 2 });
+  // Filtered KPIs are refreshed inside renderSales()
+}
+
+function applyPreset(v) {
+  const s = document.getElementById('fStart');
+  const e = document.getElementById('fEnd');
+  const today = new Date();
+  const iso = (d) => d.toISOString().slice(0, 10);
+  if (v === 'today') { s.value = iso(today); e.value = iso(today); }
+  else if (v === 'week') { s.value = iso(new Date(Date.now() - 6 * 86400000)); e.value = iso(today); }
+  else if (v === 'month') { s.value = iso(today).slice(0, 7) + '-01'; e.value = iso(today); }
+  else { s.value = ''; e.value = ''; }
+  renderSales();
+}
+
+function clearMgrFilters() {
+  ['fSearch', 'fCategory', 'fStart', 'fEnd', 'fPayment', 'fStaff', 'fPreset'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  renderSales();
+}
+
+function reportTitleText() {
+  const pay = document.getElementById('fPayment').value;
+  const cat = document.getElementById('fCategory').value.trim();
+  const staff = document.getElementById('fStaff').value;
+  const s = document.getElementById('fStart').value;
+  const e = document.getElementById('fEnd').value;
+  let t = pay ? pay.toUpperCase() + ' Sales' : 'Sales';
+  if (cat) t += ' | Category: ' + cat;
+  if (staff) t += ' | Staff: ' + staff;
+  if (s || e) t += ` (${s || 'Start'} to ${e || 'Today'})`;
+  return t + ' Report';
 }
 
 function renderSales() {
   const search = document.getElementById('fSearch').value.toLowerCase();
-  const dateFilter = document.getElementById('fDate').value;
+  const catQ = document.getElementById('fCategory').value.toLowerCase().trim();
+  const startV = document.getElementById('fStart').value;
+  const endV = document.getElementById('fEnd').value;
+  const payV = document.getElementById('fPayment').value;
+  const staffV = document.getElementById('fStaff').value;
   let list = sales;
   if (search) list = list.filter(s => (s.items||[]).some(i => (i.name||'').toLowerCase().includes(search)));
-  if (dateFilter) list = list.filter(s => (s.date||s.createdAt||'').startsWith(dateFilter));
+  if (catQ) list = list.filter(s => (s.items||[]).some(i => ((i.category||'') + ' ' + (i.name||'')).toLowerCase().includes(catQ)));
+  if (startV) list = list.filter(s => saleDateOnly(s) >= startV);
+  if (endV) list = list.filter(s => saleDateOnly(s) <= endV);
+  if (payV) list = list.filter(s => (s.paymentMethod||'').toLowerCase() === payV);
+  if (staffV) list = list.filter(s => (s.recordedByName||'') === staffV);
+  // Populate staff filter once
+  const staffSel = document.getElementById('fStaff');
+  if (staffSel.options.length <= 1) {
+  const names = [...new Set(sales.map(s => s.recordedByName).filter(Boolean))];
+  staffSel.innerHTML = '<option value="">All staff</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (staffV) staffSel.value = staffV;
+  }
+  // Filtered KPIs (Module 2.1: revenue / txn count / avg)
+  const fTotal = list.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
+  document.getElementById('kpiRevenue').innerHTML = '&#8369;' + fTotal.toLocaleString('en', { minimumFractionDigits: 2 });
+  document.getElementById('kpiRevenueSub').textContent = list.length + ' transaction(s) in filter';
+  document.getElementById('kpiTransactions').textContent = list.length;
+  document.getElementById('kpiAvg').innerHTML = '&#8369;' + (list.length ? fTotal / list.length : 0).toLocaleString('en', { minimumFractionDigits: 2 });
+  // Top seller in filter
+  const pmap = {};
+  list.forEach(s => (s.items || []).forEach(i => {
+    const k = i.name || 'Unknown';
+    pmap[k] = pmap[k] || { qty: 0, rev: 0 };
+    pmap[k].qty += parseInt(i.quantity || i.qty || 1);
+    pmap[k].rev += parseFloat(i.subtotal ?? (i.unitPrice * (i.quantity || i.qty || 1))) || 0;
+  }));
+  const top = Object.entries(pmap).sort((a, b) => b[1].rev - a[1].rev)[0];
+  document.getElementById('kpiTop').textContent = top ? top[0] : '—';
+  document.getElementById('kpiTopSub').textContent = top ? `${top[1].qty} sold • ₱${top[1].rev.toLocaleString('en', { minimumFractionDigits: 2 })}` : 'No data';
   const el = document.getElementById('salesTable');
   if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No sales found</h3></div>'; return; }
-  el.innerHTML = `<table><thead><tr><th>Date</th><th>Items</th><th>Payment</th><th>Total</th><th>Recorded By</th></tr></thead><tbody>
-    ${list.map(s => `<tr>
-      <td>${new Date(s.date||s.createdAt).toLocaleDateString()}</td>
-      <td>${(s.items||[]).map(i => i.name).join(', ')||'—'}</td>
+  const total = fTotal;
+  el.innerHTML = `<div style="margin-bottom:8px;font-size:0.85rem"><strong>${reportTitleText()}</strong> — ${list.length} transaction(s), Total: &#8369;${total.toLocaleString('en',{minimumFractionDigits:2})}</div>
+  <table><thead><tr><th>Date</th><th>Txn ID</th><th>Items</th><th>Payment</th><th>Status</th><th>Total</th><th>Recorded By</th><th class="no-print">Receipt</th></tr></thead><tbody>
+    ${list.map((s, idx) => {
+      // Sale status: return-adjustment records are "Returned"; sales with processed returns (partial/fully) are "Partially Returned"; otherwise "Successful"
+      let statusBadge;
+      if (s.isReturnAdjustment || (s.paymentMethod || '').toUpperCase() === 'RETURN_ADJUSTMENT') {
+        statusBadge = '<span class="stock-badge stock-out">Returned</span>' + (s.originalTransactionId ? `<br><small style="color:var(--gray-500);font-size:0.7rem">for ${s.originalTransactionId}</small>` : '');
+      } else if (s.hasReturn || (parseFloat(s.returnedTotal) || 0) > 0) {
+        statusBadge = '<span class="stock-badge low-stock">Partially Returned</span>';
+      } else {
+        statusBadge = '<span class="stock-badge in-stock">Successful</span>';
+      }
+      return `<tr>
+      <td>${saleDateOnly(s)}<br><small>${s.time || ''}</small></td>
+      <td><code style="font-size:0.75rem">${s.transactionId || s.id || '—'}</code></td>
+      <td>${(s.items||[]).map(i => i.name + '×' + (i.quantity || i.qty || 1)).join(', ')||'—'}</td>
       <td><span class="stock-badge in-stock">${s.paymentMethod||'cash'}</span></td>
+      <td>${statusBadge}</td>
       <td class="fw-bold">&#8369;${parseFloat(s.total||0).toLocaleString('en',{minimumFractionDigits:2})}</td>
       <td style="font-size:0.82rem">${s.recordedByName||'—'}</td>
-    </tr>`).join('')}
+      <td class="no-print"><button class="btn btn-outline btn-sm" data-idx="${sales.indexOf(s)}" onclick="showSaleReceiptByIdx(this.getAttribute('data-idx'))">Receipt</button></td>
+    </tr>`; }).join('')}
   </tbody></table>`;
+  window._filteredSales = list;
 }
 
 async function loadProducts() {
   try {
     const res = await API.get('/api/inventory?biz=' + BIZ);
     if (res.success) {
+      window._mgrProducts = res.data || [];
       const sel = document.getElementById('s_product');
       sel.innerHTML = '<option value="">-- Select --</option>' + (res.data||[]).map(p =>
-        `<option value="${p.id}" data-price="${p.sellingPrice||0}" data-qty="${p.quantity||0}">${p.name} (Stock: ${p.quantity||0})</option>`
+        `<option value="${p.id}" data-price="${p.sellingPrice||0}" data-qty="${p.quantity||0}" data-cat="${(p.category||'').replace(/"/g,'&quot;')}">${p.name} (Stock: ${p.quantity||0})</option>`
       ).join('');
     }
   } catch(e) { /* skip */ }
@@ -180,11 +332,16 @@ function updatePrice() {
 async function recordSale() {
   const productEl = document.getElementById('s_product');
   const productId = productEl.value;
-  const productName = productEl.options[productEl.selectedIndex]?.text.split(' (')[0] || '';
+  const opt = productEl.options[productEl.selectedIndex];
+  const productName = opt?.text.split(' (')[0] || '';
+  const productCat = opt?.getAttribute('data-cat') || '';
   const qty = parseInt(document.getElementById('s_qty').value) || 1;
   const price = parseFloat(document.getElementById('s_price').value) || 0;
   const payment = document.getElementById('s_payment').value;
   const notes = document.getElementById('s_notes').value.trim();
+  const customerName = (document.getElementById('s_customer')?.value || 'Walk-in').trim() || 'Walk-in';
+  const amountPaidRaw = document.getElementById('s_paid')?.value;
+  const amountPaid = amountPaidRaw === '' || amountPaidRaw == null ? null : parseFloat(amountPaidRaw);
   if (!productId) { Toast.warning('Please select a product'); return; }
   if (qty < 1) { Toast.warning('Quantity must be at least 1'); return; }
   if (price <= 0) { Toast.warning('Invalid price'); return; }
@@ -192,20 +349,27 @@ async function recordSale() {
   const rate = taxRates[BIZ] || 0;
   const taxAmount = total * (rate / 100);
   const subtotal = total - taxAmount;
+  if (payment !== 'credit' && amountPaid !== null && !isNaN(amountPaid) && amountPaid < total - 0.005) {
+    Toast.warning('Amount paid is less than total. Use Credit for balances.');
+    return;
+  }
   try {
     const res = await API.post('/api/sales', {
-      items: [{ id: productId, name: productName, quantity: qty, unitPrice: price, subtotal: total }],
+      items: [{ id: productId, name: productName, category: productCat, quantity: qty, unitPrice: price, subtotal: total }],
       subtotal,
       taxRate: rate,
       taxAmount,
       total,
       paymentMethod: payment,
+      amountPaid,
+      customerName,
       notes,
       businessCategory: BIZ,
     });
     if (res.success) {
-      Toast.success('Sale recorded!');
+      Toast.success('Sale recorded! ' + (res.data.transactionId || ''));
       closeModal('saleModal');
+      if (res.data) showSaleReceipt(res.data);
       loadData();
     } else {
       Toast.error(res.message);
@@ -220,13 +384,87 @@ async function initPage() {
   const u = await getCurrentUser();
   if (u) {
     const bizAccess = u.businessAccess || [];
-    BIZ = bizAccess.includes('all') ? 'RENTAL' : (bizAccess[0] || 'RENTAL');
+    BIZ = bizAccess.includes('all') ? 'AGRI' : (bizAccess[0] || 'AGRI');
     document.getElementById('sidebarName').textContent = u.name;
     document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
     document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
+  document.getElementById('preparedByName').textContent = u.name;
   }
   document.getElementById('topbarTitle').textContent = BIZ + ' - Sales';
   loadData();
+}
+
+function printSales() {
+  const title = reportTitleText();
+  document.getElementById('printHeader').style.display = 'block';
+  document.getElementById('printBizName').textContent = BIZ;
+  document.getElementById('printReportTitle').textContent = title;
+  document.getElementById('printPeriod').textContent = (document.getElementById('fStart').value || 'Start') + ' to ' + (document.getElementById('fEnd').value || 'Today');
+  document.getElementById('preparedByNameTop').textContent = document.getElementById('preparedByName')?.textContent || '';
+  document.getElementById('printedAtTop').textContent = new Date().toLocaleString('en-PH');
+  document.getElementById('salesSignatures').style.display = 'block';
+  document.getElementById('printedAt').textContent = new Date().toLocaleString('en-PH');
+  try {
+    const u = document.getElementById('preparedByName');
+    if (u && !u.textContent) getCurrentUser().then(x => { if (x) u.textContent = x.name; });
+  } catch (_) {}
+  printSection('salesPrintArea');
+  setTimeout(() => {
+    document.getElementById('salesSignatures').style.display = 'none';
+    document.getElementById('printHeader').style.display = 'none';
+  }, 500);
+}
+
+function exportMgrCSV() {
+  const list = window._filteredSales || [];
+  if (!list.length) { Toast.warning('No data to export.'); return; }
+  const rows = list.map(s => ({
+    txn: s.transactionId || s.id, date: saleDateOnly(s), time: s.time || '',
+    customer: s.customerName || 'Walk-in', items: (s.items || []).map(i => `${i.name}x${i.quantity || i.qty}`).join('; '),
+    total: s.total, paid: s.amountPaid ?? '', change: s.change ?? '', balance: s.balanceDue ?? '',
+    payment: s.paymentMethod, staff: s.recordedByName || ''
+  }));
+  exportToCSV(rows, `sales-${BIZ}-${new Date().toISOString().slice(0, 10)}`);
+}
+
+function showSaleReceiptByIdx(idx) {
+  const s = sales[parseInt(idx)];
+  if (s) showSaleReceipt(s);
+}
+
+function showSaleReceipt(s) {
+  const items = Array.isArray(s.items) ? s.items : [];
+  document.getElementById('receiptContent').innerHTML = `
+    <div style="text-align:center;border-bottom:1px dashed #ccc;padding-bottom:10px;margin-bottom:10px">
+      <strong>OBA SYSTEM — PSAU</strong><br>
+      <small>Office of Business Affairs</small><br>
+      <small>${s.businessCategory || BIZ}</small>
+    </div>
+    <div>Txn ID: <strong>${s.transactionId || s.id || 'N/A'}</strong></div>
+    <div>Date: ${saleDateOnly(s)} ${s.time || ''}</div>
+    <div>Customer: ${s.customerName || 'Walk-in'}</div>
+    <div>Payment: ${(s.paymentMethod || 'cash').toUpperCase()}</div>
+    <div style="border-top:1px dashed #ccc;margin:10px 0;padding-top:10px">
+      ${items.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.name} x${i.quantity || i.qty}</span><span>₱${parseFloat(i.subtotal ?? (i.unitPrice * (i.quantity || i.qty || 1))).toFixed(2)}</span></div>`).join('')}
+    </div>
+    <div style="border-top:1px dashed #ccc;padding-top:8px">
+      <div style="display:flex;justify-content:space-between"><span>TOTAL</span><strong>₱${parseFloat(s.total || 0).toFixed(2)}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>PAID</span><span>₱${parseFloat(s.amountPaid ?? s.total ?? 0).toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between"><span>CHANGE</span><span>₱${parseFloat(s.change || 0).toFixed(2)}</span></div>
+      ${(s.balanceDue ? `<div style="display:flex;justify-content:space-between;color:#c00"><span>BALANCE</span><span>₱${parseFloat(s.balanceDue).toFixed(2)}</span></div>` : '')}
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:0.8rem;color:#888">Thank you! — OBA System</div>
+  `;
+  openModal('receiptModal');
+}
+
+function printReceiptOnly() {
+  const content = document.getElementById('receiptContent').innerHTML;
+  const w = window.open('', '_blank', 'width=400,height=600');
+  w.document.write(`<html><head><title>Receipt</title><style>body{font-family:'Courier New',monospace;padding:20px;font-size:12px;color:#000;}</style></head><body>${content}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 200);
 }
 
 document.addEventListener('DOMContentLoaded', initPage);

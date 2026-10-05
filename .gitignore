@@ -3,3 +3,10 @@ node_modules/
 npm-debug.log*
 .DS_Store
 *.log
+
+# Local scratch/debug scripts — one-off helpers, not part of the app
+tmp_check_report.js
+check-users.js
+_extract.js
+test-generate.js
+test-return-flow.js

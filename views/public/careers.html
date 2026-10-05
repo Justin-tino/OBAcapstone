@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Careers | OBA System</title>
+  <meta name="description" content="Career opportunities at the Office of Business Affairs, Pampanga State Agricultural University.">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+  body { background: var(--white); font-family: var(--font-main); }
+  .navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 60px; background: var(--white);
+  border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+  }
+  .navbar-logo { display:flex; align-items:center; gap:10px; font-size: 1.3rem; font-weight: 800; color: var(--black); text-decoration: none; }
+  .navbar-logo span { color: var(--green); }
+  .navbar-logo img { width: 36px; height: 36px; object-fit: contain; }
+  .navbar-links { display: flex; align-items: center; gap: 28px; }
+  .navbar-links a { font-size: 0.95rem; font-weight: 500; color: var(--gray-600); text-decoration: none; transition: 0.2s; }
+  .navbar-links a:hover, .navbar-links a.active { color: var(--green); font-weight: 600; }
+
+  .header-banner { background: var(--black); padding: 80px 60px; text-align: center; color: var(--white); }
+  .header-banner h1 { font-size: 3rem; margin-bottom: 20px; color: var(--yellow); }
+  .header-banner p { color: rgba(255,255,255,0.8); max-width: 700px; margin: 0 auto; font-size: 1.2rem; line-height: 1.6; }
+
+  .section { padding: 80px 60px; max-width: 1100px; margin: 0 auto; }
+
+  .careers-intro { text-align: center; margin-bottom: 60px; }
+  .careers-intro h2 { font-size: 2rem; color: var(--black); margin-bottom: 16px; }
+  .careers-intro p { font-size: 1.1rem; color: var(--gray-600); line-height: 1.7; max-width: 700px; margin: 0 auto; }
+
+  .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 80px; }
+  .value-card {
+  padding: 32px; border-radius: 16px; background: var(--gray-50);
+  border: 1px solid var(--gray-200); text-align: center; transition: transform 0.2s;
+  }
+  .value-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+  .value-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: var(--green-light); color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px auto;
+  }
+  .value-card h3 { font-size: 1.2rem; color: var(--black); margin-bottom: 10px; }
+  .value-card p { font-size: 0.92rem; color: var(--gray-600); line-height: 1.6; }
+
+  .openings-section h2 { font-size: 2rem; color: var(--black); margin-bottom: 8px; }
+  .openings-section .subtitle { font-size: 1.05rem; color: var(--gray-600); margin-bottom: 40px; line-height: 1.6; }
+
+  .opening-card {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 28px 32px; border-radius: 16px; background: var(--gray-50);
+  border: 1px solid var(--gray-200); margin-bottom: 16px; transition: transform 0.2s;
+  }
+  .opening-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .opening-info h3 { font-size: 1.2rem; color: var(--black); margin-bottom: 6px; }
+  .opening-info p { font-size: 0.9rem; color: var(--gray-600); }
+  .opening-tags { display: flex; gap: 8px; margin-top: 8px; }
+  .opening-tags span {
+  font-size: 0.78rem; font-weight: 600; padding: 4px 12px;
+  border-radius: 50px; background: var(--green-light); color: var(--green);
+  }
+
+  .no-openings {
+  text-align: center; padding: 60px 40px; border-radius: 16px;
+  background: var(--gray-50); border: 1px solid var(--gray-200);
+  }
+  .no-openings svg { color: var(--gray-400); margin-bottom: 16px; }
+  .no-openings h3 { font-size: 1.3rem; color: var(--black); margin-bottom: 8px; }
+  .no-openings p { font-size: 1rem; color: var(--gray-600); line-height: 1.6; max-width: 500px; margin: 0 auto; }
+
+  .cta-banner {
+  margin-top: 80px; padding: 48px; border-radius: 16px;
+  background: #1b5e20;
+  text-align: center; color: var(--white);
+  }
+  .cta-banner h3 { font-size: 1.6rem; margin-bottom: 12px; }
+  .cta-banner p { font-size: 1rem; color: rgba(255,255,255,0.85); margin-bottom: 24px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+  .cta-banner a {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--white); color: var(--green-dark); padding: 14px 32px;
+  border-radius: 8px; font-size: 1rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+  }
+  .cta-banner a:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+  @media (max-width: 768px) {
+  .navbar { padding: 16px 20px; }
+  .header-banner { padding: 60px 20px; }
+  .header-banner h1 { font-size: 2rem; }
+  .section { padding: 40px 20px; }
+  .values-grid { grid-template-columns: 1fr; }
+  .opening-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+
+  footer { background: var(--black); color: rgba(255,255,255,0.6); text-align: center; padding: 30px 40px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+  <a href="/" class="navbar-logo">
+  <img src="/images/psaulogo.png" alt="OBA Logo">
+  PSAU <span>OBA System</span>
+  </a>
+  <div class="navbar-links">
+  <a href="/">Home</a>
+  <a href="/features">Features</a>
+  <a href="/contact">Contact</a>
+  <a href="/careers" class="active">Careers</a>
+  </div>
+  <div>
+  <a href="/login" class="btn btn-green">System Login</a>
+  </div>
+  </nav>
+
+  <div class="header-banner">
+  <h1>Careers at OBA</h1>
+  <p>Join the Office of Business Affairs at Pampanga State Agricultural University and help drive institutional excellence through innovation.</p>
+  </div>
+
+  <div class="section">
+  <div class="careers-intro">
+  <h2>Why Work With Us</h2>
+  <p>The Office of Business Affairs manages diverse revenue-generating operations at PSAU. We are committed to transparency, efficiency, and service excellence for the university community.</p>
+  </div>
+
+  <div class="values-grid">
+  <div class="value-card">
+  <div class="value-icon">
+  
+  </div>
+  <h3>Team Collaboration</h3>
+  <p>Work alongside dedicated professionals committed to the growth and modernization of university services.</p>
+  </div>
+  <div class="value-card">
+  <div class="value-icon">
+  
+  </div>
+  <h3>Professional Growth</h3>
+  <p>Gain hands-on experience in managing multi-business operations, financial reporting, and digital systems.</p>
+  </div>
+  <div class="value-card">
+  <div class="value-icon">
+  
+  </div>
+  <h3>Public Service</h3>
+  <p>Contribute to the transparent and accountable management of institutional resources for the benefit of the university community.</p>
+  </div>
+  </div>
+
+  <div class="openings-section">
+  <h2>Current Openings</h2>
+  <p class="subtitle">Staff recruitment is managed through official Pampanga State Agricultural University channels. Current openings related to the Office of Business Affairs will be posted here when available.</p>
+
+  <div class="no-openings">
+  
+  <h3>No Openings at This Time</h3>
+  <p>There are currently no open positions. Please check back regularly or contact the Office of Business Affairs for inquiries about future opportunities.</p>
+  </div>
+  </div>
+
+  <div class="cta-banner">
+  <h3>Interested in Joining?</h3>
+  <p>Even if there are no current openings, feel free to reach out. We welcome inquiries from qualified individuals who share our commitment to institutional excellence.</p>
+  <a href="/contact">
+  
+  Contact Us
+  </a>
+  </div>
+  </div>
+
+  <footer>
+  <p>&copy; 2025 OBA System &middot; Pampanga State Agricultural University</p>
+  <p style="margin-top: 8px; font-size: 0.8rem; opacity: 0.7;">Capstone Project by Ondot, Salenga &amp; Tolosa</p>
+  </footer>
+
+
+</body>
+</html>

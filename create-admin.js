@@ -1,8 +1,8 @@
 require('dotenv').config();
-const { auth, db } = require('./config/firebase');
+const { auth, firestore } = require('./config/firebase');
 
 async function createDefaultAdmin() {
-  if (!auth || !db) {
+  if (!auth || !firestore) {
     console.error('❌ Firebase is not configured properly in .env');
     process.exit(1);
   }
@@ -31,15 +31,23 @@ async function createDefaultAdmin() {
       }
     }
 
-    // Add admin role to Realtime Database
-    await db.ref(`users/${userRecord.uid}`).set({
+    // Add admin role to Firestore (users/{uid})
+    await firestore.collection('users').doc(userRecord.uid).set({
+      uid: userRecord.uid,
       name,
       email,
-      role: 'admin',
+      role: 'system_administrator',
       businesses: ['all'],
       status: 'active',
+      lastLogin: 'Never',
       createdAt: new Date().toISOString(),
-    });
+    }, { merge: true });
+
+    // Ensure default tax rates exist (settings/taxes)
+    const taxesSnap = await firestore.collection('settings').doc('taxes').get();
+    if (!taxesSnap.exists) {
+      await firestore.collection('settings').doc('taxes').set({ AGRI: 0, NON_AGRI: 12, MAIN: 12 });
+    }
 
     console.log('✅ Successfully added admin permissions to Firestore!');
     console.log('\n=======================================');
@@ -47,7 +55,6 @@ async function createDefaultAdmin() {
     console.log(`Email: ${email}`);
     console.log(`Password: ${password}`);
     console.log('=======================================\n');
-    console.log('Note: After logging in and creating other accounts, you can delete this script and remove this admin account from the Firebase Console if you wish.');
     process.exit(0);
 
   } catch (error) {

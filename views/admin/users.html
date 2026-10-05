@@ -6,233 +6,409 @@
   <title>Manage Users — OBA System</title>
   <link rel="stylesheet" href="/css/main.css">
   <style>
-    /* Business Category Tabs */
+    /* ─── Modern Category Tabs ─── */
     .biz-tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
+      gap: 6px;
+      margin-bottom: 20px;
       padding: 6px;
-      background: var(--gray-100);
-      border-radius: var(--radius);
+      background: var(--white);
+      border-radius: 12px;
       border: 1px solid var(--gray-200);
       overflow-x: auto;
+      box-shadow: var(--shadow-sm);
     }
     .biz-tab {
-      flex: 1;
-      padding: 10px 16px;
-      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
       font-weight: 700;
       font-size: 0.82rem;
       cursor: pointer;
-      border-radius: var(--radius-sm);
+      border-radius: 8px;
       transition: var(--transition);
       color: var(--gray-600);
       background: transparent;
       user-select: none;
       white-space: nowrap;
+      border: none;
     }
     .biz-tab:hover {
-      background: rgba(255, 255, 255, 0.5);
+      background: var(--gray-100);
       color: var(--black);
     }
     .biz-tab.active {
+      background: var(--green);
       color: var(--white) !important;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 2px 6px rgba(45, 106, 46, 0.25);
     }
-    .biz-tab .count {
+    .biz-tab .tab-count {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.05);
-      color: var(--gray-600);
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 0.7rem;
-      margin-left: 6px;
-      font-weight: 700;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: var(--gray-200);
+      color: var(--gray-700);
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
       transition: var(--transition);
     }
-    .biz-tab.active .count {
-      background: rgba(255, 255, 255, 0.2);
+    .biz-tab.active .tab-count {
+      background: rgba(255, 255, 255, 0.25);
       color: var(--white);
     }
+    .biz-tab .tab-badge-alert {
+      background: #DC3545;
+      color: #fff;
+      font-weight: 800;
+      animation: pulseAlert 2s infinite;
+    }
+    @keyframes pulseAlert {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
 
-    /* KPI Strip */
+    /* ─── KPI Cards Strip (4 focused metrics) ─── */
     .kpi-strip {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
     .kpi-strip .kp {
       background: var(--white);
       border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 20px;
-      text-align: left;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
       box-shadow: var(--shadow-sm);
-      position: relative;
-      overflow: hidden;
       transition: var(--transition);
     }
     .kpi-strip .kp:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
-      border-color: rgba(0, 0, 0, 0.08);
     }
     .kpi-strip .kp .v {
-      font-size: 1.6rem;
+      font-size: 1.7rem;
       font-weight: 800;
       color: var(--black);
-      line-height: 1.2;
+      line-height: 1.1;
     }
     .kpi-strip .kp .l {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       color: var(--gray-500);
-      margin-top: 4px;
+      margin-top: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       font-weight: 700;
     }
 
-    /* Toolbar */
+    /* ─── Pending Banner Notification ─── */
+    .pending-alert-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: #FFF8E1;
+      border: 1px solid #FFE082;
+      border-radius: 10px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #795548;
+    }
+    .pending-alert-banner strong {
+      color: #E65100;
+    }
+
+    /* ─── Toolbar ─── */
     .toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
-      margin-bottom: 24px;
-      padding: 16px 20px;
+      margin-bottom: 18px;
+      padding: 14px 18px;
       background: var(--white);
       border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
+      border-radius: 12px;
       box-shadow: var(--shadow-sm);
     }
-    .toolbar .left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .toolbar .right { display: flex; gap: 10px; align-items: center; }
+    .toolbar .left {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .toolbar .right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-    /* Role Sections */
-    .role-section { margin-bottom: 32px; }
-    .role-section:last-child { margin-bottom: 0; }
-    .role-header {
+    /* ─── User Management Data Table ─── */
+    .user-table-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .user-table-card table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .user-table-card th {
+      background: var(--gray-50);
+      color: var(--gray-600);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .user-table-card td {
+      padding: 14px 18px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+    }
+    .user-table-card tr:last-child td {
+      border-bottom: none;
+    }
+    .user-table-card tr:hover td {
+      background: #FAFAFA;
+    }
+
+    /* ─── User Row Profile Presentation ─── */
+    .user-cell {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 16px 20px;
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius) var(--radius) 0 0;
-      border-bottom: none;
     }
-    .role-header .role-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 800;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-sm);
-    }
-    .role-header h3 { margin: 0; font-size: 1rem; font-weight: 800; }
-    .role-header .count { font-size: 0.8rem; color: var(--gray-500); font-weight: 600; margin-left: auto; }
-
-    /* User Cards Grid */
-    .user-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 16px;
-      padding: 20px;
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: 0 0 var(--radius) var(--radius);
-      border-top: none;
-    }
-
-    .user-card {
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 20px;
-      transition: var(--transition);
-      position: relative;
-      box-shadow: var(--shadow-sm);
-    }
-    .user-card:hover {
-      box-shadow: var(--shadow-md);
-      border-color: var(--yellow-dark);
-      transform: translateY(-2px);
-    }
-    .user-card .card-top { display: flex; align-items: start; gap: 14px; }
-    .user-card .user-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+    .user-avatar-sm {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: #fff;
       flex-shrink: 0;
       box-shadow: var(--shadow-sm);
     }
-    .user-card .user-info { flex: 1; min-width: 0; }
-    .user-card .user-name { font-weight: 800; font-size: 0.95rem; color: var(--black); }
-    .user-card .user-email { font-size: 0.8rem; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-    .user-card .user-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
-    .user-card .user-actions {
+    .user-meta-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--black);
       display: flex;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--gray-100);
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
     }
-    .user-card .card-badge { position: absolute; top: 20px; right: 20px; }
-    .user-card .last-login { font-size: 0.72rem; color: var(--gray-400); margin-top: 4px; font-weight: 500; }
-    .user-card .status-dot-sm { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-
-    .empty-biz {
-      text-align: center;
-      padding: 64px 24px;
-      color: var(--gray-400);
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
+    .user-meta-email {
+      font-size: 0.78rem;
+      color: var(--gray-500);
+      margin-top: 1px;
     }
-    .empty-biz h3 { font-size: 1.1rem; margin-bottom: 6px; color: var(--gray-700); font-weight: 700; }
+    .you-pill {
+      font-size: 0.65rem;
+      background: #E8F5E9;
+      color: #2E7D32;
+      border: 1px solid #A5D6A7;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
 
-    .action-btn {
+    /* ─── Role Badges ─── */
+    .role-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .role-tag.admin {
+      background: #FFEBEE;
+      color: #C62828;
+      border: 1px solid #FFCDD2;
+    }
+    .role-tag.accounting {
+      background: #E3F2FD;
+      color: #1565C0;
+      border: 1px solid #BBDEFB;
+    }
+    .role-tag.sales {
+      background: #E8F5E9;
+      color: #2E7D32;
+      border: 1px solid #C8E6C9;
+    }
+
+    /* ─── Category & Business Badges ─── */
+    .biz-tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .biz-tag-badge.AGRI {
+      background: #FFF8E1;
+      color: #B78103;
+      border: 1px solid #FFE082;
+    }
+    .biz-tag-badge.NON_AGRI {
+      background: #ECEFF1;
+      color: #37474F;
+      border: 1px solid #CFD8DC;
+    }
+    .biz-tag-badge.MAIN {
+      background: #E3F2FD;
+      color: #0D47A1;
+      border: 1px solid #90CAF9;
+    }
+    .biz-tag-badge.ALL {
+      background: #F5F5F5;
+      color: #616161;
+      border: 1px solid #E0E0E0;
+    }
+    .biz-names-subtext {
+      font-size: 0.73rem;
+      color: var(--gray-500);
+      margin-top: 3px;
+      max-width: 240px;
+      white-space: normal;
+      line-height: 1.3;
+    }
+
+    /* ─── Status Badges ─── */
+    .status-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+    .status-pill .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .status-pill.active {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    .status-pill.active .dot {
+      background: #2E7D32;
+    }
+    .status-pill.pending {
+      background: #FFF8E1;
+      color: #F57F17;
+    }
+    .status-pill.pending .dot {
+      background: #F57F17;
+    }
+    .status-pill.inactive {
+      background: #ECEFF1;
+      color: #546E7A;
+    }
+    .status-pill.inactive .dot {
+      background: #90A4AE;
+    }
+    .status-pill.suspended {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+    .status-pill.suspended .dot {
+      background: #C62828;
+    }
+
+    /* ─── Action Buttons ─── */
+    .action-btn-group {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .btn-act {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
-      border: 1.5px solid var(--gray-200);
+      border: 1px solid var(--gray-200);
       background: var(--white);
       color: var(--gray-700);
       transition: var(--transition);
       font-family: var(--font-main);
     }
-    .action-btn:hover { background: var(--gray-50); border-color: var(--yellow); color: var(--yellow-dark); }
-    .action-btn.danger { color: var(--danger); border-color: var(--danger); }
-    .action-btn.danger:hover { background: var(--danger-light); }
-    .action-btn.primary { color: var(--green); border-color: var(--green); }
-    .action-btn.primary:hover { background: var(--green-light); }
-    .action-btn svg { flex-shrink: 0; }
+    .btn-act:hover {
+      background: var(--gray-100);
+      color: var(--black);
+    }
+    .btn-act.danger {
+      color: #D32F2F;
+      border-color: #FFCDD2;
+    }
+    .btn-act.danger:hover {
+      background: #FFEBEE;
+    }
+    .btn-act.primary {
+      color: var(--green);
+      border-color: #C8E6C9;
+    }
+    .btn-act.primary:hover {
+      background: #E8F5E9;
+    }
 
-    @media (max-width: 768px) {
-      .biz-tabs { flex-wrap: nowrap; }
-      .user-grid { grid-template-columns: 1fr; padding: 12px; }
+    /* ─── Empty States ─── */
+    .empty-box {
+      text-align: center;
+      padding: 50px 24px;
+      color: var(--gray-500);
+    }
+    .empty-box svg {
+      margin-bottom: 12px;
+      color: var(--gray-400);
+    }
+    .empty-box h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+    .empty-box p {
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    @media (max-width: 900px) {
       .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { flex-direction: column; align-items: stretch; }
       .toolbar .left { width: 100%; }
       .toolbar .left input { flex: 1; }
     }
@@ -240,18 +416,19 @@
 </head>
 <body>
 <div class="app-layout">
+  <!-- Standard Admin Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item" href="/admin/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
       <a class="nav-item" href="/admin/business"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg></span> Business</a>
       <a class="nav-item" href="/admin/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" href="/admin/all-inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> Business Inventory</a>
       <a class="nav-item" href="/admin/sales"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
       <a class="nav-item" href="/admin/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-      <a class="nav-item" href="/admin/notifications"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notifications</a>
       <a class="nav-item active" href="/admin/users"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Manage Users</a>
       <a class="nav-item" href="/admin/settings"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Settings</a>
       <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
@@ -259,68 +436,161 @@
     <div class="sidebar-footer">
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="sidebarAvatar">A</div>
-        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Logged in as:</div></div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+          <div class="sidebar-user-role">Logged in as:</div>
+        </div>
       </div>
     </div>
   </aside>
 
   <div class="main-content">
-    <div class="topbar topbar-green">
-      <div class="flex-c gap-12">
-        
-        <button class="btn btn-ghost btn-icon" id="hamburger" style="color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></button>
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <svg class="header-leaf-icon" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 25C7 25 7.5 16 16.5 10.5C22 7 26 6 26 6C26 6 25 10 21.5 15.5C16 24.5 7 25 7 25Z" fill="#1b5e20"/>
+          <path d="M7 25C13 19 18 14 26 6" stroke="#4ade80" stroke-width="1.2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M12 25C12 25 12.5 20.5 17 17.5C20 15.5 23 15 23 15C23 15 22.5 17 20.5 20C17 25 12 25 12 25Z" fill="#22c55e"/>
+        </svg>
         <span class="topbar-title">Manage Users</span>
       </div>
-      <div class="topbar-actions" style="display:flex;align-items:center;gap:12px">
+      <div class="topbar-actions">
         <div class="notif-bell" id="notifBell" onclick="toggleNotifDropdown()">
-          <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
           <span class="notif-count" id="notifCount" style="display:none">0</span>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <button class="profile-btn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg> Profile</button>
+        <button class="profile-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profile <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
     </div>
 
     <div class="page-content">
-
-      <!-- KPI Strip -->
+      <!-- 4 Focused KPI Metrics -->
       <div class="kpi-strip">
-        <div class="kp"><div class="v" id="kpiTotal">0</div><div class="l">Total Accounts</div></div>
-        <div class="kp"><div class="v" id="kpiActive" style="color:var(--green)">0</div><div class="l">Active</div></div>
-        <div class="kp"><div class="v" id="kpiPending" style="color:var(--yellow-dark)">0</div><div class="l">Pending</div></div>
-        <div class="kp"><div class="v" id="kpiInactive" style="color:var(--gray-500)">0</div><div class="l">Inactive</div></div>
-        <div class="kp"><div class="v" id="kpiBiz" style="color:var(--info)">0</div><div class="l">Assigned to Business</div></div>
-      </div>
-
-      <!-- Toolbar -->
-      <div class="toolbar">
-        <div class="left">
-          <input type="text" id="fSearch" class="form-control" placeholder="Search by name or email..." oninput="renderUsers()" style="width:240px;font-size:0.82rem">
-          <select id="fRole" class="form-control" onchange="renderUsers()" style="width:auto;font-size:0.82rem">
-            <option value="">All Roles</option>
-            <option value="super_admin">Super Admin</option>
-            <option value="manager">Manager</option>
-            <option value="employee">Employee</option>
-            <option value="viewer">Viewer</option>
-          </select>
-          <select id="fStatus" class="form-control" onchange="renderUsers()" style="width:auto;font-size:0.82rem">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="inactive">Inactive</option>
-            <option value="suspended">Suspended</option>
-          </select>
+        <div class="kp">
+          <div class="v" id="kpiTotal">0</div>
+          <div class="l">Total Accounts</div>
         </div>
-        <div class="right">
-          <button class="btn btn-primary" onclick="openAddUser()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Account</button>
+        <div class="kp">
+          <div class="v" id="kpiActive" style="color:var(--green)">0</div>
+          <div class="l">Active Users</div>
+        </div>
+        <div class="kp">
+          <div class="v" id="kpiPending" style="color:#F57F17">0</div>
+          <div class="l">Pending Approvals</div>
+        </div>
+        <div class="kp">
+          <div class="v" id="kpiInactive" style="color:var(--gray-500)">0</div>
+          <div class="l">Inactive / Suspended</div>
         </div>
       </div>
 
-      <!-- Business Tabs -->
-      <div class="biz-tabs" id="bizTabs"></div>
+      <!-- Pending Access Requests Notification Banner (visible only when pending requests exist) -->
+      <div class="pending-alert-banner" id="pendingAlert" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="20" height="20" fill="none" stroke="#F57F17" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span><strong id="pendingCountText">0 new access request(s)</strong> are awaiting administrative approval.</span>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="switchTab('REQUESTS')">Review Requests</button>
+      </div>
 
-      <!-- User Content -->
-      <div id="userContent"></div>
+      <!-- Category Navigation Tabs -->
+      <div class="biz-tabs" id="bizTabs">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Main Users View (Shown for All, Agri, Non-Agri, Main, Admins) -->
+      <div id="usersViewPanel">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="left">
+            <input type="text" id="fSearch" class="form-control" placeholder="Search by name or email..." oninput="renderUsersTable()" style="width:260px;font-size:0.84rem">
+            <select id="fRole" class="form-control" onchange="renderUsersTable()" style="width:auto;font-size:0.84rem">
+              <option value="">All Roles</option>
+              <option value="sales_staff">Sales Staff</option>
+              <option value="accounting_officer">Accounting Officer</option>
+              <option value="system_administrator">System Administrator</option>
+            </select>
+            <select id="fStatus" class="form-control" onchange="renderUsersTable()" style="width:auto;font-size:0.84rem">
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+          <div class="right">
+            <button class="btn btn-primary" onclick="openAddUser()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Account</button>
+          </div>
+        </div>
+
+        <!-- Categorized Users Table -->
+        <div class="user-table-card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th style="min-width:240px">User Account</th>
+                  <th>System Role</th>
+                  <th>Assigned Category &amp; Business</th>
+                  <th>Status</th>
+                  <th>Last Login</th>
+                  <th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody">
+                <!-- Rows rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+          <div id="tableEmptyState" style="display:none">
+            <div class="empty-box">
+              <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <h3>No Accounts Found</h3>
+              <p>No user accounts matched the current category and filter criteria.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Access Requests Dedicated Tab View -->
+      <div id="requestsViewPanel" style="display:none">
+        <div class="user-table-card">
+          <div style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-200);background:var(--white)">
+            <div>
+              <h3 style="margin:0;font-size:1rem;font-weight:800">Pending Access Requests</h3>
+              <div style="font-size:0.8rem;color:var(--gray-500);margin-top:2px">Accounts signed up via the registration page. Review and assign a role and business.</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="loadRequests()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right:4px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Refresh</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Applicant</th>
+                  <th>Position</th>
+                  <th>Requested Role</th>
+                  <th>Target Business</th>
+                  <th>Request Date</th>
+                  <th style="min-width:280px;text-align:right">Approval Actions</th>
+                </tr>
+              </thead>
+              <tbody id="requestTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+          <div id="requestsEmptyState" style="display:none">
+            <div class="empty-box">
+              <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <h3>All Caught Up</h3>
+              <p>There are currently no pending access requests awaiting review.</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -328,347 +598,688 @@
 
 <!-- Add/Edit User Modal -->
 <div class="modal-overlay" id="addUserModal">
-  <div class="modal" style="max-width:500px">
+  <div class="modal" style="max-width:520px">
     <div class="modal-header">
       <span class="modal-title" id="userModalTitle">Add User Account</span>
       <button class="modal-close" onclick="closeModal('addUserModal')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <input type="hidden" id="u_id">
+    
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="u_name" class="form-control" placeholder="Full Name"></div>
-      <div class="form-group"><label class="form-label">Email *</label><input type="email" id="u_email" class="form-control" placeholder="you@psau.edu.ph"></div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Full Name *</label>
+        <input type="text" id="u_name" class="form-control" placeholder="e.g. Juan Dela Cruz">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Email Address *</label>
+        <input type="email" id="u_email" class="form-control" placeholder="user@psau.edu.ph">
+      </div>
     </div>
+
     <div class="form-row" id="pwRow">
-      <div class="form-group"><label class="form-label">Password *</label><input type="password" id="u_password" class="form-control" placeholder="Create password"></div>
-      <div class="form-group"><label class="form-label">Confirm Password *</label><input type="password" id="u_confirm" class="form-control" placeholder="Confirm password"></div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Password *</label>
+        <input type="password" id="u_password" class="form-control" placeholder="Min 6 characters">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Confirm Password *</label>
+        <input type="password" id="u_confirm" class="form-control" placeholder="Re-type password">
+      </div>
     </div>
+
     <div class="form-row">
-      <div class="form-group"><label class="form-label">System Role *</label>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">System Role *</label>
         <select id="u_role" class="form-control" onchange="onRoleChange()">
-          <option value="employee">Employee</option>
-          <option value="manager">Manager (Per-Business)</option>
-          <option value="viewer">Viewer (Read-only &amp; Print)</option>
-          <option value="super_admin">Super Admin (Full Access)</option>
+          <option value="sales_staff">Sales Staff (POS &amp; Operations)</option>
+          <option value="accounting_officer">Accounting Officer (Sales, Expenses &amp; COGS)</option>
+          <option value="system_administrator">System Administrator (Full System Control)</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Status</label>
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Status</label>
         <select id="u_status" class="form-control">
           <option value="active">Active</option>
-          <option value="pending">Pending (Awaiting Approval)</option>
+          <option value="pending">Pending</option>
           <option value="inactive">Inactive</option>
           <option value="suspended">Suspended</option>
         </select>
       </div>
     </div>
-    <div class="form-group" id="bizGroup">
-      <label class="form-label">Assigned Business Category *</label>
-      <div style="font-size:0.78rem;color:var(--gray-600);margin-bottom:8px">Select which business category this user can access and manage.</div>
-      <select id="u_businesses" class="form-control">
-        <option value="" disabled selected>— Select a category —</option>
-        <option value="RENTAL">Rental</option>
-        <option value="BUSINESS">Business</option>
-        <option value="AGRI">Agriculture</option>
-        <option value="NON_AGRI">Non-Agriculture</option>
-        <option value="MAIN">Main</option>
-      </select>
-    </div>
-    <div id="bizInfoBox" style="display:none;background:var(--info-light);border:1px solid #90CDF4;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px;font-size:0.82rem;color:var(--info)"></div>
-    <div class="modal-footer" style="display:flex;justify-content:space-between;width:100%;box-sizing:border-box">
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+
+    <!-- Category & Business Assignment (Hidden for System Administrator) -->
+    <div id="bizAssignmentSection">
+      <div class="form-group">
+        <label class="form-label">Assigned Business Category *</label>
+        <select id="u_businesses" class="form-control" onchange="onCategoryChange()">
+          <option value="" disabled selected>— Select a category —</option>
+          <option value="AGRI">Agriculture</option>
+          <option value="NON_AGRI">Non-Agriculture</option>
+          <option value="MAIN">Main</option>
+        </select>
+        <div id="accountingNoticeBox" style="display:none;background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:0.82rem;color:#0D6EFD">
+          <strong>Accounting Officer Scope:</strong> This user will have category-wide access to monitor expenses, income, ROI, taxes, and inventory across <strong>all businesses</strong> registered under this category.
+        </div>
       </div>
+
+      <div class="form-group" id="bizSelectGroup" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label class="form-label" style="margin:0">Assigned Businesses * <span id="bizCount" style="font-weight:400;color:var(--gray-500)"></span></label>
+          <div style="font-size:0.75rem">
+            <a href="javascript:void(0)" onclick="toggleAllBiz(true)" style="color:var(--green);font-weight:700">Select all</a> · 
+            <a href="javascript:void(0)" onclick="toggleAllBiz(false)" style="color:var(--gray-500)">Clear</a>
+          </div>
+        </div>
+        <div id="bizCheckList" style="max-height:160px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;background:var(--gray-50)"></div>
+      </div>
+    </div>
+
+    <div id="adminNoticeBox" style="display:none;background:#E8F5E9;border:1px solid #C8E6C9;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:0.82rem;color:#2E7D32">
+      <strong>System Administrator Notice:</strong> This user will have full access across all business categories, settings, inventory, sales, and user accounts.
+    </div>
+
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">Save Account</button>
     </div>
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
-const BIZ_MAP = { RENTAL:'Rental', BUSINESS:'Business', AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main' };
-const BIZ_COLORS = { RENTAL:'#6B3FA0', BUSINESS:'#2d6a2e', AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD' };
-
-const ROLE_CONFIG = {
-  super_admin: { color: '#DC3545', bg: '#FFE0E0', icon: 'SA', label: 'Super Admin' },
-  admin:       { color: '#DC3545', bg: '#FFE0E0', icon: 'SA', label: 'Super Admin' },
-  manager:     { color: '#0D6EFD', bg: '#D0E4FF', icon: 'MG', label: 'Manager' },
-  employee:    { color: '#198754', bg: '#D1F0D1', icon: 'EM', label: 'Employee' },
-  viewer:      { color: '#FF8C00', bg: '#FFE8CC', icon: 'VW', label: 'Viewer' },
-};
-
-function normRole(r) { return r === 'admin' ? 'super_admin' : r; }
+const BIZ_MAP = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'Main' };
+const BIZ_COLORS = { AGRI: '#D4A915', NON_AGRI: '#1A1A1A', MAIN: '#0D6EFD' };
 
 let users = [];
-let activeBiz = '';
+let allBusinesses = [];
+let accessRequests = [];
+let currentTab = 'all'; // 'all', 'AGRI', 'NON_AGRI', 'MAIN', 'ADMIN', 'REQUESTS'
 
-function getUserBiz(u) {
-  if (!u.businesses || !Array.isArray(u.businesses)) return '';
-  return u.businesses[0] === 'all' ? '' : u.businesses[0];
+function bizIdToCategory(id) {
+  if (!id || id === 'all') return '';
+  if (id === 'AGRI' || id === 'NON_AGRI' || id === 'MAIN') return id;
+  const s = String(id);
+  if (s.startsWith('NON_AGRI')) return 'NON_AGRI';
+  if (s.startsWith('AGRI')) return 'AGRI';
+  if (s.startsWith('MAIN')) return 'MAIN';
+  return '';
 }
 
-function getBizLabel(b) { return b ? (BIZ_MAP[b] || b) : 'All Categories'; }
+function bizIdToName(id) {
+  const b = allBusinesses.find(x => x.id === id);
+  return b ? b.name : id;
+}
+
+function getUserBiz(u) {
+  if (!u.businesses || !Array.isArray(u.businesses) || !u.businesses.length) return '';
+  if (u.businesses[0] === 'all') return 'all';
+  return bizIdToCategory(u.businesses[0]) || u.businesses[0];
+}
+
+function getUserBizNames(u) {
+  if (!u.businesses || !Array.isArray(u.businesses) || !u.businesses.length) return [];
+  if (u.businesses[0] === 'all') return ['All Categories'];
+  return u.businesses.map(b => (BIZ_MAP[b] ? BIZ_MAP[b] : bizIdToName(b)));
+}
+
+async function loadBusinesses() {
+  try {
+    const res = await API.get('/api/admin/businesses');
+    if (res.success) allBusinesses = (res.data || []).filter(b => (b.status || 'active') === 'active');
+  } catch (e) { console.error(e); }
+}
+
+function cleanUsersList(arr) {
+  const seenUid = new Set();
+  const seenEmail = new Set();
+  const out = [];
+  for (const raw of (arr || [])) {
+    if (!raw || !raw.email) continue;
+    // Hide rejected signups and still-pending registrations (they belong to the
+    // Access Requests tab, not the accounts list) so count always matches table.
+    const st = String(raw.status || '').toLowerCase();
+    if (st === 'rejected' || st === 'pending') continue;
+    const u = { ...raw };
+    const uidKey = String(u.uid || '');
+    const emailKey = String(u.email || '').toLowerCase();
+    if (uidKey && seenUid.has(uidKey)) continue;
+    if (seenEmail.has(emailKey)) continue;
+    if (uidKey) seenUid.add(uidKey);
+    seenEmail.add(emailKey);
+    out.push(u);
+  }
+  return out;
+}
 
 async function loadData() {
   try {
     const res = await API.get('/api/admin/users');
-    if (res.success) { users = (res.data || []).map(u => ({ ...u, role: normRole(u.role) })); renderAll(); }
-  } catch(e) { Toast.error('Error loading data'); }
+    if (res.success) {
+      users = cleanUsersList(res.data);
+      updateKPIs();
+      renderTabs();
+      renderUsersTable();
+    }
+  } catch(e) {
+    Toast.error('Error loading users list');
+  }
+  loadRequests();
 }
 
-function renderAll() {
-  renderTabs();
-  renderUsers();
-  updateKPIs();
+async function loadRequests() {
+  try {
+    const res = await API.get('/api/admin/access-requests');
+    if (res.success) {
+      accessRequests = res.data || [];
+      renderRequests();
+      renderTabs();
+      updateKPIs();
+    }
+  } catch(e) { /* silent */ }
 }
 
 function updateKPIs() {
-  const active = users.filter(u => u.status === 'active').length;
-  const pending = users.filter(u => u.status === 'pending').length;
-  const inactive = users.filter(u => u.status === 'inactive').length;
-  const withBiz = users.filter(u => getUserBiz(u)).length;
+  const active = users.filter(u => (u.status || '').toLowerCase() === 'active').length;
+  const pendingRequests = accessRequests.filter(r => (r.status || '').toLowerCase() === 'pending').length;
+  const inactive = users.filter(u => {
+    const s = (u.status || '').toLowerCase();
+    return s === 'inactive' || s === 'suspended';
+  }).length;
+
   document.getElementById('kpiTotal').textContent = users.length;
   document.getElementById('kpiActive').textContent = active;
-  document.getElementById('kpiPending').textContent = pending;
+  document.getElementById('kpiPending').textContent = pendingRequests;
   document.getElementById('kpiInactive').textContent = inactive;
-  document.getElementById('kpiBiz').textContent = withBiz;
+
+  // Pending banner logic
+  const banner = document.getElementById('pendingAlert');
+  if (pendingRequests > 0) {
+    banner.style.display = 'flex';
+    document.getElementById('pendingCountText').textContent = `${pendingRequests} pending access request${pendingRequests > 1 ? 's' : ''}`;
+  } else {
+    banner.style.display = 'none';
+  }
 }
 
 function renderTabs() {
-  const counts = {};
-  users.forEach(u => { const b = getUserBiz(u); if (b) counts[b] = (counts[b] || 0) + 1; });
+  const counts = { all: users.length, AGRI: 0, NON_AGRI: 0, MAIN: 0, ADMIN: 0 };
+  users.forEach(u => {
+    const isAdm = u.role === 'system_administrator' || u.role === 'super_admin' || u.role === 'admin';
+    if (isAdm) counts.ADMIN++;
+    const cat = getUserBiz(u);
+    if (cat && counts[cat] !== undefined) counts[cat]++;
+  });
+
+  const pendingReqs = accessRequests.filter(r => (r.status || '').toLowerCase() === 'pending').length;
+
   const tabs = [
-    { id: '', label: 'All Accounts', count: users.length, color: '#1A1A1A' },
-    ...['RENTAL','BUSINESS','AGRI','NON_AGRI','MAIN'].map(id => ({
-      id, label: BIZ_MAP[id], count: counts[id] || 0, color: BIZ_COLORS[id]
-    })),
+    { id: 'all', label: 'All Accounts', count: counts.all },
+    { id: 'AGRI', label: 'Agriculture', count: counts.AGRI },
+    { id: 'NON_AGRI', label: 'Non-Agriculture', count: counts.NON_AGRI },
+    { id: 'MAIN', label: 'Main Category', count: counts.MAIN },
+    { id: 'ADMIN', label: 'System Admins', count: counts.ADMIN },
+    { id: 'REQUESTS', label: 'Access Requests', count: pendingReqs, isAlert: pendingReqs > 0 }
   ];
-  document.getElementById('bizTabs').innerHTML = tabs.map(t =>
-    `<div class="biz-tab ${activeBiz === t.id ? 'active' : ''}" style="${activeBiz === t.id ? 'background:' + t.color : ''}" onclick="switchBiz('${t.id}')">
-      ${t.label} <span class="count">${t.count}</span>
-    </div>`
-  ).join('');
+
+  document.getElementById('bizTabs').innerHTML = tabs.map(t => `
+    <button class="biz-tab ${currentTab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}')">
+      ${t.label} 
+      <span class="tab-count ${t.isAlert ? 'tab-badge-alert' : ''}">${t.count}</span>
+    </button>
+  `).join('');
 }
 
-function switchBiz(biz) { activeBiz = biz; renderTabs(); renderUsers(); }
+function switchTab(tabId) {
+  currentTab = tabId;
+  renderTabs();
 
-function getFiltered() {
-  const s = document.getElementById('fSearch').value.toLowerCase();
+  const usersPanel = document.getElementById('usersViewPanel');
+  const reqsPanel = document.getElementById('requestsViewPanel');
+
+  if (tabId === 'REQUESTS') {
+    usersPanel.style.display = 'none';
+    reqsPanel.style.display = 'block';
+    renderRequests();
+  } else {
+    usersPanel.style.display = 'block';
+    reqsPanel.style.display = 'none';
+    renderUsersTable();
+  }
+}
+
+function getFilteredUsers() {
+  const s = (document.getElementById('fSearch').value || '').toLowerCase();
   const rf = document.getElementById('fRole').value;
   const sf = document.getElementById('fStatus').value;
+
   let list = [...users];
-  if (activeBiz) list = list.filter(u => getUserBiz(u) === activeBiz);
-  if (s) list = list.filter(u => u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s));
-  if (rf) list = list.filter(u => u.role === rf);
-  if (sf) list = list.filter(u => u.status === sf);
+
+  // Tab categorization filter
+  if (currentTab === 'ADMIN') {
+    list = list.filter(u => u.role === 'system_administrator' || u.role === 'super_admin' || u.role === 'admin');
+  } else if (currentTab === 'AGRI' || currentTab === 'NON_AGRI' || currentTab === 'MAIN') {
+    list = list.filter(u => {
+      const arr = u.businesses || [];
+      if (arr.includes('all')) return true;
+      return arr.some(b => b === currentTab || bizIdToCategory(b) === currentTab);
+    });
+  }
+
+  // Live search
+  if (s) {
+    list = list.filter(u => (u.name || '').toLowerCase().includes(s) || (u.email || '').toLowerCase().includes(s));
+  }
+
+  // Role filter
+  if (rf) {
+    list = list.filter(u => {
+      if (rf === 'system_administrator') return u.role === 'system_administrator' || u.role === 'super_admin' || u.role === 'admin';
+      return u.role === rf;
+    });
+  }
+
+  // Status filter
+  if (sf) {
+    list = list.filter(u => (u.status || '').toLowerCase() === sf.toLowerCase());
+  }
+
   return list;
 }
 
-function renderUsers() {
-  const list = getFiltered();
-  const groups = {};
-  const order = ['super_admin','manager','employee','viewer'];
-  const names = { super_admin:'Super Admin', manager:'Managers', employee:'Employees', viewer:'Viewers' };
+function renderUsersTable() {
+  const list = getFilteredUsers();
+  const tbody = document.getElementById('userTableBody');
+  const emptyState = document.getElementById('tableEmptyState');
 
-  list.forEach(u => {
-    const r = order.includes(u.role) ? u.role : 'employee';
-    if (!groups[r]) groups[r] = [];
-    groups[r].push(u);
-  });
-
-  const container = document.getElementById('userContent');
   if (!list.length) {
-    container.innerHTML = `<div class="empty-biz"><h3>No accounts found</h3><p>${activeBiz ? 'No accounts assigned to this business category.' : 'Click "Add Account" to create the first one.'}</p></div>`;
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
     return;
   }
 
-  let html = '';
-  order.forEach(role => {
-    const grp = groups[role];
-    if (!grp || !grp.length) return;
-    const cfg = ROLE_CONFIG[role] || ROLE_CONFIG.employee;
-    html += `<div class="role-section">
-      <div class="role-header">
-        <div class="role-icon" style="background:${cfg.color}">${cfg.icon}</div>
-        <h3 style="color:${cfg.color}">${names[role] || role}</h3>
-        <span class="count">${grp.length} account${grp.length > 1 ? 's' : ''}</span>
-      </div>
-      <div class="user-grid">
-        ${grp.map(u => renderCard(u)).join('')}
-      </div>
-    </div>`;
+  emptyState.style.display = 'none';
+  const myUid = (window._currentUser && window._currentUser.uid) || '';
+
+  tbody.innerHTML = list.map(u => {
+    const isOwn = u.uid === myUid;
+    const roleKey = u.role || 'sales_staff';
+    const isAdmin = roleKey === 'system_administrator' || roleKey === 'super_admin' || roleKey === 'admin';
+    const isAccounting = roleKey === 'accounting_officer' || roleKey === 'manager';
+    
+    // Role styling
+    let roleClass = 'sales';
+    let roleLabel = 'Sales Staff';
+    let avatarColor = '#2E7D32';
+
+    if (isAdmin) {
+      roleClass = 'admin';
+      roleLabel = 'System Administrator';
+      avatarColor = '#C62828';
+    } else if (isAccounting) {
+      roleClass = 'accounting';
+      roleLabel = 'Accounting Officer';
+      avatarColor = '#1565C0';
+    }
+
+    // Category / Business assignment
+    const cat = getUserBiz(u);
+    const bizNames = getUserBizNames(u);
+    let bizBadgeHtml = '';
+
+    if (isAdmin || cat === 'all') {
+      bizBadgeHtml = `<span class="biz-tag-badge ALL">All Categories</span>`;
+    } else if (cat && BIZ_MAP[cat]) {
+      const bListText = bizNames.length > 2 ? `${bizNames.slice(0, 2).join(', ')} (+${bizNames.length - 2})` : bizNames.join(', ');
+      bizBadgeHtml = `
+        <span class="biz-tag-badge ${cat}">${BIZ_MAP[cat]}</span>
+        <div class="biz-names-subtext" title="${bizNames.join(', ')}">${bListText || 'All ' + BIZ_MAP[cat]}</div>
+      `;
+    } else {
+      bizBadgeHtml = `<span class="biz-tag-badge ALL">Unassigned</span>`;
+    }
+
+    // Status pill
+    const statusVal = (u.status || 'active').toLowerCase();
+    const statusHtml = `<span class="status-pill ${statusVal}"><span class="dot"></span>${statusVal}</span>`;
+
+    // Last Login
+    const lastLogin = u.lastLogin && u.lastLogin !== 'Never' ? fmt.datetime(u.lastLogin) : 'Never';
+
+    return `
+      <tr>
+        <td>
+          <div class="user-cell">
+            <div class="user-avatar-sm" style="background:${avatarColor}">${(u.name || 'U').charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="user-meta-name">${escapeHtml(u.name || '')} ${isOwn ? '<span class="you-pill">You</span>' : ''}</div>
+              <div class="user-meta-email">${escapeHtml(u.email || '')}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="role-tag ${roleClass}">${roleLabel}</span>
+        </td>
+        <td>
+          ${bizBadgeHtml}
+        </td>
+        <td>
+          ${statusHtml}
+        </td>
+        <td style="color:var(--gray-600);font-size:0.82rem">
+          ${lastLogin}
+        </td>
+        <td style="text-align:right">
+          <div class="action-btn-group">
+            <button class="btn-act primary" onclick="editUser('${u.uid}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+            ${!isAdmin && !isOwn ? `<button class="btn-act danger" onclick="deleteUser('${u.uid}', '${escapeHtml(u.name || '')}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderRequests() {
+  const tbody = document.getElementById('requestTableBody');
+  const emptyState = document.getElementById('requestsEmptyState');
+  const pending = accessRequests.filter(r => (r.status || '').toLowerCase() === 'pending');
+
+  if (!pending.length) {
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  tbody.innerHTML = pending.map(r => {
+    const cat = r.businessUnit || (r.businesses && r.businesses[0]) || 'AGRI';
+    const reqDate = r.createdAt ? fmt.date(r.createdAt) : (r.date || '—');
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:700;font-size:0.9rem">${escapeHtml(r.name || '')}</div>
+          <div style="font-size:0.78rem;color:var(--gray-500)">${escapeHtml(r.email || '')}</div>
+        </td>
+        <td style="font-weight:600;color:var(--gray-700)">${escapeHtml(r.position || '—')}</td>
+        <td><span class="role-tag sales">${escapeHtml(r.requestedRole || r.role || 'Sales Staff')}</span></td>
+        <td><span class="biz-tag-badge ${cat}">${BIZ_MAP[cat] || cat}</span></td>
+        <td style="color:var(--gray-600);font-size:0.82rem">${reqDate}</td>
+        <td style="text-align:right">
+          <div style="display:inline-flex;gap:8px;align-items:center">
+            <select id="req_role_${r.id}" class="form-control" style="width:145px;font-size:0.8rem;padding:5px 8px">
+              <option value="sales_staff">Sales Staff</option>
+              <option value="accounting_officer">Accounting Officer</option>
+            </select>
+            <button class="btn-act primary" onclick="approveRequest('${r.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
+            <button class="btn-act danger" onclick="rejectRequest('${r.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function approveRequest(id) {
+  const roleSel = document.getElementById('req_role_' + id);
+  const role = roleSel ? roleSel.value : 'sales_staff';
+  const req = accessRequests.find(r => r.id === id);
+  const businesses = req && req.businessUnit ? [req.businessUnit] : ['AGRI'];
+
+  confirm(`Approve this user account as ${formatRole(role)}?`, async () => {
+    const res = await API.put(`/api/admin/access-requests/${id}/approve`, { role, businesses });
+    if (res.success) {
+      Toast.success('Account approved successfully');
+      loadRequests();
+      loadData();
+    } else {
+      Toast.error(res.message || 'Failed to approve');
+    }
   });
-  container.innerHTML = html;
 }
 
-function renderCard(u) {
-  const biz = getUserBiz(u);
-  const cfg = ROLE_CONFIG[u.role] || ROLE_CONFIG.employee;
-  const lastLogin = u.lastLogin && u.lastLogin !== 'Never' ? fmt.datetime(u.lastLogin) : u.lastLogin || 'Never';
-  const createdDate = u.createdAt ? fmt.date(u.createdAt) : '';
-  const isOwn = u.uid === (window._currentUser ? window._currentUser.uid : '');
-
-  const statusDots = {
-    active: '#198754', pending: '#FFC107', inactive: '#6C757D', suspended: '#DC3545'
-  };
-
-  return `<div class="user-card">
-    <div class="card-top">
-      <div class="user-avatar" style="background:${cfg.color}">${u.name.charAt(0).toUpperCase()}</div>
-      <div class="user-info">
-        <div class="user-name">${u.name} ${isOwn ? '<span style="font-size:0.65rem;background:var(--info-light);color:var(--info);padding:1px 6px;border-radius:4px;font-weight:600">You</span>' : ''}</div>
-        <div class="user-email">${u.email}</div>
-        <div class="last-login"><span class="status-dot-sm" style="background:${statusDots[u.status] || '#999'}"></span> ${u.status} · Last login: ${lastLogin}${createdDate ? ' · Created ' + createdDate : ''}</div>
-      </div>
-      <div class="card-badge">${roleBadge(u.role)}</div>
-    </div>
-    <div class="user-meta">
-      ${statusBadge(u.status)}
-      <span class="badge" style="background:${biz ? BIZ_COLORS[biz] : '#6C757D'}18;color:${biz ? BIZ_COLORS[biz] : '#6C757D'};border:1px solid ${biz ? BIZ_COLORS[biz] : '#6C757D'}40">${biz ? BIZ_MAP[biz] : 'All Categories'}</span>
-      ${u.createdBy ? `<span style="font-size:0.7rem;color:var(--gray-400)">Created by ${u.createdBy}</span>` : ''}
-    </div>
-    <div class="user-actions">
-      <button class="action-btn primary" onclick="editUser('${u.uid}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
-      ${u.role !== 'super_admin' && !isOwn ? `<button class="action-btn danger" onclick="deleteUser('${u.uid}', '${u.name.replace(/'/g, "\\'")}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete</button>` : ''}
-    </div>
-  </div>`;
+async function rejectRequest(id) {
+  confirm('Reject this access request? The registration will be declined.', async () => {
+    const res = await API.put(`/api/admin/access-requests/${id}/reject`, {});
+    if (res.success) {
+      Toast.success('Request rejected');
+      loadRequests();
+      loadData();
+    } else {
+      Toast.error(res.message || 'Failed to reject');
+    }
+  });
 }
 
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ─── Add / Edit Modal Logic ─── */
 function onRoleChange() {
   const role = document.getElementById('u_role').value;
-  const bizGroup = document.getElementById('bizGroup');
-  const infoBox = document.getElementById('bizInfoBox');
-  const msgs = {
-    super_admin: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><strong>Super Admin</strong> — Full system access: all categories, user management, audit trail, settings, and backup. Cannot be deleted.',
-    manager: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><strong>Manager</strong> — Manages assigned business category: inventory, sales, expenses, reports. Can add/edit/delete records.',
-    viewer: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><strong>Viewer</strong> — Read-only access to all dashboards and reports. Can print documents.',
-  };
-  if (role === 'super_admin' || role === 'viewer') {
-    bizGroup.style.display = 'none';
+  const bizSec = document.getElementById('bizAssignmentSection');
+  const adminBox = document.getElementById('adminNoticeBox');
+  const acctBox = document.getElementById('accountingNoticeBox');
+  const bizGroup = document.getElementById('bizSelectGroup');
+
+  if (role === 'system_administrator' || role === 'super_admin') {
+    bizSec.style.display = 'none';
+    adminBox.style.display = 'block';
+    if (acctBox) acctBox.style.display = 'none';
+    if (bizGroup) bizGroup.style.display = 'none';
+  } else if (role === 'accounting_officer') {
+    bizSec.style.display = 'block';
+    adminBox.style.display = 'none';
+    if (acctBox) acctBox.style.display = 'block';
+    if (bizGroup) bizGroup.style.display = 'none'; // Never ask business scope for accounting officer
   } else {
-    bizGroup.style.display = 'block';
+    bizSec.style.display = 'block';
+    adminBox.style.display = 'none';
+    if (acctBox) acctBox.style.display = 'none';
+    const cat = document.getElementById('u_businesses').value;
+    if (bizGroup) bizGroup.style.display = cat ? 'block' : 'none';
   }
-  infoBox.style.display = 'block';
-  infoBox.innerHTML = msgs[role] || '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><strong>Employee</strong> — Accesses only the selected business category for inventory, sales, and reports.';
+}
+
+function onCategoryChange() {
+  const role = document.getElementById('u_role').value;
+  const cat = document.getElementById('u_businesses').value;
+  const group = document.getElementById('bizSelectGroup');
+  const list = document.getElementById('bizCheckList');
+
+  // Accounting officer only accesses the whole category, do not show sub-business checklist
+  if (role === 'accounting_officer') {
+    if (group) group.style.display = 'none';
+    if (list) list.innerHTML = '';
+    return;
+  }
+
+  if (!cat) {
+    if (group) group.style.display = 'none';
+    if (list) list.innerHTML = '';
+    return;
+  }
+
+  const inCat = allBusinesses.filter(b => b.categoryId === cat);
+  if (group) group.style.display = 'block';
+
+  if (!inCat.length) {
+    list.innerHTML = `<div style="font-size:0.8rem;color:var(--gray-500);padding:4px">No specific businesses found under ${BIZ_MAP[cat] || cat}. You can create one under Business Management.</div>`;
+  } else {
+    list.innerHTML = inCat.map(b => `
+      <label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer;background:#fff;border:1px solid var(--gray-200);border-radius:6px;padding:6px 10px">
+        <input type="checkbox" class="biz-check" value="${b.id}" style="width:15px;height:15px">
+        <span style="font-weight:700">${escapeHtml(b.name)}</span>
+        <span style="font-size:0.72rem;color:var(--gray-500);margin-left:auto">${escapeHtml(b.location || '')}</span>
+      </label>
+    `).join('');
+    list.querySelectorAll('.biz-check').forEach(c => c.addEventListener('change', updateBizCount));
+  }
+  updateBizCount();
+}
+
+function updateBizCount() {
+  const n = document.querySelectorAll('.biz-check:checked').length;
+  document.getElementById('bizCount').textContent = n ? `(${n} selected)` : '';
+}
+
+function toggleAllBiz(on) {
+  document.querySelectorAll('.biz-check').forEach(c => { c.checked = on; });
+  updateBizCount();
+}
+
+function getSelectedBusinesses() {
+  return Array.from(document.querySelectorAll('.biz-check:checked')).map(c => c.value);
 }
 
 function openAddUser() {
   document.getElementById('userModalTitle').textContent = 'Add User Account';
-  document.getElementById('pwRow').style.display = '';
   document.getElementById('u_id').value = '';
   document.getElementById('u_name').value = '';
-  document.getElementById('u_email').value = ''; document.getElementById('u_email').disabled = false;
-  document.getElementById('u_role').value = 'employee';
-  document.getElementById('u_status').value = 'active';
+  document.getElementById('u_email').value = '';
+  document.getElementById('u_email').disabled = false;
   document.getElementById('u_password').value = '';
   document.getElementById('u_confirm').value = '';
-  document.getElementById('u_password').placeholder = 'Create password';
-  document.getElementById('u_confirm').placeholder = 'Confirm password';
+  document.getElementById('u_password').placeholder = 'Min 6 characters';
+  document.getElementById('u_confirm').placeholder = 'Re-type password';
+  document.getElementById('u_role').value = 'sales_staff';
+  document.getElementById('u_status').value = 'active';
   document.getElementById('u_businesses').value = '';
+  document.getElementById('bizSelectGroup').style.display = 'none';
+  document.getElementById('bizCheckList').innerHTML = '';
   onRoleChange();
   openModal('addUserModal');
 }
 
-function editUser(uid) {
+async function editUser(uid) {
   const u = users.find(x => x.uid === uid);
   if (!u) return;
+  if (!allBusinesses.length) await loadBusinesses();
+
   document.getElementById('userModalTitle').textContent = 'Edit User Account';
-  document.getElementById('pwRow').style.display = '';
   document.getElementById('u_id').value = u.uid;
-  document.getElementById('u_name').value = u.name;
-  document.getElementById('u_email').value = u.email; document.getElementById('u_email').disabled = true;
+  document.getElementById('u_name').value = u.name || '';
+  document.getElementById('u_email').value = u.email || '';
+  document.getElementById('u_email').disabled = true;
   document.getElementById('u_password').value = '';
   document.getElementById('u_confirm').value = '';
-  document.getElementById('u_password').placeholder = 'Leave blank to keep current password';
-  document.getElementById('u_confirm').placeholder = 'Leave blank to keep current password';
-  document.getElementById('u_role').value = u.role;
-  document.getElementById('u_status').value = u.status;
+  document.getElementById('u_password').placeholder = 'Leave blank to keep unchanged';
+  document.getElementById('u_confirm').placeholder = 'Leave blank to keep unchanged';
+  const roleVal = (u.role === 'super_admin' || u.role === 'admin') ? 'system_administrator' : (u.role === 'manager' ? 'accounting_officer' : (u.role || 'sales_staff'));
+  document.getElementById('u_role').value = roleVal;
+  document.getElementById('u_status').value = u.status || 'active';
+
   const biz = u.businesses;
   if (biz && Array.isArray(biz) && biz.length > 0 && biz[0] !== 'all') {
-    document.getElementById('u_businesses').value = biz[0];
+    const cat = bizIdToCategory(biz[0]) || biz[0];
+    document.getElementById('u_businesses').value = cat;
+    onCategoryChange();
+    if (roleVal !== 'accounting_officer') {
+      const ids = biz.filter(id => id === cat || bizIdToCategory(id) === cat);
+      document.querySelectorAll('.biz-check').forEach(c => { c.checked = ids.includes(c.value); });
+      if (ids.length === 1 && ids[0] === cat) toggleAllBiz(true);
+      updateBizCount();
+    }
   } else {
     document.getElementById('u_businesses').value = '';
+    document.getElementById('bizSelectGroup').style.display = 'none';
   }
+
   onRoleChange();
   openModal('addUserModal');
 }
 
 async function saveUser() {
   const id = document.getElementById('u_id').value;
+  const name = document.getElementById('u_name').value.trim();
+  const email = document.getElementById('u_email').value.trim();
   const pw = document.getElementById('u_password').value;
   const pw2 = document.getElementById('u_confirm').value;
-  if (pw !== pw2) { Toast.warning('Passwords do not match'); return; }
-  if (pw && pw.length < 6) { Toast.warning('Password must be at least 6 characters'); return; }
   const role = document.getElementById('u_role').value;
-  const selectedBiz = document.getElementById('u_businesses').value;
-  if ((role === 'employee' || role === 'manager') && !selectedBiz) {
-    Toast.warning('Please select a business category for this user');
+  const status = document.getElementById('u_status').value;
+  const selectedCat = document.getElementById('u_businesses').value;
+
+  if (!name || !email) {
+    Toast.warning('Full name and email are required');
     return;
   }
-  const businesses = (role === 'super_admin' || role === 'viewer') ? ['all'] : [selectedBiz];
-  const data = {
-    name: document.getElementById('u_name').value,
-    email: document.getElementById('u_email').value,
-    role, businesses,
-    status: document.getElementById('u_status').value
-  };
-  if (!data.name || !data.email) { Toast.warning('Name and email are required'); return; }
+
+  if (!id && !pw) {
+    Toast.warning('Password is required for new accounts');
+    return;
+  }
+
+  if (pw && pw !== pw2) {
+    Toast.warning('Passwords do not match');
+    return;
+  }
+
+  if (pw && pw.length < 6) {
+    Toast.warning('Password must be at least 6 characters');
+    return;
+  }
+
+  let businesses;
+  if (role === 'system_administrator') {
+    businesses = ['all'];
+  } else if (role === 'accounting_officer') {
+    if (!selectedCat) {
+      Toast.warning('Please choose a business category for this Accounting Officer');
+      return;
+    }
+    // Accounting Officer accesses all businesses under the assigned category
+    businesses = [selectedCat];
+  } else {
+    if (!selectedCat) {
+      Toast.warning('Please choose a business category for this user');
+      return;
+    }
+    const selected = getSelectedBusinesses();
+    businesses = selected.length ? selected : [selectedCat];
+  }
+
+  const data = { name, email, role, businesses, status };
   if (pw) data.password = pw;
+
   try {
     const res = id ? await API.put(`/api/admin/users/${id}`, data) : await API.post('/api/admin/users', data);
-    if (res.success) { Toast.success(id ? 'User updated' : 'User created successfully!'); closeModal('addUserModal'); loadData(); }
-    else { Toast.error(res.message); }
-  } catch(e) { Toast.error('Error saving user'); }
-}
-
-async function deactivateUser(uid) {
-  confirm('Set this user to Inactive? They will not be able to log in. Transactions and audit logs are preserved.', async () => {
-    try {
-      const res = await API.put('/api/admin/users/' + uid, { status: 'inactive' });
-      if (res.success) { Toast.success('User deactivated.'); loadData(); }
-      else { Toast.error(res.message); }
-    } catch(err) { Toast.error('Failed to deactivate user'); }
-  });
-}
-
-async function reactivateUser(uid) {
-  confirm('Reactivate this user account?', async () => {
-    try {
-      const res = await API.put('/api/admin/users/' + uid, { status: 'active' });
-      if (res.success) { Toast.success('User reactivated.'); loadData(); }
-      else { Toast.error(res.message); }
-    } catch(err) { Toast.error('Failed to reactivate user'); }
-  });
+    if (res.success) {
+      Toast.success(id ? 'Account updated successfully' : 'Account created successfully');
+      closeModal('addUserModal');
+      loadData();
+    } else {
+      Toast.error(res.message || 'Failed to save account');
+    }
+  } catch(e) {
+    Toast.error('An error occurred while saving user account');
+  }
 }
 
 async function deleteUser(uid, name) {
-  confirm(`Permanently delete "${name}"? This removes the account from Firebase Auth and the system. Transactions and audit logs linked to this user will remain but the account will be gone.`, async () => {
+  confirm(`Permanently delete account for "${name}"? This removes access to the system. Existing transactions remain safely archived.`, async () => {
     try {
       const res = await API.del('/api/admin/users/' + uid);
-      if (res.success) { Toast.success(`"${name}" deleted permanently.`); loadData(); }
-      else { Toast.error(res.message); }
-    } catch(err) { Toast.error('Failed to delete user'); }
+      if (res.success) {
+        Toast.success(`Account for "${name}" deleted`);
+        loadData();
+      } else {
+        Toast.error(res.message || 'Failed to delete account');
+      }
+    } catch(err) {
+      Toast.error('Failed to delete account');
+    }
   });
 }
 
-async function resetUserPassword(uid) {
-  const targetUid = uid || document.getElementById('u_id').value;
-  if (!targetUid) return;
-  const newPw = prompt("Enter new password (minimum 6 characters):");
-  if (newPw === null || newPw.trim().length < 6) { Toast.warning("Password must be at least 6 characters."); return; }
-  try {
-    const res = await API.post(`/api/admin/users/${targetUid}/reset-password`, { password: newPw.trim() });
-    if (res.success) { Toast.success("Password reset successfully!"); closeModal('addUserModal'); }
-    else { Toast.error(res.message); }
-  } catch(e) { Toast.error("Failed to reset password"); }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadBusinesses();
   loadData();
   getCurrentUser().then(u => {
     if (u) {
       window._currentUser = u;
       document.getElementById('sidebarName').textContent = u.name;
       document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
-      document.getElementById('sidebarAvatar').textContent = u.name.charAt(0);
+      document.getElementById('sidebarAvatar').textContent = (u.name || 'A').charAt(0).toUpperCase();
     }
   });
 });

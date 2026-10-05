@@ -18,10 +18,17 @@
 <div class="app-layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo-area">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,0.9);margin-bottom:8px"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <img src="/images/logo.png" alt="OBA Logo" class="sidebar-logo-img">
       <div class="org-name">Office of Business Affairs</div>
     </div>
-    <nav class="sidebar-nav" id="empNav"></nav>
+    <nav class="sidebar-nav" id="empNav">
+      <a class="nav-item" data-page="/employee/dashboard" href="/employee/dashboard"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
+      <a class="nav-item active" data-page="/employee/inventory" href="/employee/inventory"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
+      <a class="nav-item" data-page="/employee/pos" href="/employee/pos"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span> POS</a>
+      <a class="nav-item" data-page="/employee/returns" href="/employee/returns"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Return History</a>
+      <a class="nav-item" data-page="/employee/reports" href="/employee/reports"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Generate Report</a>
+      <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
+    </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="sidebarAvatar">E</div>
@@ -46,15 +53,47 @@
         <div class="kpi-card black"><div class="kpi-label">Out of Stock</div><div class="kpi-value" id="kpiOut">0</div></div>
       </div>
 
-      <div class="card">
+  <!-- Tab Navigation -->
+  <div style="display:flex; gap:10px; margin-bottom:16px;">
+  <button class="btn btn-primary" id="btnTabProducts" onclick="switchInvTab('products')">Products Directory</button>
+  <button class="btn btn-outline" id="btnTabMovements" onclick="switchInvTab('movements')">Inventory Movement Audit Trail</button>
+  </div>
+
+  <!-- Products Panel -->
+  <div class="card" id="panelProducts">
         <div class="inv-toolbar">
           <div class="search-box">
             <input id="fSearch" class="form-control" placeholder="Search products..." oninput="renderTable()">
           </div>
-          <button class="btn btn-primary" onclick="openAdd()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Product</button>
+  <div id="invActionButtons">
+  <button class="btn btn-outline btn-sm" style="margin-right:6px;" onclick="openRestockModal()">+ Restock</button>
+  <button class="btn btn-primary btn-sm" onclick="openAdd()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Product</button>
+  </div>
         </div>
         <div id="invTable">
           <div class="empty-state"><h3>No products yet</h3><p>Click "Add Product" to start tracking your inventory</p></div>
+  </div>
+  </div>
+
+  <!-- Movements Audit Trail Panel -->
+  <div class="card" id="panelMovements" style="display:none;">
+  <div class="inv-toolbar" style="gap:12px; flex-wrap:wrap;">
+  <div class="search-box">
+  <input id="mSearch" class="form-control" placeholder="Search product or notes..." oninput="renderMovementsTable()">
+  </div>
+  <select id="mType" class="form-control" onchange="renderMovementsTable()" style="width:auto;">
+  <option value="">All Movement Types</option>
+  <option value="SALE_DEDUCTION">Sale Deduction</option>
+  <option value="RESTOCK">Restock</option>
+  <option value="INITIAL">Initial Stock</option>
+  <option value="RETURN">Return / Refund</option>
+  </select>
+  <input type="date" id="mStart" class="form-control" style="width:auto;" onchange="renderMovementsTable()">
+  <input type="date" id="mEnd" class="form-control" style="width:auto;" onchange="renderMovementsTable()">
+  <button class="btn btn-outline btn-sm" onclick="clearMovementFilters()">Clear Filters</button>
+  </div>
+  <div id="movementsTable">
+  <div class="empty-state"><h3>No movement logs found</h3></div>
         </div>
       </div>
     </div>
@@ -83,40 +122,93 @@
     <div class="form-group"><label class="form-label">Description</label><textarea id="p_description" class="form-control" placeholder="Product description (e.g. sizes, variations)..." rows="3"></textarea></div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
+  <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
+  </div>
+  </div>
+</div>
 
-      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+<!-- Restock Product Modal -->
+<div class="modal-overlay" id="restockModal">
+  <div class="modal" style="max-width:480px">
+  <div class="modal-header"><h3>Record Product Restock</h3><button class="modal-close" onclick="closeModal('restockModal')">&times;</button></div>
+  <div class="form-group">
+  <label class="form-label">Select Product *</label>
+  <select id="r_product" class="form-control" onchange="updateRestockProductDetails()"></select>
+  </div>
+  <div class="form-row">
+  <div class="form-group"><label class="form-label">Quantity to Add *</label><input id="r_qty" type="number" class="form-control" placeholder="1" min="1"></div>
+  <div class="form-group"><label class="form-label">Unit Cost (&#8369;)</label><input id="r_cost" type="number" class="form-control" placeholder="0.00" step="0.01"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Supplier</label><input id="r_supplier" class="form-control" placeholder="Supplier name"></div>
+  <div class="form-group"><label class="form-label">Notes / Delivery Details</label><input id="r_notes" class="form-control" placeholder="e.g. Batch #102 invoice details"></div><div class="form-group"><label class="form-label">Date Received</label><input id="r_date" type="date" class="form-control"></div>
+  <div class="modal-footer">
+  <button class="btn btn-outline" onclick="closeModal('restockModal')">Cancel</button>
+  <button class="btn btn-primary" id="restockSubmitBtn" onclick="submitRestock()">Submit Restock</button>
+  </div>
+  </div>
+</div>
+
+<!-- Return Product Modal -->
+<div class="modal-overlay" id="returnModal">
+  <div class="modal" style="max-width:480px">
+  <div class="modal-header"><h3>Process Product Return / Refund</h3><button class="modal-close" onclick="closeModal('returnModal')">&times;</button></div>
+  <div class="form-group">
+  <label class="form-label">Select Product *</label>
+  <select id="ret_product" class="form-control"></select>
+  </div>
+  <div class="form-row">
+  <div class="form-group"><label class="form-label">Quantity Returned *</label><input id="ret_qty" type="number" class="form-control" placeholder="1" min="1"></div>
+  <div class="form-group"><label class="form-label">Customer Name</label><input id="ret_customer" class="form-control" placeholder="Walk-in Customer"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Reason for Return</label><input id="ret_reason" class="form-control" placeholder="e.g. Defective item, customer exchange"></div>
+  <div class="modal-footer">
+  <button class="btn btn-outline" onclick="closeModal('returnModal')">Cancel</button>
+  <button class="btn btn-primary" id="returnSubmitBtn" onclick="submitReturn()">Submit Return</button>
     </div>
   </div>
 </div>
 
-<script src="/js/app.js"></script>
+<script src="/js/app.js?v=2"></script>
 <script>
-const BIZ_META = {
-  RENTAL:   { name: 'Rental', color: '#6B3FA0' },
-  BUSINESS: { name: 'Business', color: '#2d6a2e' },
-  AGRI:     { name: 'Agriculture', color: '#D4A915' },
+const BIZ_META = {  AGRI:     { name: 'Agriculture', color: '#D4A915' },
   NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A' },
   MAIN:     { name: 'Main', color: '#0D6EFD' },
 };
 const params = new URLSearchParams(window.location.search);
-const BIZ = params.get('biz') || 'RENTAL';
-const meta = BIZ_META[BIZ] || BIZ_META.RENTAL;
+const BIZ = params.get('biz') || 'AGRI';
+const ENTITY = params.get('entity') || '';
+const ENTITY_QS = ENTITY ? '&entity=' + encodeURIComponent(ENTITY) : '';
+const meta = BIZ_META[BIZ] || BIZ_META.AGRI;
+let WORKSPACE_NAME = '';
+loadWorkspaceName().then(n => {
+  if (n) {
+    WORKSPACE_NAME = n;
+    const t = document.getElementById('workspaceTitle');
+    if (t) t.textContent = n;
+  }
+});
 let products = [];
+let currentUser = null;
 
-function buildNav() {
-  document.getElementById('empNav').innerHTML = `
-    <a class="nav-item" href="/employee/dashboard?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Dashboard</a>
-    <a class="nav-item active" href="/employee/inventory?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span> Inventory</a>
-    <a class="nav-item" href="/employee/sales?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span> Sales</a>
-    <a class="nav-item" href="/employee/expenses?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Expenses / Income</a>
-    <a class="nav-item" href="/employee/reports?biz=${BIZ}"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span> Reports</a>
-    <a class="nav-item" href="javascript:void(0)" onclick="confirm('Are you sure you want to logout?', () => window.location.href='/logout');"><span class="nav-icon"><svg width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout</a>
-  `;
+function wsQueryInv() {
+  let q = '?biz=' + encodeURIComponent(typeof BIZ !== 'undefined' ? BIZ : 'AGRI');
+  if (typeof ENTITY_QS !== 'undefined' && ENTITY_QS) q += ENTITY_QS.startsWith('&') ? ENTITY_QS : '&entity=' + encodeURIComponent(ENTITY_QS);
+  else if (typeof ENTITY !== 'undefined' && ENTITY) q += '&entity=' + encodeURIComponent(ENTITY);
+  return q;
+}
+function buildNav(user) {
+  // Sidebar nav is rendered statically in the HTML (prevents the sidebar from
+  // flickering/disappearing on page load). Here we only sync the workspace
+  // query params (?biz= & entity=) onto the links.
+  const q = wsQueryInv();
+  document.querySelectorAll('#empNav a[data-page]').forEach(a => {
+    a.href = a.getAttribute('data-page') + q;
+  });
 }
 
 async function loadData() {
   try {
-    const res = await API.get('/api/inventory?biz=' + BIZ);
+    const res = await API.get('/api/inventory?biz=' + BIZ + ENTITY_QS);
     if (res.success) { products = res.data || []; renderTable(); updateKPIs(); }
   } catch(e) { console.error(e); }
 }
@@ -131,12 +223,16 @@ function updateKPIs() {
   document.getElementById('kpiOut').textContent = out;
 }
 
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function renderTable() {
   const search = document.getElementById('fSearch').value.toLowerCase();
   let list = products;
   if (search) list = list.filter(p => (p.name||'').toLowerCase().includes(search) || (p.category||'').toLowerCase().includes(search) || (p.description||'').toLowerCase().includes(search));
   const el = document.getElementById('invTable');
-  if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No products found</h3><p>Click "Add Product" to start tracking inventory</p></div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No products found</h3></div>'; return; }
   el.innerHTML = `<table><thead><tr><th style="width: 70px;">QR Code</th><th>Product</th><th>Description</th><th>Category</th><th>Qty</th><th>Unit</th><th>Unit Cost</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${list.map(p => {
       const qty = p.quantity || 0;
@@ -148,15 +244,24 @@ function renderTable() {
       const qrUrl = p.qrCode || `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${p.id}`;
       const desc = p.description || '';
       const descShort = desc.length > 40 ? desc.substring(0,40)+'...' : desc;
+      const hasReminder = Boolean(p.accountingComment);
       return `<tr>
         <td style="text-align: center; vertical-align: middle;">
           <img src="${qrUrl}" alt="QR" style="width:36px; height:36px; cursor:pointer; border-radius:4px; border:1px solid var(--gray-200); background:#fff; padding:2px; display:block; margin:0 auto;" onclick="showQRCode('${p.id}', '${p.name.replace(/'/g, "\\'")}', '${(p.category||'').replace(/'/g, "\\'")}')" title="Click to view/print QR Code">
         </td>
-        <td class="fw-bold">${p.name}</td>
+        <td class="fw-bold">
+          <div>${escapeHtml(p.name)}</div>
+          ${hasReminder ? `
+            <div style="margin-top:6px;font-size:0.75rem;background:#FFF9C4;color:#5D4037;padding:4px 8px;border-radius:6px;border:1px solid #FFE082;display:flex;align-items:center;gap:6px;max-width:320px">
+              <span style="color:#E65100;font-weight:700">⚠️ Accounting Notice:</span>
+              <span style="font-weight:600">${escapeHtml(p.accountingComment)}</span>
+              <small style="color:#8D6E63;margin-left:auto">— ${escapeHtml(p.accountingCommentBy || 'Officer')}</small>
+            </div>` : ''}
+        </td>
         <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${desc.replace(/"/g,'&quot;')}">${desc ? descShort : '—'}</td>
-        <td>${p.category || '—'}</td>
+        <td>${escapeHtml(p.category || '—')}</td>
         <td>${qty}</td>
-        <td>${p.unit || 'pcs'}</td>
+        <td>${escapeHtml(p.unit || 'pcs')}</td>
         <td>&#8369;${parseFloat(p.unitCost || 0).toLocaleString('en',{minimumFractionDigits:2})}</td>
         <td>&#8369;${parseFloat(p.sellingPrice || 0).toLocaleString('en',{minimumFractionDigits:2})}</td>
         <td><span class="stock-badge ${cls}">${status}</span></td>
@@ -204,7 +309,9 @@ function editProduct(id) {
   openModal('productModal');
 }
 
+let isSavingProduct = false;
 async function saveProduct() {
+  if (isSavingProduct) return;
   const id = document.getElementById('p_id').value;
   const data = {
     name: document.getElementById('p_name').value,
@@ -217,14 +324,19 @@ async function saveProduct() {
     supplier: document.getElementById('p_supplier').value,
     description: document.getElementById('p_description').value,
     businessCategory: BIZ,
+    entityId: ENTITY,
+    entityName: WORKSPACE_NAME || ENTITY,
   };
   if (!data.name) { Toast.warning('Product name is required'); return; }
   if (!data.category) { Toast.warning('Category is required'); return; }
   if (document.getElementById('p_qty').value.trim() === '' || isNaN(data.quantity) || data.quantity < 0) { Toast.warning('Valid Quantity is required'); return; }
   if (document.getElementById('p_price').value.trim() === '' || isNaN(data.sellingPrice) || data.sellingPrice <= 0) { Toast.warning('Valid Selling Price is required'); return; }
+  const saveBtn = document.getElementById('saveProductBtn');
+  isSavingProduct = true;
+  saveBtn.disabled = true;
   try {
     const res = id
-      ? await API.put('/api/inventory/' + id, data)
+      ? await API.put('/api/inventory/' + id + '?biz=' + BIZ + ENTITY_QS, data)
       : await API.post('/api/inventory', data);
     if (res.success) {
       Toast.success(id ? 'Product updated' : 'Product added');
@@ -238,12 +350,16 @@ async function saveProduct() {
     }
     else { Toast.error(res.message || 'Unknown server error'); }
   } catch(e) { Toast.error('Save failed: ' + e.message); }
+  finally {
+    isSavingProduct = false;
+    saveBtn.disabled = false;
+  }
 }
 
 function deleteProduct(id) {
   confirm('Delete this product?', async () => {
     try {
-      const res = await API.del('/api/inventory/' + id + '?biz=' + BIZ);
+      const res = await API.del('/api/inventory/' + id + '?biz=' + BIZ + ENTITY_QS);
       if (res.success) {
         Toast.success('Product deleted');
         closeModal('productModal');
@@ -292,12 +408,170 @@ function printQR() {
   w.document.close();
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// INVENTORY MOVEMENT HISTORY AUDIT TRAIL LOGIC
+// ═══════════════════════════════════════════════════════════════════
+let activeTab = 'products';
+let movements = [];
+
+function switchInvTab(tab) {
+  activeTab = tab;
+  document.getElementById('panelProducts').style.display = tab === 'products' ? 'block' : 'none';
+  document.getElementById('panelMovements').style.display = tab === 'movements' ? 'block' : 'none';
+  document.getElementById('btnTabProducts').className = tab === 'products' ? 'btn btn-primary' : 'btn btn-outline';
+  document.getElementById('btnTabMovements').className = tab === 'movements' ? 'btn btn-primary' : 'btn btn-outline';
+  if (tab === 'movements') loadMovementsData();
+}
+
+async function loadMovementsData() {
+  try {
+  const res = await API.get('/api/inventory/movements?biz=' + BIZ);
+  if (res.success) { movements = res.data || []; renderMovementsTable(); }
+  } catch(e) {
+  document.getElementById('movementsTable').innerHTML = '<div class="empty-state"><h3>Error loading movement logs</h3></div>';
+  }
+}
+
+function renderMovementsTable() {
+  const search = (document.getElementById('mSearch').value || '').toLowerCase();
+  const type = document.getElementById('mType').value;
+  const startD = document.getElementById('mStart').value;
+  const endD = document.getElementById('mEnd').value;
+  let list = movements;
+  if (search) list = list.filter(m => (m.productName||'').toLowerCase().includes(search) || (m.notes||'').toLowerCase().includes(search) || (m.createdBy||'').toLowerCase().includes(search));
+  if (type) list = list.filter(m => m.type === type);
+  if (startD) list = list.filter(m => (m.createdAt || '') >= startD);
+  if (endD) list = list.filter(m => (m.createdAt || '') <= endD + 'T23:59:59.999Z');
+  const el = document.getElementById('movementsTable');
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No inventory movement logs found</h3></div>'; return; }
+  const badgeMap = { SALE_DEDUCTION:'<span class="stock-badge out">Sale Deduction</span>', RESTOCK:'<span class="stock-badge in-stock">Restock</span>', MANUAL_ADJUSTMENT:'<span class="stock-badge low-stock">Manual Adjustment</span>', INITIAL:'<span class="stock-badge in-stock">Initial Stock</span>', RETURN:'<span class="stock-badge in-stock">Return / Refund</span>' };
+  el.innerHTML = `<table><thead><tr><th>Date & Time</th><th>Product</th><th>Type</th><th>Qty Change</th><th>Stock Shift</th><th>Performed By</th><th>Notes</th></tr></thead><tbody>
+  ${list.map(m => {
+  const changeStr = m.quantityChange > 0 ? '+'+m.quantityChange : ''+m.quantityChange;
+  const changeCls = m.quantityChange > 0 ? 'color:var(--green);font-weight:bold' : 'color:var(--danger);font-weight:bold';
+  const dStr = m.createdAt ? new Date(m.createdAt).toLocaleString('en-PH') : '—';
+  return `<tr><td style="font-size:0.8rem">${dStr}</td><td class="fw-bold">${m.productName||'—'}</td><td>${badgeMap[m.type]||'<span class="stock-badge">'+m.type+'</span>'}</td><td style="${changeCls}">${changeStr}</td><td>${m.previousStock!==undefined?m.previousStock+' → '+m.newStock:'—'}</td><td style="font-size:0.82rem">${m.createdBy||'—'}</td><td style="font-size:0.82rem;max-width:200px">${m.notes||'—'}</td></tr>`;
+  }).join('')}
+  </tbody></table>`;
+}
+
+function clearMovementFilters() {
+  ['mSearch','mType','mStart','mEnd'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  renderMovementsTable();
+}
+
+function populateProductOptions(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  if (!products.length) { sel.innerHTML = '<option value="">No products available</option>'; return; }
+  sel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.quantity||0})</option>`).join('');
+}
+
+function openRestockModal() {
+  populateProductOptions('r_product');
+  document.getElementById('r_qty').value = '10';
+  document.getElementById('r_cost').value = '';
+  document.getElementById('r_supplier').value = '';
+  document.getElementById('r_notes').value = '';
+  updateRestockProductDetails();
+  // Re-arm submit: exactly ONE submission is allowed per time the modal is opened
+  __restockInFlight = false;
+  const btn = document.getElementById('restockSubmitBtn');
+  if (btn) btn.disabled = false;
+  openModal('restockModal');
+}
+
+function updateRestockProductDetails() {
+  const sel = document.getElementById('r_product');
+  if (!sel || !sel.value) return;
+  const p = products.find(x => x.id === sel.value);
+  if (p) {
+  if (p.unitCost) document.getElementById('r_cost').value = p.unitCost;
+  if (p.supplier) document.getElementById('r_supplier').value = p.supplier;
+  }
+}
+
+let __restockInFlight = false;
+async function submitRestock() {
+  if (__restockInFlight) return; // ignore duplicate clicks — one submit per modal open
+  const sel = document.getElementById('r_product');
+  const productId = sel ? sel.value : '';
+  const quantityAdded = parseInt(document.getElementById('r_qty').value);
+  if (!productId) { Toast.warning('Please select a product'); return; }
+  if (isNaN(quantityAdded) || quantityAdded <= 0) { Toast.warning('Valid positive restock quantity required'); return; }
+  __restockInFlight = true;
+  const restockBtn = document.getElementById('restockSubmitBtn');
+  if (restockBtn) restockBtn.disabled = true;
+  try {
+  const res = await API.post('/api/inventory/restock', {
+  productId, businessCategory: BIZ, quantityAdded,
+  unitCost: parseFloat(document.getElementById('r_cost').value) || undefined,
+  supplier: document.getElementById('r_supplier').value,
+  notes: document.getElementById('r_notes').value || 'Restock received',
+  dateReceived: document.getElementById('r_date').value || undefined
+  });
+  if (res.success) {
+  // Flag intentionally stays locked: the modal closes and is only re-armed
+  // by openRestockModal(), so one modal session can never double-submit.
+  Toast.success('Product restocked successfully'); closeModal('restockModal'); loadData(); if (activeTab==='movements') loadMovementsData();
+  }
+  else { __restockInFlight = false; if (restockBtn) restockBtn.disabled = false; Toast.error(res.message || 'Restock failed'); }
+  } catch(e) { __restockInFlight = false; if (restockBtn) restockBtn.disabled = false; Toast.error('Error recording restock'); }
+}
+
+function openReturnModal() {
+  populateProductOptions('ret_product');
+  document.getElementById('ret_qty').value = '1';
+  document.getElementById('ret_customer').value = '';
+  document.getElementById('ret_reason').value = '';
+  // Re-arm submit: exactly ONE submission is allowed per time the modal is opened
+  __returnInFlight = false;
+  const btn = document.getElementById('returnSubmitBtn');
+  if (btn) btn.disabled = false;
+  openModal('returnModal');
+}
+
+let __returnInFlight = false;
+async function submitReturn() {
+  if (__returnInFlight) return; // ignore duplicate clicks — one submit per modal open
+  const sel = document.getElementById('ret_product');
+  const productId = sel ? sel.value : '';
+  const quantityReturned = parseInt(document.getElementById('ret_qty').value);
+  if (!productId) { Toast.warning('Please select a product'); return; }
+  if (isNaN(quantityReturned) || quantityReturned <= 0) { Toast.warning('Valid positive quantity returned required'); return; }
+  __returnInFlight = true;
+  const returnBtn = document.getElementById('returnSubmitBtn');
+  if (returnBtn) returnBtn.disabled = true;
+  try {
+  const res = await API.post('/api/inventory/return', {
+  productId, businessCategory: BIZ, quantityReturned,
+  customerName: document.getElementById('ret_customer').value,
+  reason: document.getElementById('ret_reason').value || 'Product returned by customer'
+  });
+  if (res.success) {
+  // Flag intentionally stays locked: the modal closes and is only re-armed
+  // by openReturnModal(), so one modal session can never double-submit.
+  Toast.success('Return processed successfully'); closeModal('returnModal'); loadData(); if (activeTab==='movements') loadMovementsData();
+  }
+  else { __returnInFlight = false; if (returnBtn) returnBtn.disabled = false; Toast.error(res.message || 'Return failed'); }
+  } catch(e) { __returnInFlight = false; if (returnBtn) returnBtn.disabled = false; Toast.error('Error processing return'); }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  buildNav();
   document.getElementById('topbarTitle').textContent = meta.name + ' - Inventory';
   document.title = meta.name + ' Inventory - OBA System';
+  getCurrentUser().then(u => {
+  currentUser = u;
+  if (u) {
+  buildNav(u);
+  document.getElementById('sidebarName').textContent = u.name;
+  document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);
+  document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase();
+  } else {
+  buildNav(null);
+  }
   loadData();
-  getCurrentUser().then(u => { if(u){ document.getElementById('sidebarName').textContent = u.name; document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role); document.getElementById('sidebarAvatar').textContent = u.name.charAt(0).toUpperCase(); }});
+  });
 
   // Event delegation for delete buttons
   document.getElementById('invTable').addEventListener('click', (e) => {

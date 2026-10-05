@@ -1,17 +1,7 @@
-+require('dotenv').config();
-const { auth, db } = require('./config/firebase');
+require('dotenv').config();
+const { auth, firestore } = require('./config/firebase');
 
 const MANAGERS = [
-  {
-    email: 'rental_manager@psau.edu.ph',
-    name: 'Rental Category Manager',
-    businesses: ['RENTAL']
-  },
-  {
-    email: 'business_manager@psau.edu.ph',
-    name: 'Business Category Manager',
-    businesses: ['BUSINESS']
-  },
   {
     email: 'agri_manager@psau.edu.ph',
     name: 'Agri Category Manager',
@@ -32,12 +22,12 @@ const MANAGERS = [
 const DEFAULT_PASSWORD = 'managerPassword123';
 
 async function createCategoryManagers() {
-  if (!auth || !db) {
-    console.error('❌ Firebase is not configured properly in .env');
+  if (!auth || !firestore) {
+    console.error(' Firebase is not configured properly in .env');
     process.exit(1);
   }
 
-  console.log('🚀 Starting manager accounts creation...');
+  console.log(' Starting manager accounts creation...');
 
   for (const mgr of MANAGERS) {
     try {
@@ -58,15 +48,17 @@ async function createCategoryManagers() {
         }
       }
 
-      // Add to users node in DB
-      await db.ref(`users/${userRecord.uid}`).set({
+      // Add to Firestore users/{uid}
+      await firestore.collection('users').doc(userRecord.uid).set({
+        uid: userRecord.uid,
         name: mgr.name,
         email: mgr.email,
         role: 'manager',
         businesses: mgr.businesses,
         status: 'active',
+        lastLogin: 'Never',
         createdAt: new Date().toISOString(),
-      });
+      }, { merge: true });
 
       console.log(`✅ Successfully added DB permissions for ${mgr.name}`);
     } catch (error) {
