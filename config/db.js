@@ -52,6 +52,21 @@ if (!USE_SUPABASE) {
 // ── Supabase (primary) ────────────────────────────────────────────────────────
 let supabase = null;
 if (USE_SUPABASE) {
+  // @supabase/supabase-js builds a RealtimeClient in its constructor, and
+  // realtime-js requires a GLOBAL WebSocket. Node only gained a native one in
+  // v22, so on Node 20 (e.g. Railway) this threw
+  // "Node.js detected but native WebSocket not found." and crashed the process
+  // before it could listen. We only ever issue plain REST calls, never a
+  // realtime subscription, so a `ws` shim satisfies the check.
+  if (typeof globalThis.WebSocket === 'undefined') {
+    try {
+      globalThis.WebSocket = require('ws');
+    } catch (_) {
+      console.error('✗ global WebSocket is missing and the "ws" package failed to load.');
+      console.error('  Either upgrade to Node 22+, or run: npm install ws');
+    }
+  }
+
   const { createClient } = require('@supabase/supabase-js');
   const anon = process.env.SUPABASE_ANON_KEY || '';
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
