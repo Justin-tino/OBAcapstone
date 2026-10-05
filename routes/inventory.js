@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const FDB = require('../config/db');
-const { firestore } = require('../config/firebase');
+const { dbReady } = require('../config/db');
 const { requireEmployee, requireManager, requireViewer, validateBizCategory, sanitizeString, accessCoversCategory } = require('../middleware/auth.middleware');
 const { computeStockStatus, workspaceEntity, emitStockStatusNotification } = require('../utils/stock-notifs');
 
@@ -19,7 +19,7 @@ function computeStatus(stock, reorderLevel) {
 
 async function writeAudit(req, action, details, businessCategory, isSuspicious = false) {
   try {
-    if (!firestore || !req.session || !req.session.user) return;
+    if (!dbReady || !req.session || !req.session.user) return;
     await FDB.addDoc('auditLogs', {
       action, module: 'inventory', details: details || '', logType: 'transaction',
       previousValue: null, newValue: null, businessId: businessCategory || null,
@@ -39,7 +39,7 @@ const NOTIF_COALESCE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 async function upsertInventoryNotification({ coalesceKey, buildNotification, buildUpdate }) {
   try {
-    if (!firestore) return;
+    if (!dbReady) return;
     const nowIso = new Date().toISOString();
     const cutoff = new Date(Date.now() - NOTIF_COALESCE_WINDOW_MS).toISOString();
     let existing = null;
@@ -71,7 +71,7 @@ router.get('/', requireViewer, async (req, res) => {
   const entityId = req.query.entity || '';
   const includeArchived = req.query.includeArchived === 'true';
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     let products = await FDB.getWhere('inventory', 'businessCategory', '==', biz);
     if (!includeArchived) products = products.filter(p => !p.isArchived);
     if (entityId) products = products.filter(p => p.entityId === entityId);
@@ -87,7 +87,7 @@ router.get('/', requireViewer, async (req, res) => {
 // Supports filters: ?biz=AGRI&productId=xxx&type=SALE_DEDUCTION&startDate=2026-01-01&endDate=2026-12-31
 router.get('/movements', requireViewer, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     const { biz, productId, type, startDate, endDate } = req.query;
     let movements = await FDB.getAll('inventoryMovements', 'createdAt');
     if (biz) movements = movements.filter(m => m.businessCategory === biz);
@@ -116,7 +116,7 @@ function extractQrData(qrValue) {
 
 router.post('/backfill-qr', requireEmployee, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, updated: 0, total: 0, stillMissing: [] });
+    if (!dbReady) return res.json({ success: true, updated: 0, total: 0, stillMissing: [] });
     const products = await FDB.getAll('inventory');
     const payloads = new Map(); // qr payload -> docId (uniqueness tracking)
     const toFix = [];
@@ -196,7 +196,7 @@ router.post('/restock', requireEmployee, async (req, res) => {
   const cleanUnitCost = unitCost !== undefined && unitCost !== '' && !isNaN(unitCost) ? parseFloat(unitCost) : null;
 
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const currentData = await FDB.getById('inventory', productId);
     if (!currentData || (currentData.businessCategory && currentData.businessCategory !== biz)) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
@@ -316,7 +316,7 @@ router.post('/return', requireEmployee, async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const currentData = await FDB.getById('inventory', productId);
     if (!currentData || (currentData.businessCategory && currentData.businessCategory !== biz)) {
       return res.status(404).json({ success: false, message: 'Product not found.' });
@@ -494,7 +494,7 @@ router.post('/', requireEmployee, async (req, res) => {
   };
 
   try {
-    if (!firestore) {
+    if (!dbReady) {
       product.id = 'prod-' + Date.now();
       product.qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${product.id}`;
       return res.json({ success: true, data: product });
@@ -575,7 +575,7 @@ router.put('/:id', requireEmployee, async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
 
     // Check stock change for notification
     const oldData = await FDB.getById('inventory', id);
@@ -652,7 +652,7 @@ router.put('/:id/archive', requireEmployee, async (req, res) => {
   const { id } = req.params;
   const biz = validateBizCategory(req.body.businessCategory || req.query.biz || 'AGRI');
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('inventory', id);
     if (!existing || (existing.businessCategory && existing.businessCategory !== biz)) return res.status(404).json({ success: false, message: 'Product not found.' });
     await FDB.updateDoc('inventory', id, { isArchived: true, archivedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
@@ -675,7 +675,7 @@ router.put('/:id/restore', requireEmployee, async (req, res) => {
   const { id } = req.params;
   const biz = validateBizCategory(req.body.businessCategory || req.query.biz || 'AGRI');
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('inventory', id);
     if (!existing || (existing.businessCategory && existing.businessCategory !== biz)) return res.status(404).json({ success: false, message: 'Product not found.' });
     await FDB.updateDoc('inventory', id, { isArchived: false, archivedAt: null, updatedAt: new Date().toISOString() });
@@ -692,7 +692,7 @@ router.delete('/:id', requireEmployee, async (req, res) => {
   const { id } = req.params;
   const hard = req.query.hard === 'true';
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('inventory', id);
     if (existing) {
       const cat = existing.businessCategory || 'AGRI';
@@ -721,7 +721,7 @@ router.post('/:id/delete', requireEmployee, async (req, res) => {
   const { id } = req.params;
   const hard = req.query.hard === 'true' || req.body.hard === true;
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('inventory', id);
     if (existing) {
       const cat = existing.businessCategory || 'AGRI';
@@ -755,7 +755,7 @@ router.post('/:id/comment', requireManager, async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.json({ success: true, data: { accountingComment: sanitizedComment } });
+    if (!dbReady) return res.json({ success: true, data: { accountingComment: sanitizedComment } });
     const product = await FDB.getById('inventory', id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
@@ -802,7 +802,7 @@ router.post('/:id/comment', requireManager, async (req, res) => {
 router.delete('/:id/comment', requireManager, async (req, res) => {
   const { id } = req.params;
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const product = await FDB.getById('inventory', id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 

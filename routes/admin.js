@@ -6,8 +6,9 @@
  */
 const express = require('express');
 const router = express.Router();
-const { firestore, auth } = require('../config/firebase');
+const { auth } = require('../config/firebase');
 const FDB = require('../config/db');
+const { dbReady } = require('../config/db');
 const { requireSuperAdmin, requireManager, requireViewer, sanitizeString, BUSINESS_UNITS } = require('../middleware/auth.middleware');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
@@ -29,7 +30,7 @@ const mailer = nodemailer.createTransport({
 
 async function writeAudit(req, action, module, details, businessId = null, isSuspicious = false) {
   try {
-    if (!firestore || !req.session || !req.session.user) return;
+    if (!dbReady || !req.session || !req.session.user) return;
     await FDB.addDoc('auditLogs', {
       action, module, details: details || '', logType: 'transaction',
       previousValue: null, newValue: null, businessId,
@@ -44,7 +45,7 @@ async function writeAudit(req, action, module, details, businessId = null, isSus
 // Uses type 'backup_restore' so it appears in the admin bell and Alert Logs.
 async function notifyBackupEvent(req, success, message) {
   try {
-    if (!firestore) return;
+    if (!dbReady) return;
     const id = `n-${Date.now()}`;
     await FDB.setDoc('notifications', id, {
       id,
@@ -105,7 +106,7 @@ router.get('/business-units', requireViewer, (req, res) => {
 // GET /api/admin/businesses — list all business entities
 router.get('/businesses', requireViewer, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, data: mockBusinesses, categories: BUSINESS_CATEGORIES });
+    if (!dbReady) return res.json({ success: true, data: mockBusinesses, categories: BUSINESS_CATEGORIES });
     const businesses = await FDB.getAll('businesses');
     res.json({ success: true, data: businesses, categories: BUSINESS_CATEGORIES });
   } catch (err) {
@@ -132,7 +133,7 @@ router.post('/businesses', requireManagerOnly, async (req, res) => {
   try {
     // Duplicate-name check (case-insensitive)
     let existing = [];
-    if (!firestore) {
+    if (!dbReady) {
       existing = mockBusinesses;
     } else {
       existing = await FDB.getAll('businesses');
@@ -153,7 +154,7 @@ router.post('/businesses', requireManagerOnly, async (req, res) => {
       createdAt: new Date().toISOString(),
       createdBy: req.session.user.name,
     };
-    if (!firestore) {
+    if (!dbReady) {
       mockBusinesses.push(newBiz);
       return res.json({ success: true, data: newBiz });
     }
@@ -170,7 +171,7 @@ router.post('/businesses', requireManagerOnly, async (req, res) => {
 router.delete('/businesses/:id', requireManagerOnly, async (req, res) => {
   const { id } = req.params;
   try {
-    if (!firestore) {
+    if (!dbReady) {
       const idx = mockBusinesses.findIndex(b => b.id === id);
       if (idx >= 0) mockBusinesses[idx].status = 'inactive';
       return res.json({ success: true });
@@ -192,7 +193,7 @@ router.put('/businesses/:id', requireManagerOnly, async (req, res) => {
     updates[k] = typeof v === 'string' ? sanitizeString(v) : v;
   }
   try {
-    if (!firestore) {
+    if (!dbReady) {
       const biz = mockBusinesses.find(b => b.id === id);
       if (biz) Object.assign(biz, updates);
       return res.json({ success: true });
@@ -234,7 +235,7 @@ router.get('/users', requireSuperAdmin, async (req, res) => {
       }
       return out;
     };
-    if (!firestore) return res.json({ success: true, data: cleanUsers(mockUsers) });
+    if (!dbReady) return res.json({ success: true, data: cleanUsers(mockUsers) });
     const docs = await FDB.getAll('users');
     const raw = docs.map(d => ({ ...d, uid: d.uid || d.id }));
     res.json({ success: true, data: cleanUsers(raw) });
@@ -281,7 +282,7 @@ router.post('/users', requireSuperAdmin, async (req, res) => {
       createdBy: req.session.user.name,
     };
 
-    if (!firestore) {
+    if (!dbReady) {
       mockUsers.push(newUser);
       return res.json({ success: true, data: newUser });
     }
@@ -311,7 +312,7 @@ router.put('/users/:uid', requireSuperAdmin, async (req, res) => {
       }
     }
 
-    if (!firestore) {
+    if (!dbReady) {
       const u = mockUsers.find(u => u.uid === uid);
       if (u) Object.assign(u, dbUpdates);
       return res.json({ success: true });
@@ -342,7 +343,7 @@ router.post('/users/:uid/reset-password', requireSuperAdmin, async (req, res) =>
     if (auth) {
       await auth.updateUser(uid, { password });
     }
-    if (firestore) {
+    if (dbReady) {
       await FDB.addDoc('auditLogs', {
         action: 'PASSWORD_RESET_BY_ADMIN',
         module: 'users',
@@ -372,7 +373,7 @@ router.delete('/users/:uid', requireSuperAdmin, async (req, res) => {
         console.warn('Could not delete user from Auth (may not exist):', e);
       }
     }
-    if (!firestore) {
+    if (!dbReady) {
       const idx = mockUsers.findIndex(u => u.uid === uid);
       if (idx !== -1) mockUsers.splice(idx, 1);
       return res.json({ success: true, message: 'User deleted.' });
@@ -393,7 +394,7 @@ router.delete('/users/:uid', requireSuperAdmin, async (req, res) => {
 // GET /api/admin/employees — get employees under manager's business
 router.get('/employees', requireManager, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     const managerBiz = req.session.user.businessAccess || [];
     const docs = await FDB.getAll('users');
     let employees = docs.map(d => ({ ...d, uid: d.uid || d.id }));
@@ -444,7 +445,7 @@ router.post('/employees', requireManager, async (req, res) => {
       createdAt: new Date().toISOString().split('T')[0],
       createdBy: req.session.user.name,
     };
-    if (!firestore) return res.json({ success: true, data: newUser });
+    if (!dbReady) return res.json({ success: true, data: newUser });
     await FDB.setDoc('users', uid, newUser);
     res.json({ success: true, data: newUser });
   } catch (err) {
@@ -465,7 +466,7 @@ router.put('/employees/:uid', requireManager, async (req, res) => {
     return res.status(400).json({ success: false, message: 'No valid fields to update.' });
   }
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     // Verify the target user is an employee in this manager's business
     const target = await FDB.getById('users', uid);
     if (!target) return res.status(404).json({ success: false, message: 'User not found.' });
@@ -489,7 +490,7 @@ router.put('/employees/:uid', requireManager, async (req, res) => {
 router.delete('/employees/:uid', requireManager, async (req, res) => {
   const { uid } = req.params;
   try {
-    if (!firestore) return res.json({ success: true, message: 'User deleted.' });
+    if (!dbReady) return res.json({ success: true, message: 'User deleted.' });
     const target = await FDB.getById('users', uid);
     if (!target) return res.status(404).json({ success: false, message: 'User not found.' });
     if (target.role !== 'employee') {
@@ -520,7 +521,7 @@ router.get('/requests', requireSuperAdmin, getAccessRequests);
 
 async function getAccessRequests(req, res) {
   try {
-    if (!firestore) return res.json({ success: true, data: mockRequests });
+    if (!dbReady) return res.json({ success: true, data: mockRequests });
     const data = await FDB.getAll('accessRequests', 'createdAt');
     res.json({ success: true, data });
   } catch (err) {
@@ -541,7 +542,7 @@ async function handleRequest(req, res) {
   const allowedRoles = ['system_administrator', 'accounting_officer', 'sales_staff', 'employee', 'manager', 'viewer'];
   const cleanRole = allowedRoles.includes(role) ? role : undefined;
   try {
-    if (!firestore) {
+    if (!dbReady) {
       const req_ = mockRequests.find(r => r.id === id);
       if (req_) req_.status = action;
       return res.json({ success: true });
@@ -596,7 +597,7 @@ router.get('/audit', requireSuperAdmin, getAuditLogs);
 async function getAuditLogs(req, res) {
   const { limit = 100, type } = req.query;
   try {
-    if (!firestore) {
+    if (!dbReady) {
       let data = mockAuditLogs.slice(-parseInt(limit)).reverse();
       if (type) data = data.filter(l => l.logType === type);
       return res.json({ success: true, data });
@@ -634,7 +635,7 @@ router.post('/audit-log', requireSuperAdmin, async (req, res) => {
   }
 
   try {
-    if (!firestore) { mockAuditLogs.push(log); return res.json({ success: true }); }
+    if (!dbReady) { mockAuditLogs.push(log); return res.json({ success: true }); }
     await FDB.addDoc('auditLogs', log);
     res.json({ success: true });
   } catch (err) {
@@ -646,7 +647,7 @@ router.post('/audit-log', requireSuperAdmin, async (req, res) => {
 // GET /api/admin/user-activity — user activity monitoring
 router.get('/user-activity', requireSuperAdmin, async (req, res) => {
   try {
-    if (!firestore) {
+    if (!dbReady) {
       const activity = mockUsers.map(u => ({
         uid: u.uid, name: u.name, email: u.email, role: u.role,
         status: u.status, lastLogin: u.lastLogin,
@@ -675,7 +676,7 @@ router.get('/user-activity', requireSuperAdmin, async (req, res) => {
 // who generated which report and for which category.
 router.get('/notifications', requireViewer, async (req, res) => {
   try {
-    if (!firestore) {
+    if (!dbReady) {
       // Generate mock notifications
       const now = new Date();
       const defaultAlerts = [];
@@ -693,7 +694,7 @@ router.get('/notifications', requireViewer, async (req, res) => {
 // PUT /api/admin/notifications/:id/read
 router.put('/notifications/:id/read', requireViewer, async (req, res) => {
   try {
-    if (!firestore) {
+    if (!dbReady) {
       const n = mockNotifications.find(n => n.id === req.params.id);
       if (n) n.isRead = true;
       return res.json({ success: true });
@@ -722,7 +723,7 @@ router.post('/notifications', requireManager, async (req, res) => {
     createdBy: req.session.user.uid,
   };
   try {
-    if (!firestore) { mockNotifications.push(notif); return res.json({ success: true, data: notif }); }
+    if (!dbReady) { mockNotifications.push(notif); return res.json({ success: true, data: notif }); }
     await FDB.setDoc('notifications', notif.id, notif);
     res.json({ success: true, data: notif });
   } catch (err) {
@@ -734,7 +735,7 @@ router.post('/notifications', requireManager, async (req, res) => {
 // DELETE /api/admin/notifications/:id — delete a single notification
 router.delete('/notifications/:id', requireViewer, async (req, res) => {
   try {
-    if (!firestore) {
+    if (!dbReady) {
       const idx = mockNotifications.findIndex(n => n.id === req.params.id);
       if (idx !== -1) mockNotifications.splice(idx, 1);
       return res.json({ success: true });
@@ -750,7 +751,7 @@ router.delete('/notifications/:id', requireViewer, async (req, res) => {
 // DELETE /api/admin/notifications — clear the whole admin (report) feed
 router.delete('/notifications', requireViewer, async (req, res) => {
   try {
-    if (!firestore) {
+    if (!dbReady) {
       mockNotifications.length = 0;
       return res.json({ success: true, deleted: 0 });
     }
@@ -797,7 +798,7 @@ async function buildBackupData() {
 
 // Helper for automated / scheduled database backups (stores full restorable blob)
 async function executeAutoBackup(triggeredBy = 'SCHEDULED_SYSTEM') {
-  if (!firestore) return null;
+  if (!dbReady) return null;
   const paths = BACKUP_PATHS;
   const backup = await buildBackupData();
   const totalRecords = backup.totalRecords;
@@ -839,7 +840,7 @@ router.get('/backup/download', requireSuperAdmin, async (req, res) => {
   if (Date.now() > entry.expiresAt) { backupTokenMemory.delete(token); return res.status(403).json({ success: false, message: 'The download link has expired. Please verify an OTP again.' }); }
 
   try {
-    if (!firestore) return res.status(400).json({ success: false, message: 'Database not connected' });
+    if (!dbReady) return res.status(400).json({ success: false, message: 'Database not connected' });
 
     const backup = await buildBackupData();
 
@@ -914,7 +915,7 @@ router.get('/backup/download', requireSuperAdmin, async (req, res) => {
 // GET /api/admin/backups/history — list backup history log
 router.get('/backups/history', requireSuperAdmin, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     const history = await FDB.getAll('backupsHistory', 'timestamp');
     history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     res.json({ success: true, data: history });
@@ -958,13 +959,13 @@ router.post('/backup/otp/send', requireSuperAdmin, async (req, res) => {
     const expiresAt = Date.now() + OTP_TTL_MS;
 
     // Persist (best-effort) + in-memory fallback
-    if (firestore) {
+    if (dbReady) {
       await FDB.setDoc('backupOtps', uid, { otp, expiresAt, email, attempts: 0 }).catch(() => {});
     }
     backupOtpMemory.set(uid, { otp, expiresAt, email, attempts: 0 });
 
     // Demo / no-Firebase mode: log the code so local testing still works
-    if (!firestore || !process.env.EMAIL_USER) {
+    if (!dbReady || !process.env.EMAIL_USER) {
       console.log(`[BACKUP OTP] ${email} -> ${otp} (dev mode: SMTP not configured)`);
     } else {
       const mailOptions = {
@@ -1007,7 +1008,7 @@ router.post('/backup/otp/verify', requireSuperAdmin, async (req, res) => {
   try {
     // Prefer the persisted record; fall back to the in-memory one
     let record = null;
-    if (firestore) {
+    if (dbReady) {
       const stored = await FDB.getById('backupOtps', uid).catch(() => null);
       if (stored && stored.otp) record = { otp: String(stored.otp), expiresAt: stored.expiresAt, attempts: stored.attempts || 0 };
     }
@@ -1019,19 +1020,19 @@ router.post('/backup/otp/verify', requireSuperAdmin, async (req, res) => {
     if (!record) return res.json({ success: false, message: 'No verification code was requested. Please request a new code.' });
     if (Date.now() > record.expiresAt) {
       backupOtpMemory.delete(uid);
-      if (firestore) FDB.deleteDoc('backupOtps', uid).catch(() => {});
+      if (dbReady) FDB.deleteDoc('backupOtps', uid).catch(() => {});
       return res.json({ success: false, message: 'The code has expired. Please request a new one.' });
     }
     if ((record.attempts || 0) > OTP_MAX_ATTEMPTS) {
       backupOtpMemory.delete(uid);
-      if (firestore) FDB.deleteDoc('backupOtps', uid).catch(() => {});
+      if (dbReady) FDB.deleteDoc('backupOtps', uid).catch(() => {});
       return res.json({ success: false, message: 'Too many incorrect attempts. Please request a new code.' });
     }
     if (record.otp !== code) return res.json({ success: false, message: 'Incorrect verification code. Please try again.' });
 
     // Success — consume the OTP and issue a one-time download token
     backupOtpMemory.delete(uid);
-    if (firestore) FDB.deleteDoc('backupOtps', uid).catch(() => {});
+    if (dbReady) FDB.deleteDoc('backupOtps', uid).catch(() => {});
 
     const token = crypto.randomBytes(32).toString('hex');
     backupTokenMemory.set(token, { uid, expiresAt: Date.now() + TOKEN_TTL_MS, used: false });
@@ -1046,7 +1047,7 @@ router.post('/backup/otp/verify', requireSuperAdmin, async (req, res) => {
 // GET /api/admin/backups/:backupId/download — download a stored backup blob
 router.get('/backups/:backupId/download', requireSuperAdmin, async (req, res) => {
   try {
-    if (!firestore) return res.status(400).json({ success: false, message: 'Database not connected' });
+    if (!dbReady) return res.status(400).json({ success: false, message: 'Database not connected' });
     const stored = await FDB.getById('backupsData', req.params.backupId);
     if (!stored) return res.status(404).json({ success: false, message: 'Backup not found.' });
     res.setHeader('Content-Type', 'application/json');
@@ -1061,7 +1062,7 @@ router.get('/backups/:backupId/download', requireSuperAdmin, async (req, res) =>
 // POST /api/admin/restore/:backupId — one-click restore from stored history
 router.post('/restore/:backupId', requireSuperAdmin, async (req, res) => {
   try {
-    if (!firestore) return res.status(400).json({ success: false, message: 'Database not connected' });
+    if (!dbReady) return res.status(400).json({ success: false, message: 'Database not connected' });
     const stored = await FDB.getById('backupsData', req.params.backupId);
     if (!stored) return res.status(404).json({ success: false, message: 'Backup not found.' });
     const backup = stored.backup || stored;
@@ -1098,7 +1099,7 @@ router.post('/restore', requireSuperAdmin, async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.status(400).json({ success: false, message: 'Database not connected' });
+    if (!dbReady) return res.status(400).json({ success: false, message: 'Database not connected' });
 
     const paths = Object.keys(backup.data);
     for (const p of paths) {
@@ -1142,7 +1143,7 @@ router.post('/restore', requireSuperAdmin, async (req, res) => {
 // GET /api/admin/backup/info — info about last backup
 router.get('/backup/info', requireSuperAdmin, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, data: { lastBackup: 'Never', size: 0 } });
+    if (!dbReady) return res.json({ success: true, data: { lastBackup: 'Never', size: 0 } });
 
     const [sales, inventory, expenses, businesses, users] = await Promise.all([
       FDB.getAll('sales').catch(() => []),
@@ -1165,7 +1166,7 @@ router.get('/backup/info', requireSuperAdmin, async (req, res) => {
 const defaultTaxes = { AGRI: 0, NON_AGRI: 12, MAIN: 12 };
 router.get('/taxes', requireViewer, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, data: defaultTaxes });
+    if (!dbReady) return res.json({ success: true, data: defaultTaxes });
     const taxes = await FDB.getById('settings', 'taxes');
     if (!taxes) {
       await FDB.setDoc('settings', 'taxes', defaultTaxes);
@@ -1184,7 +1185,7 @@ router.post('/taxes', requireSuperAdmin, async (req, res) => {
   const { taxes } = req.body;
   if (!taxes) return res.status(400).json({ success: false, message: 'Taxes object is required.' });
   try {
-    if (!firestore) {
+    if (!dbReady) {
       Object.assign(defaultTaxes, taxes);
       return res.json({ success: true, data: defaultTaxes });
     }

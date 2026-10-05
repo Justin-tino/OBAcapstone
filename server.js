@@ -164,6 +164,20 @@ app.get('/api/firebase-config', (req, res) => {
   res.json(firebaseClientConfig);
 });
 
+// ─── Supabase Config Endpoint ─────────────────────────────────────────────────
+// Public anon key only. RLS is enabled with no policies, so the browser cannot
+// read any table even with this key — all data access goes through /api/*.
+app.get('/api/supabase-config', (req, res) => {
+  const { supabaseClientConfig } = require('./config/firebase');
+  res.json(supabaseClientConfig);
+});
+
+// ─── Which datastore is active (diagnostics) ──────────────────────────────────
+app.get('/api/db-info', (req, res) => {
+  const FDB = require('./config/db');
+  res.json({ provider: FDB._provider, tables: Object.keys(FDB._tables).length });
+});
+
 // ─── Public Contact / Request Demo (stored for admin follow-up) ──────────────
 const contactLimiter = require('express-rate-limit')({
   windowMs: 15 * 60 * 1000,
@@ -183,8 +197,8 @@ app.post('/api/contact', contactLimiter, express.json(), async (req, res) => {
     if (!isValidEmail(email)) return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
     const allowedSubjects = ['general', 'demo', 'access', 'support', 'feedback'];
     const cleanSubject = allowedSubjects.includes(subject.toLowerCase()) ? subject.toLowerCase() : 'general';
-    const { firestore } = require('./config/firebase');
-    if (firestore) {
+    const { dbReady } = require('./config/db');
+    if (dbReady) {
       const FDB = require('./config/db');
       await FDB.addDoc('contactRequests', {
         name, email, subject: cleanSubject, message,

@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { auth, firestore } = require('./config/firebase');
+const FDB = require('./config/db');
 
 const MANAGERS = [
   {
@@ -48,8 +49,9 @@ async function createCategoryManagers() {
         }
       }
 
-      // Add to Firestore users/{uid}
-      await firestore.collection('users').doc(userRecord.uid).set({
+      // Add the app profile to the users collection (Supabase by default)
+      await FDB.setDoc('users', userRecord.uid, {
+        id: userRecord.uid,
         uid: userRecord.uid,
         name: mgr.name,
         email: mgr.email,
@@ -58,7 +60,7 @@ async function createCategoryManagers() {
         status: 'active',
         lastLogin: 'Never',
         createdAt: new Date().toISOString(),
-      }, { merge: true });
+      }, true);
 
       console.log(`✅ Successfully added DB permissions for ${mgr.name}`);
     } catch (error) {

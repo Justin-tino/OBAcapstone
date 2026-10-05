@@ -5,8 +5,9 @@
  */
 const express = require('express');
 const router = express.Router();
-const { firestore, auth } = require('../config/firebase');
+const { auth } = require('../config/firebase');
 const FDB = require('../config/db');
+const { dbReady } = require('../config/db');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
@@ -87,13 +88,26 @@ router.post('/login', loginLimiter, async (req, res) => {
   const { email, password, idToken, selectedRole, selectedCategory } = req.body;
 
   try {
-    // ─── Firebase mode (Admin SDK available) ───
-    if (auth && firestore && idToken) {
+    // ─── Firebase Auth mode (Admin SDK available) ───
+    // NOTE: gated on `auth` only. The datastore is Supabase now (config/db.js),
+    // so this must NOT test `dbReady` — that variable is intentionally null
+    // on the Supabase path and testing it silently broke every login.
+    if (auth && idToken) {
       const decoded = await auth.verifyIdToken(idToken);
       const uid = decoded.uid;
 
-      // Fetch user profile from Firestore 'users' collection
-      const userData = await FDB.getById('users', uid);
+      // Fetch the user profile from the `users` collection (Supabase/Firestore)
+      let userData;
+      try {
+        userData = await FDB.getById('users', uid);
+      } catch (dbErr) {
+        // Surface datastore problems instead of the misleading "Login failed".
+        console.error('Datastore error during login:', dbErr.code || dbErr.message);
+        return res.status(503).json({
+          success: false,
+          message: 'The database is temporarily unavailable. Please try again shortly.',
+        });
+      }
       if (!userData) {
         return res.json({ success: false, message: 'Account not found in system. Please contact the admin or request access.' });
       }
@@ -197,15 +211,30 @@ router.post('/login', loginLimiter, async (req, res) => {
     return res.json({ success: true, role: user.role, redirect: getRoleRedirect(user.role, user.businessAccess) });
 
   } catch (err) {
+    // Surface the real reason so a datastore or token problem is never hidden
+    // behind a generic "Login failed".
     console.error('Login error:', err);
-    res.json({ success: false, message: 'Login failed. Please try again.' });
+    const code = err.code || '';
+    const detail = err.message || '';
+    if (String(code).includes('argument-error') || /issuer|\"iss\"|id-token/i.test(detail)) {
+      return res.status(401).json({ success: false, message: 'Session token was rejected. Please sign in again.' });
+    }
+    if (String(code).includes('RESOURCE_EXHAUSTED') || /quota/i.test(detail)) {
+      return res.status(503).json({ success: false, message: 'The database is busy right now. Please try again shortly.' });
+    }
+    if (/fetch failed|ENOTFOUND|ECONNREFUSED|ETIMEDOUT/i.test(detail)) {
+      return res.status(503).json({ success: false, message: 'Cannot reach the database. Please try again shortly.' });
+    }
+    res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
   }
 });
 
 // POST /logout
 router.post('/logout', async (req, res) => {
   const user = req.session?.user;
-  if (user && firestore) {
+  // Gated on the session only — `dbReady` is null on the Supabase path, so
+  // testing it here would skip the activity-tracking write.
+  if (user) {
     logAudit(user.uid, user.email, user.name, 'LOGOUT', 'auth', 'User logged out');
     // ─── Track activity: stamp last active + mark offline ───
     try {
@@ -221,7 +250,7 @@ router.post('/logout', async (req, res) => {
 // GET /logout
 router.get('/logout', async (req, res) => {
   const user = req.session?.user;
-  if (user && firestore) {
+  if (user) {
     logAudit(user.uid, user.email, user.name, 'LOGOUT', 'auth', 'User logged out');
     // ─── Track activity: stamp last active + mark offline ───
     try {
@@ -250,7 +279,7 @@ router.post('/api/signup/send-otp', otpLimiter, async (req, res) => {
   if (!isValidEmail(email)) return res.json({ success: false, message: 'Please enter a valid email address.' });
 
   try {
-    if (!firestore) return res.json({ success: false, message: 'Database not configured.' });
+    if (!dbReady) return res.json({ success: false, message: 'Database not configured.' });
 
     // Check if email already exists in Firebase Auth
     if (auth) {
@@ -319,7 +348,7 @@ router.post('/api/signup/verify-and-register', async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.json({ success: false, message: 'Database not configured.' });
+    if (!dbReady) return res.json({ success: false, message: 'Database not configured.' });
 
     // Verify OTP
     const emailKey = email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
@@ -411,7 +440,7 @@ router.post('/api/forgot-password/send-link', resetLimiter, async (req, res) => 
   if (!email) return res.json({ success: false, message: 'Email is required.' });
 
   try {
-    if (!auth || !firestore) {
+    if (!auth || !dbReady) {
       return res.json({ success: false, message: 'Database not initialized.' });
     }
 
@@ -562,7 +591,7 @@ function redirectByRole(res, role, businessAccess) {
 
 async function logAudit(uid, email, name, action, target, details) {
   try {
-    if (firestore) {
+    if (dbReady) {
       await FDB.addDoc('auditLogs', {
         // Unified schema (used by admin routes) + legacy fields for compatibility
         action,

@@ -17,7 +17,7 @@
 const express = require('express');
 const router = express.Router();
 const FDB = require('../config/db');
-const { firestore } = require('../config/firebase');
+const { dbReady } = require('../config/db');
 const { requireEmployee, accessCoversCategory, validateBizCategory, sanitizeString } = require('../middleware/auth.middleware');
 
 // Notification types that are relevant to sales staff.
@@ -87,7 +87,7 @@ router.get('/notifications', requireEmployee, async (req, res) => {
     // Optional per-business narrowing: ?entity=<workspace entity id>
     const entityFilter = req.query.entity ? sanitizeString(String(req.query.entity)) : null;
 
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
 
     let all = await FDB.getAll('notifications', 'createdAt');
     const matches = scopeFilter({ user, bizFilter, entityFilter });
@@ -102,7 +102,7 @@ router.get('/notifications', requireEmployee, async (req, res) => {
 // PUT /api/employee/notifications/:id/read — mark as read (scoped)
 router.put('/notifications/:id/read', requireEmployee, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const user = req.session.user;
     const notif = await FDB.getById('notifications', req.params.id);
     if (!notif) return res.status(404).json({ success: false, message: 'Notification not found.' });
@@ -122,7 +122,7 @@ router.put('/notifications/:id/read', requireEmployee, async (req, res) => {
 // DELETE /api/employee/notifications/:id — delete a single notification (scoped)
 router.delete('/notifications/:id', requireEmployee, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const user = req.session.user;
     const notif = await FDB.getById('notifications', req.params.id);
     if (!notif) return res.status(404).json({ success: false, message: 'Notification not found.' });
@@ -142,7 +142,7 @@ router.delete('/notifications/:id', requireEmployee, async (req, res) => {
 // DELETE /api/employee/notifications?biz=AGRI&entity=... — clear the whole scoped feed
 router.delete('/notifications', requireEmployee, async (req, res) => {
   try {
-    if (!firestore) return res.json({ success: true, deleted: 0 });
+    if (!dbReady) return res.json({ success: true, deleted: 0 });
     const user = req.session.user;
     const access = user.businessAccess || [];
     const isAll = access.includes('all');

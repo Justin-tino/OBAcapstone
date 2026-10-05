@@ -6,8 +6,8 @@
  */
 const express = require('express');
 const router = express.Router();
-const { firestore } = require('../config/firebase');
 const FDB = require('../config/db');
+const { dbReady } = require('../config/db');
 const { requireViewer } = require('../middleware/auth.middleware');
 
 const BIZ_CATEGORIES = ['AGRI', 'NON_AGRI', 'MAIN'];
@@ -15,7 +15,7 @@ const DEFAULT_TAX_RATES = { AGRI: 0, NON_AGRI: 12, MAIN: 12 };
 
 async function writeReportAudit(req, reportName, bizId) {
   try {
-    if (!firestore || !req.session || !req.session.user) return;
+    if (!dbReady || !req.session || !req.session.user) return;
     await FDB.addDoc('auditLogs', {
       action: 'GENERATE_REPORT',
       module: 'reports',
@@ -31,7 +31,7 @@ async function writeReportAudit(req, reportName, bizId) {
 }
 
 async function getBizTaxRate(bizId) {
-  if (!firestore) return DEFAULT_TAX_RATES[bizId] || 0;
+  if (!dbReady) return DEFAULT_TAX_RATES[bizId] || 0;
   try {
     const doc = await FDB.getById('settings', 'taxes');
     const rates = doc || DEFAULT_TAX_RATES;
@@ -146,7 +146,7 @@ router.param('bizId', (req, res, next, val) => {
 });
 
 async function getBizData(bizId, query = {}) {
-  if (!firestore) return { curSales: [], prevSales: [], curExpenses: [], prevExpenses: [], inventory: [], allSales: [], allExpenses: [] };
+  if (!dbReady) return { curSales: [], prevSales: [], curExpenses: [], prevExpenses: [], inventory: [], allSales: [], allExpenses: [] };
 
   const targets = (bizId === 'all' || !bizId) ? BIZ_CATEGORIES : [bizId];
   let allSales = [];
@@ -1263,7 +1263,7 @@ router.get(['/:bizId/budget-utilization-staff', '/:bizId/budgetutilizationstaff'
     let setDate = new Date().toISOString();
     let budgetHistory = [];
 
-    if (firestore) {
+    if (dbReady) {
       const val = await FDB.getById('budgetLimits', bizId);
       if (val) {
         if (val.totalBudget) budgetLimit = parseFloat(val.totalBudget);
@@ -1375,7 +1375,7 @@ router.get(['/:bizId/inventory-report', '/:bizId/inventoryreport'], requireViewe
 router.post('/send-consolidated', requireViewer, async (req, res) => {
   const { bizId, reportSummary } = req.body;
   try {
-    if (firestore) {
+    if (dbReady) {
       await FDB.addDoc('sent_reports', {
         bizId: bizId || 'GENERAL',
         reportType: 'Consolidated Sales & P&L Report',
@@ -1436,7 +1436,7 @@ async function resolveReportScope(user) {
     else bizIds.add(e);                                    // unknown id — keep for entity matching
   };
 
-  if (entries.length && firestore) {
+  if (entries.length && dbReady) {
     try {
       const bizById = {};
       (await FDB.getAll('businesses')).forEach(b => { bizById[b.id] = b; });
@@ -1485,7 +1485,7 @@ router.get('/generate', requireViewer, async (req, res) => {
 
     // ── 4. Load data for the selected categories ──
     let allSales = [], allExpenses = [], allInventory = [];
-    if (firestore) {
+    if (dbReady) {
       for (const c of categories) {
         const [s, e, i] = await Promise.all([
           FDB.getWhere('sales', 'businessCategory', '==', c).catch(() => []),
@@ -1500,7 +1500,7 @@ router.get('/generate', requireViewer, async (req, res) => {
 
     // Business workspace names (labels / breakdowns)
     const bizName = {};
-    if (firestore) { (await FDB.getAll('businesses').catch(() => [])).forEach(b => { bizName[b.id] = b.name; }); }
+    if (dbReady) { (await FDB.getAll('businesses').catch(() => [])).forEach(b => { bizName[b.id] = b.name; }); }
 
     // Narrow to the selected businesses (entityId match, entityName fallback)
     if (businessIds) {
@@ -1776,7 +1776,7 @@ router.get('/generate', requireViewer, async (req, res) => {
 
     // ── Notify admins: WHO generated WHICH report for WHICH category ──
     try {
-      if (firestore) {
+      if (dbReady) {
         const gen = (req.session && req.session.user) || {};
         const catLabel = categories.map(c => CAT_NAMES[c] || c).join(', ');
         const bizLabel = businessIds

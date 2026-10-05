@@ -1,24 +1,29 @@
 /**
  * reset-firestore.js — DESTRUCTIVE reset for the OBA System.
  *
- * Wipes Firestore collections + Firebase Auth users, keeping only the
- * default admin (admin@psau.edu.ph), then reseeds admin + default settings.
+ * Wipes all data collections + Firebase Auth users, keeping only the default
+ * admin (admin@psau.edu.ph), then reseeds admin + default settings.
+ *
+ * Data now lives in Supabase Postgres (see config/db.js, DB_PROVIDER). Firebase
+ * Auth is still the identity provider, so Auth users are still reset here.
  *
  * Usage: node reset-firestore.js --confirm
  */
 require('dotenv').config();
 const { auth, firestore } = require('./config/firebase');
+const FDB = require('./config/db');
 const { deleteCollection } = require('./config/db');
 
 const ADMIN_EMAIL = 'admin@psau.edu.ph';
 const ADMIN_PASSWORD = 'adminPassword123';
 const ADMIN_NAME = 'Default Admin';
 
-// Flat Firestore collections (CAPSTONE §5.1 unified database)
+// Flat collections (CAPSTONE §5.1 unified database)
 const COLLECTIONS_TO_WIPE = [
   'businesses',
   'accessRequests',
   'sales',
+  'returns',
   'inventory',
   'expenses',
   'inventoryMovements',
@@ -31,6 +36,7 @@ const COLLECTIONS_TO_WIPE = [
   'sent_reports',
   'backupsHistory',
   'backupsData',
+  'backupOtps',
   'users', // wiped separately (keep admin doc)
 ];
 
@@ -46,12 +52,12 @@ async function main() {
     console.error('   Run: node reset-firestore.js --confirm');
     process.exit(1);
   }
-  if (!auth || !firestore) {
+  if (!auth) {
     console.error('❌ Firebase is not configured properly in .env');
     process.exit(1);
   }
 
-  console.log('🚨 Starting Firestore + Auth reset (keeping admin)...');
+  console.log(`🚨 Starting ${FDB._provider} + Auth reset (keeping admin)...`);
 
   // 1. Wipe data collections (users handled below to preserve admin)
   for (const c of COLLECTIONS_TO_WIPE.filter(c => c !== 'users')) {
@@ -71,26 +77,25 @@ async function main() {
     const list = await auth.listUsers(1000, nextPageToken);
     for (const u of list.users) {
       if (keepUids.has(u.uid)) continue;
-      if ((u.email || '').toLowerCase() === ADMIN_EMAIL) { keepUids.add(u.uid); continue; }
-      try { await auth.deleteUser(u.uid); deletedAuth++; } catch (e) { console.warn(`  ⚠️ could not delete auth ${u.email}: ${e.message}`); }
+      await auth.deleteUser(u.uid).catch(() => {});
+      deletedAuth++;
     }
     nextPageToken = list.pageToken;
   } while (nextPageToken);
   console.log(`  🧹 auth: deleted ${deletedAuth} user(s)`);
 
   // 3. Wipe users collection except admin doc
-  const usersSnap = await firestore.collection('users').get();
+  const users = await FDB.getAll('users');
   let deletedDocs = 0;
-  for (const d of usersSnap.docs) {
-    const data = d.data() || {};
-    const email = String(data.email || '').toLowerCase();
-    if (email === ADMIN_EMAIL || keepUids.has(d.id)) continue;
-    await d.ref.delete().catch(() => {});
+  for (const u of users) {
+    const email = String(u.email || '').toLowerCase();
+    if (email === ADMIN_EMAIL || keepUids.has(u.id)) continue;
+    await FDB.deleteDoc('users', u.id).catch(() => {});
     deletedDocs++;
   }
   console.log(`  🧹 users: deleted ${deletedDocs} doc(s), kept admin`);
 
-  // 4. Ensure admin exists in Auth + Firestore
+  // 4. Ensure admin exists in Auth + the users table
   let adminRec;
   try {
     adminRec = await auth.getUserByEmail(ADMIN_EMAIL);
@@ -101,7 +106,8 @@ async function main() {
       console.log('  ✅ created admin auth:', adminRec.uid);
     } else throw e;
   }
-  await firestore.collection('users').doc(adminRec.uid).set({
+  await FDB.setDoc('users', adminRec.uid, {
+    id: adminRec.uid,
     uid: adminRec.uid,
     name: ADMIN_NAME,
     email: ADMIN_EMAIL,
@@ -110,17 +116,17 @@ async function main() {
     status: 'active',
     lastLogin: 'Never',
     createdAt: new Date().toISOString(),
-  }, { merge: true });
+  }, true);
 
   // 5. Reset default settings (settings/taxes)
-  await firestore.collection('settings').doc('taxes').set({ AGRI: 0, NON_AGRI: 12, MAIN: 12 });
+  await FDB.setDoc('settings', 'taxes', { id: 'taxes', AGRI: 0, NON_AGRI: 12, MAIN: 12 });
   console.log('  ✅ settings/taxes reset to defaults');
 
   // 6. Seed audit marker
-  await firestore.collection('auditLogs').add({
+  await FDB.addDoc('auditLogs', {
     action: 'SYSTEM_RESET',
     module: 'admin',
-    details: 'Full Firestore + Auth reset executed (kept admin)',
+    details: `Full ${FDB._provider} + Auth reset executed (kept admin)`,
     logType: 'transaction',
     previousValue: null, newValue: null, businessId: null,
     userId: adminRec.uid, userName: ADMIN_NAME, userEmail: ADMIN_EMAIL,
@@ -132,6 +138,7 @@ async function main() {
   console.log(`   Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
   console.log('   All other collections are empty.');
   console.log('=======================================\n');
+  void firestore;
   process.exit(0);
 }
 

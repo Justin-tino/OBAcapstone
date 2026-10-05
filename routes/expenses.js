@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const FDB = require('../config/db');
-const { firestore } = require('../config/firebase');
+const { dbReady } = require('../config/db');
 const { requireEmployee, requireManager, requireViewer, validateBizCategory, sanitizeString, accessCoversCategory } = require('../middleware/auth.middleware');
 
 const VALID_EXPENSE_TYPES = ['income', 'expense'];
@@ -15,7 +15,7 @@ const VALID_EXPENSE_CATEGORIES = ['utilities', 'suppliers', 'salaries', 'mainten
 
 async function writeAudit(req, action, details, businessCategory, isSuspicious = false) {
   try {
-    if (!firestore || !req.session || !req.session.user) return;
+    if (!dbReady || !req.session || !req.session.user) return;
     await FDB.addDoc('auditLogs', {
       action, module: 'expenses', details: details || '', logType: 'transaction',
       previousValue: null, newValue: null, businessId: businessCategory || null,
@@ -27,14 +27,14 @@ async function writeAudit(req, action, details, businessCategory, isSuspicious =
 
 // Canonical budget path is `budgetLimits/{biz}` (doc id = biz, single source).
 async function readBudget(biz) {
-  if (!firestore) return { totalBudget: 500000, categoryBudgets: {} };
+  if (!dbReady) return { totalBudget: 500000, categoryBudgets: {} };
   const doc = await FDB.getById('budgetLimits', biz);
   if (doc) return doc;
   return { totalBudget: 500000, categoryBudgets: {} };
 }
 
 async function writeBudget(biz, payload) {
-  if (!firestore) return;
+  if (!dbReady) return;
   await FDB.setDoc('budgetLimits', biz, payload);
 }
 
@@ -43,7 +43,7 @@ router.get('/', requireViewer, async (req, res) => {
   const biz = validateBizCategory(req.query.biz || 'AGRI');
   const entityId = req.query.entity || '';
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     let data = await FDB.getWhere('expenses', 'businessCategory', '==', biz);
     data.sort((a, b) => String(b.date || '') < String(a.date || '') ? -1 : 1);
     if (entityId) data = data.filter(e => e.entityId === entityId);
@@ -101,7 +101,7 @@ router.post('/', requireEmployee, async (req, res) => {
     createdAt: new Date().toISOString(),
   };
   try {
-    if (!firestore) return res.json({ success: true, data: entry });
+    if (!dbReady) return res.json({ success: true, data: entry });
     const { id } = await FDB.addDoc('expenses', { ...entry, businessCategory: biz });
     entry.id = id;
     await FDB.updateDoc('expenses', id, { id });
@@ -149,7 +149,7 @@ router.put('/:id', requireEmployee, async (req, res) => {
     updates.amount = a;
   }
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('expenses', id);
     if (!existing) return res.json({ success: true });
     await FDB.updateDoc('expenses', id, updates);
@@ -165,7 +165,7 @@ router.put('/:id', requireEmployee, async (req, res) => {
 router.delete('/:id', requireManager, async (req, res) => {
   const { id } = req.params;
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('expenses', id);
     if (existing) {
       await FDB.deleteDoc('expenses', id);
@@ -203,7 +203,7 @@ router.post('/budget-limits', requireEmployee, async (req, res) => {
       updatedAt: new Date().toISOString(),
       updatedBy: req.session.user ? req.session.user.name : 'System'
     };
-    if (firestore) {
+    if (dbReady) {
       await writeBudget(biz, payload);
       writeAudit(req, 'UPDATE_BUDGET', `Budget for ${biz} set to ${cleanTotal}`, biz);
     }

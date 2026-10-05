@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { auth, firestore } = require('./config/firebase');
+const FDB = require('./config/db');
 
 async function createDefaultAdmin() {
   if (!auth || !firestore) {
@@ -31,8 +32,9 @@ async function createDefaultAdmin() {
       }
     }
 
-    // Add admin role to Firestore (users/{uid})
-    await firestore.collection('users').doc(userRecord.uid).set({
+    // Add admin role to the users collection (Supabase by default)
+    await FDB.setDoc('users', userRecord.uid, {
+      id: userRecord.uid,
       uid: userRecord.uid,
       name,
       email,
@@ -41,13 +43,14 @@ async function createDefaultAdmin() {
       status: 'active',
       lastLogin: 'Never',
       createdAt: new Date().toISOString(),
-    }, { merge: true });
+    }, true);
 
     // Ensure default tax rates exist (settings/taxes)
-    const taxesSnap = await firestore.collection('settings').doc('taxes').get();
-    if (!taxesSnap.exists) {
-      await firestore.collection('settings').doc('taxes').set({ AGRI: 0, NON_AGRI: 12, MAIN: 12 });
+    const existingTaxes = await FDB.getById('settings', 'taxes');
+    if (!existingTaxes) {
+      await FDB.setDoc('settings', 'taxes', { id: 'taxes', AGRI: 0, NON_AGRI: 12, MAIN: 12 });
     }
+    void firestore;
 
     console.log('✅ Successfully added admin permissions to Firestore!');
     console.log('\n=======================================');

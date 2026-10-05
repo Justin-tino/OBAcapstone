@@ -14,7 +14,7 @@
  * the per-business feed (routes/notifications.js filters on entityId).
  */
 const FDB = require('../config/db');
-const { firestore } = require('../config/firebase');
+const { dbReady } = require('../config/db');
 
 // A product is considered HIGH STOCK when its quantity exceeds this
 // multiple of its reorder level (e.g. reorder 10 → high at >100).
@@ -53,7 +53,7 @@ function workspaceEntity(req) {
 // the window refresh the existing document instead of creating duplicates.
 async function upsertNotification({ coalesceKey, buildNotification, buildUpdate }) {
   try {
-    if (!firestore) return;
+    if (!dbReady) return;
     const nowIso = new Date().toISOString();
     const cutoff = new Date(Date.now() - NOTIF_COALESCE_WINDOW_MS).toISOString();
     let existing = null;
@@ -87,7 +87,7 @@ async function emitStockStatusNotification({
   emitNormal = false,
 }) {
   try {
-    if (!firestore) return;
+    if (!dbReady) return;
     const status = computeStockStatus(newQty, reorderLevel);
     if (status === 'normal_stock' && !emitNormal) return;
     const meta = STATUS_META[status];

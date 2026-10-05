@@ -25,7 +25,7 @@
 const express = require('express');
 const router = express.Router();
 const FDB = require('../config/db');
-const { firestore } = require('../config/firebase');
+const { dbReady } = require('../config/db');
 const { sanitizeString, validateBizCategory } = require('../middleware/auth.middleware');
 
 const VALID_CATS = ['AGRI', 'NON_AGRI', 'MAIN'];
@@ -100,7 +100,7 @@ function guardPage(req, res, next) {
 // ── Audit + notification helpers ────────────────────────────────────────────
 async function writeAudit(req, action, details, businessId, isSuspicious = false) {
   try {
-    if (!firestore || !req.session || !req.session.user) return;
+    if (!dbReady || !req.session || !req.session.user) return;
     await FDB.addDoc('auditLogs', {
       action, module: 'inventory', details: details || '', logType: 'transaction',
       previousValue: null, newValue: null, businessId: businessId || null,
@@ -113,7 +113,7 @@ async function writeAudit(req, action, details, businessId, isSuspicious = false
 
 async function notify(req, { title, message, biz, entityId, entityName, priority = 'info', type = 'inventory' }) {
   try {
-    if (!firestore) return;
+    if (!dbReady) return;
     const notif = {
       id: `n-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       type, title, message,
@@ -132,7 +132,7 @@ async function notify(req, { title, message, biz, entityId, entityName, priority
 
 // ── Business catalogue (cached per request, cheap to rebuild) ────────────────
 async function loadBusinesses() {
-  if (!firestore) return [];
+  if (!dbReady) return [];
   const docs = await FDB.getAll('businesses').catch(() => []);
   return docs.map(b => ({
     id: b.id,
@@ -153,7 +153,7 @@ router.get('/overview', guard, async (req, res) => {
   try {
     const includeArchived = req.query.includeArchived === 'true';
     const businesses = await loadBusinesses();
-    const products = firestore ? await FDB.getAll('inventory').catch(() => []) : [];
+    const products = dbReady ? await FDB.getAll('inventory').catch(() => []) : [];
     const visible = includeArchived ? products : products.filter(p => !p.isArchived);
 
     // Businesses that only exist as an entityId on products (legacy data)
@@ -260,7 +260,7 @@ router.post('/products', guard, async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error });
 
   try {
-    if (!firestore) return res.json({ success: true, data: { ...value, businessCategory: biz, entityId } });
+    if (!dbReady) return res.json({ success: true, data: { ...value, businessCategory: biz, entityId } });
     const businesses = await loadBusinesses();
     const target = businesses.find(b => b.id === entityId);
     const entityName = target ? target.name : entityId;
@@ -328,7 +328,7 @@ router.post('/products/bulk', guard, async (req, res) => {
   }
 
   try {
-    if (!firestore) {
+    if (!dbReady) {
       return res.json({ success: true, added: normalized.length, data: normalized.map((p, i) => ({ id: `mock-${i}`, ...p })) });
     }
     const businesses = await loadBusinesses();
@@ -371,7 +371,7 @@ router.post('/products/:id/copy', guard, async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.json({ success: true, copied: 0 });
+    if (!dbReady) return res.json({ success: true, copied: 0 });
     const source = await FDB.getById('inventory', id);
     if (!source) return res.status(404).json({ success: false, message: 'Source product not found.' });
 
@@ -451,7 +451,7 @@ router.put('/products/:id', guard, async (req, res) => {
   }
 
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('inventory', id);
     if (!existing) return res.status(404).json({ success: false, message: 'Product not found.' });
 
@@ -503,7 +503,7 @@ router.delete('/products/:id', guard, async (req, res) => {
   const { id } = req.params;
   const hard = req.query.hard === 'true' || (req.body && req.body.hard === true);
   try {
-    if (!firestore) return res.json({ success: true });
+    if (!dbReady) return res.json({ success: true });
     const existing = await FDB.getById('inventory', id);
     if (!existing) return res.status(404).json({ success: false, message: 'Product not found.' });
 

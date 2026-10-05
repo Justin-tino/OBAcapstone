@@ -1,15 +1,24 @@
 /**
- * functions/index.js — Cloud Functions for the OBA System (Firestore).
+ * functions/index.js — Cloud Functions for the OBA System.
  *
- * - Low-stock monitor: watches inventory docs and creates a
- *   low_stock / out-of-stock notification when quantity falls
- *   at or below the reorder level.
- * - Scheduled backup marker: records a daily backup heartbeat
- *   (the Express app performs the full snapshot; this marker
- *   keeps the schedule visible in Firebase console).
+ * ⚠️ DISABLED — the primary datastore is now Supabase Postgres, not Firestore.
  *
- * Deploy with: firebase deploy --only functions
+ * These triggers fire on Firestore document writes. Since inventory writes now
+ * go to Postgres, they will never fire again, and enabling them would create
+ * an orphaned second datastore. The Express app already covers both behaviours
+ * on the Supabase path:
+ *   - low stock / out-of-stock alerts → utils/stock-notifs.js
+ *     (emitStockStatusNotification, called from routes/inventory.js)
+ *   - daily backup snapshot → routes/admin.js executeAutoBackup()
+ *
+ * Both functions are kept, commented out, for reference. Do not deploy them
+ * unless the project is deliberately rolled back to Firestore
+ * (DB_PROVIDER=firestore).
+ *
+ * Deploy with: firebase deploy --only functions   (only after rollback)
  */
+
+/*
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
@@ -62,3 +71,4 @@ exports.dailyBackupHeartbeat = onSchedule(
     });
   }
 );
+*/

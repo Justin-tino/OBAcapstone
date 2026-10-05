@@ -7,13 +7,13 @@
 const express = require('express');
 const router = express.Router();
 const FDB = require('../config/db');
-const { firestore } = require('../config/firebase');
+const { dbReady } = require('../config/db');
 const { requireEmployee, requireManager, requireViewer, validateBizCategory, validatePaymentMethod, sanitizeString, accessCoversCategory } = require('../middleware/auth.middleware');
 const { computeStockStatus, emitStockStatusNotification } = require('../utils/stock-notifs');
 
 async function writeAudit(req, action, details, businessCategory) {
   try {
-    if (!firestore || !req.session || !req.session.user) return;
+    if (!dbReady || !req.session || !req.session.user) return;
     await FDB.addDoc('auditLogs', {
       action,
       module: 'sales',
@@ -36,7 +36,7 @@ router.get('/', requireViewer, async (req, res) => {
   const biz = validateBizCategory(req.query.biz || 'AGRI');
   const entityId = req.query.entity || '';
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     let sales = await FDB.getWhere('sales', 'businessCategory', '==', biz);
     sales.sort((a, b) => (String(b.date || '') < String(a.date || '') ? -1 : 1));
     // Filter by entity if specified
@@ -149,7 +149,7 @@ router.post('/', requireEmployee, (req, res, next) => {
   };
 
   try {
-    if (!firestore) return res.json({ success: true, data: transaction });
+    if (!dbReady) return res.json({ success: true, data: transaction });
     // Recalculate total if not passed or zero
     if (!transaction.total && transaction.items.length > 0) {
       transaction.subtotal = transaction.items.reduce((sum, item) => sum + ((parseFloat(item.unitPrice) || 0) * (parseInt(item.quantity || item.qty) || 1)), 0);
@@ -257,7 +257,7 @@ router.get('/lookup', requireViewer, async (req, res) => {
   const txnId = String(req.query.txnId || '').trim();
   if (!txnId) return res.status(400).json({ success: false, message: 'Transaction ID is required.' });
   try {
-    if (!firestore) return res.status(404).json({ success: false, message: 'Sales storage unavailable.' });
+    if (!dbReady) return res.status(404).json({ success: false, message: 'Sales storage unavailable.' });
     const sales = await FDB.getWhere('sales', 'businessCategory', '==', biz);
     const wanted = txnId.toUpperCase();
     const sale =
@@ -287,7 +287,7 @@ router.get('/lookup', requireViewer, async (req, res) => {
 router.get('/returns', requireViewer, async (req, res) => {
   const biz = validateBizCategory(req.query.biz || 'AGRI');
   try {
-    if (!firestore) return res.json({ success: true, data: [] });
+    if (!dbReady) return res.json({ success: true, data: [] });
     let returns = await FDB.getWhere('returns', 'businessCategory', '==', biz);
     returns.sort((a, b) => (String(b.createdAt || '') < String(a.createdAt || '') ? -1 : 1));
     res.json({ success: true, data: returns });
@@ -309,7 +309,7 @@ router.post('/:id/return', requireEmployee, async (req, res) => {
   const userAccess = req.session.user.businessAccess || [];
 
   try {
-    if (!firestore) return res.status(400).json({ success: false, message: 'Sales storage unavailable.' });
+    if (!dbReady) return res.status(400).json({ success: false, message: 'Sales storage unavailable.' });
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: 'No return items provided.' });
     }
