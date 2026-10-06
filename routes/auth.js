@@ -8,7 +8,7 @@ const router = express.Router();
 const { auth } = require('../config/firebase');
 const FDB = require('../config/db');
 const { dbReady } = require('../config/db');
-const nodemailer = require('nodemailer');
+const { sendMail, transportName } = require('../utils/mailer');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { sanitizeString, isValidEmail } = require('../middleware/auth.middleware');
@@ -49,18 +49,9 @@ const resetLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 20000
-});
+// Outgoing mail goes through utils/mailer.js (Brevo HTTPS API, with an SMTP
+// fallback). It used to be built here directly from SMTP_HOST/SMTP_PORT, which
+// is unreachable from Railway — see utils/mailer.js for the full explanation.
 
 // Demo users for development (fallback when Firebase is not connected)
 const DEMO_USERS = [];
@@ -299,10 +290,11 @@ router.post('/api/signup/send-otp', otpLimiter, async (req, res) => {
     const emailKey = email.replace(/\./g, '_dot_').replace(/@/g, '_at_');
     await FDB.setDoc('signupOtps', emailKey, { otp, expiresAt, name, email });
 
-    // Send OTP email
+    // Send OTP email. `from` is owned by the mailer (Brevo requires a verified
+    // sender, so it is configured in one place rather than at each call site).
     const mailOptions = {
-      from: `"OBA System" <${process.env.EMAIL_USER}>`,
       to: email,
+      toName: name,
       subject: 'OBA System - Email Verification OTP',
       text: `Your OTP for account registration is: ${otp}\nIt is valid for 10 minutes.`,
       html: `
@@ -319,10 +311,20 @@ router.post('/api/signup/send-otp', otpLimiter, async (req, res) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     return res.json({ success: true, message: 'OTP sent to your email. Please check your inbox.' });
   } catch (err) {
-    console.error('Signup OTP Send Error:', err);
+    // This handler used to collapse every failure into one generic message,
+    // which hid a bad API key, an unverified sender and an exhausted sending
+    // quota behind the same "try again" text. Log the transport and provider
+    // code, and distinguish the one case the user can actually act on.
+    console.error(
+      `Signup OTP send failed [transport=${err.transport || transportName()} code=${err.code || err.status || 'ERR'}]:`,
+      err.message || err
+    );
+    if (err.quota) {
+      return res.status(503).json({ success: false, message: 'The mail service has reached its daily sending limit. Please try again tomorrow.' });
+    }
     return res.json({ success: false, message: 'Failed to send OTP. Please try again.' });
   }
 });
@@ -468,7 +470,6 @@ router.post('/api/forgot-password/send-link', resetLimiter, async (req, res) => 
     const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
     const mailOptions = {
-      from: `"OBA System" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'OBA System - Password Reset Request',
       text: `You requested a password reset. Please click the link below to set a new password (valid for 10 minutes):\n\n${resetLink}`,
@@ -488,10 +489,16 @@ router.post('/api/forgot-password/send-link', resetLimiter, async (req, res) => 
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     return res.json({ success: true, message: 'A magic reset link has been sent to your email.' });
   } catch (err) {
-    console.error('Send Reset Link Error:', err);
+    console.error(
+      `Password reset email failed [transport=${err.transport || transportName()} code=${err.code || err.status || 'ERR'}]:`,
+      err.message || err
+    );
+    if (err.quota) {
+      return res.status(503).json({ success: false, message: 'The mail service has reached its daily sending limit. Please try again tomorrow.' });
+    }
     return res.json({ success: false, message: 'Failed to send password reset link.' });
   }
 });

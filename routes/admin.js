@@ -10,23 +10,14 @@ const { auth } = require('../config/firebase');
 const FDB = require('../config/db');
 const { dbReady } = require('../config/db');
 const { requireSuperAdmin, requireManager, requireViewer, sanitizeString, BUSINESS_UNITS } = require('../middleware/auth.middleware');
-const nodemailer = require('nodemailer');
+const { sendMail, transportName, isConfigured } = require('../utils/mailer');
 const crypto = require('crypto');
 const archiver = require('archiver');
 
-// ── Outgoing mail (Gmail SMTP) for backup-download OTP ─────────────
-const mailer = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 20000
-});
+// ── Outgoing mail for the backup-download OTP goes through utils/mailer.js
+// (Brevo HTTPS API, SMTP fallback). It used to be a raw nodemailer SMTP
+// transport here, which never connected from Railway — Gmail's :587 is not
+// reachable from that host. See utils/mailer.js.
 
 async function writeAudit(req, action, module, details, businessId = null, isSuspicious = false) {
   try {
@@ -984,13 +975,13 @@ router.post('/backup/otp/send', requireSuperAdmin, async (req, res) => {
     }
     backupOtpMemory.set(uid, { otp, expiresAt, email, attempts: 0 });
 
-    // Demo / no-Firebase mode: log the code so local testing still works
-    if (!dbReady || !process.env.EMAIL_USER) {
-      console.log(`[BACKUP OTP] ${email} -> ${otp} (dev mode: SMTP not configured)`);
+    // Demo / no-mail-transport mode: log the code so local testing still works
+    if (!dbReady || !isConfigured()) {
+      console.log(`[BACKUP OTP] ${email} -> ${otp} (dev mode: no mail transport configured)`);
     } else {
       const mailOptions = {
-        from: `"OBA System" <${process.env.EMAIL_USER}>`,
         to: email,
+        toName: req.session.user.name || 'Admin',
         subject: 'OBA System — Database Backup Verification Code',
         text: `Your verification code for downloading a database backup is: ${otp}\nIt is valid for 10 minutes.`,
         html: `
@@ -1006,7 +997,7 @@ router.post('/backup/otp/send', requireSuperAdmin, async (req, res) => {
           </div>
         `
       };
-      await mailer.sendMail(mailOptions);
+      await sendMail(mailOptions);
     }
 
     writeAudit(req, 'BACKUP_OTP_SENT', 'backup', `Backup download OTP sent to ${maskEmail(email)}`, null);
