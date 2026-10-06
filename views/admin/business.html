@@ -481,7 +481,7 @@
       </div>
       <div class="form-group"><label class="form-label">Description</label><textarea id="edit_e_desc" class="form-control" placeholder="Brief description of the business..."></textarea></div>
       <div class="modal-footer" style="justify-content:space-between">
-        <button class="btn btn-outline" id="deactivateBizBtn" onclick="deactivateFromEdit()" style="color:var(--danger);border-color:var(--danger)">Deactivate</button>
+        <button class="btn btn-outline" id="deleteBizBtn" onclick="deleteFromEdit()" style="color:var(--danger);border-color:var(--danger)">Delete Business</button>
         <div style="display:flex;gap:8px">
           <button class="btn btn-outline" onclick="closeModal('editEntityModal')">Cancel</button>
           <button class="btn btn-primary btn-save-entity" id="saveEditBizBtn" onclick="saveEditEntity()">Save Changes</button>
@@ -609,7 +609,11 @@
       try {
         const res = await API.get('/api/admin/businesses');
         if(res.success) {
-          entities = (res.data || []).filter(e => (e.status || 'active') === 'active');
+          // Show every business, including legacy `inactive` rows left behind by
+          // the old deactivate feature. Deactivation is gone (DELETE is now a
+          // hard delete), so hiding them here only stranded rows nobody could
+          // reach or remove. They render as "Inactive" and can be deleted.
+          entities = res.data || [];
           renderCategoryCards();
           if (currentCategory) {
             renderEntities();
@@ -754,21 +758,60 @@
       }
     }
 
-    async function deactivateBusiness(id, name) {
-      if (!confirm('Deactivate "' + name + '"? Its inventory/sales history is kept but hidden.')) return;
-      try {
-        const res = await API.del('/api/admin/businesses/' + encodeURIComponent(id));
-        if (res.success) { Toast.success('Business deactivated'); loadEntities(); }
-        else Toast.error(res.message || 'Failed');
-      } catch (e) { Toast.error('Error deactivating'); }
+    // The app overrides the global `confirm()` with a callback-based modal that
+    // returns undefined (see public/js/app.js). Calling it as a boolean guard
+    // silently bails out AND leaves an invisible overlay behind, so it must be
+    // used with a callback. The `confirm.length >= 2` check falls back to the
+    // native dialog if that helper is ever removed.
+    function _escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    async function deactivateFromEdit() {
+    function deleteBusiness(id, name) {
+      // Permanent and irreversible: the row is removed, not flagged. Require the
+      // exact business name typed out so this can never be triggered by a
+      // stray click. History (sales/expenses/inventory/audit logs) is retained.
+      const label = String(name || '').trim();
+      const msg =
+        '<b>Delete &ldquo;' + _escHtml(label) + '&rdquo;?</b><br><br>' +
+        'This <b>permanently removes</b> the business workspace. It cannot be ' +
+        'reactivated or restored.<br><br>' +
+        'Its sales, expenses, inventory and audit logs are kept for reporting.';
+
+      const run = async () => {
+        const typed = prompt('Type the business name exactly to confirm:\n\n' + label);
+        if (typed === null) return;                       // cancelled the prompt
+        if (typed.trim() !== label) {
+          Toast.error('Name did not match — nothing was deleted.');
+          return;
+        }
+        try {
+          const res = await API.del('/api/admin/businesses/' + encodeURIComponent(id));
+          if (res.success) {
+            Toast.success('Business "' + label + '" deleted');
+            closeModal('editEntityModal');
+            loadEntities();
+          } else {
+            Toast.error(res.message || 'Failed to delete');
+          }
+        } catch (e) {
+          // Surface the real reason (e.g. "HTTP 403") instead of a generic toast.
+          Toast.error('Delete failed: ' + (e.message || e));
+          console.error('deleteBusiness failed', e);
+        }
+      };
+
+      if (typeof confirm === 'function' && confirm.length >= 2) confirm(msg, run);
+      else if (window.confirm(msg.replace(/<[^>]+>/g, ''))) run();
+    }
+
+    function deleteFromEdit() {
       const id = document.getElementById('edit_e_id').value;
       const name = document.getElementById('edit_e_name').value || '';
-      if (!id) return;
-      await deactivateBusiness(id, name);
-      closeModal('editEntityModal');
+      if (!id) { Toast.error('Could not identify the business to delete.'); return; }
+      deleteBusiness(id, name);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

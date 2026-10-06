@@ -167,18 +167,38 @@ router.post('/businesses', requireManagerOnly, async (req, res) => {
   }
 });
 
-// DELETE /api/admin/businesses/:id — deactivate (soft delete) a business workspace
+// DELETE /api/admin/businesses/:id — permanently delete a business workspace.
+//
+// The row is removed outright, so the business can never be reactivated or
+// resurrected. Only the `businesses` row is deleted: inventory, sales, returns,
+// expenses, inventory movements and audit logs are deliberately KEPT so
+// historical reports and the audit trail stay intact and reconcilable.
+//
+// NOTE: a business is referenced by `entityId`, which for sales/returns/
+// expenses/inventory_movements lives inside the `data` jsonb (only `inventory`
+// has a real entity_id column). Deleting only the businesses row avoids having
+// to cascade across those tables, which is the point of this endpoint.
 router.delete('/businesses/:id', requireManagerOnly, async (req, res) => {
   const { id } = req.params;
   try {
     if (!dbReady) {
       const idx = mockBusinesses.findIndex(b => b.id === id);
-      if (idx >= 0) mockBusinesses[idx].status = 'inactive';
+      if (idx >= 0) mockBusinesses.splice(idx, 1);
       return res.json({ success: true });
     }
-    await FDB.updateDoc('businesses', id, { status: 'inactive' });
-    writeAudit(req, 'DEACTIVATE_BUSINESS', `Business ${id} deactivated`, id);
-    res.json({ success: true });
+
+    // Resolve first so we can refuse unknown ids instead of reporting success
+    // for a row that was never there.
+    const existing = await FDB.getById('businesses', id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Business not found.' });
+    }
+
+    await FDB.deleteDoc('businesses', id);
+    writeAudit(req, 'DELETE_BUSINESS', 'business',
+      `Business "${existing.name || id}" (${id}) permanently deleted; related records retained`,
+      null, true);
+    res.json({ success: true, name: existing.name || id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'An internal error occurred.' });
