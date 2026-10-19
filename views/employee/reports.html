@@ -530,7 +530,8 @@ function prevPeriodQuery() {
     ps = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     pe = new Date(now.getFullYear(), now.getMonth(), 0);
   }
-  return 'period=custom&startDate=' + iso(ps) + '&endDate=' + iso(pe);
+  const wsEntity = new URLSearchParams(window.location.search).get('entity') || '';
+  return 'period=custom&startDate=' + iso(ps) + '&endDate=' + iso(pe) + (wsEntity ? '&entity=' + encodeURIComponent(wsEntity) : '');
 }
 
 // Same formula as routes/reports.js calculateTrend()
@@ -844,6 +845,10 @@ async function runSelectedReport() {
   if (period === 'custom' && startDate && endDate) {
     queryUrl += `&startDate=${startDate}&endDate=${endDate}`;
   }
+  // Keep the report scoped to this workspace's business entity (if any) so
+  // the numbers match what the business dashboard shows.
+  const wsEntity = new URLSearchParams(window.location.search).get('entity') || '';
+  if (wsEntity) queryUrl += '&entity=' + encodeURIComponent(wsEntity);
 
   const container = document.getElementById('reportSheetContainer');
   container.innerHTML = `<div class="empty-state"><div class="spinner"></div><p style="margin-top:12px">Generating official ledger sheets &amp; comparative trends...</p></div>`;

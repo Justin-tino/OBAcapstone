@@ -163,6 +163,17 @@ async function getBizData(bizId, query = {}) {
     iList.forEach(i => allInventory.push({ bizId: b, ...i }));
   }
 
+  // Per-business scoping: when a specific business entity is requested
+  // (e.g. sales staff workspace reports), keep only that entity's records
+  // so reports never mix data from other businesses in the same category.
+  // Mirrors the ?entity= filtering used by /api/sales, /api/expenses, /api/inventory.
+  const entityId = query.entity || '';
+  if (entityId) {
+    allSales = allSales.filter(s => s.entityId === entityId);
+    allExpenses = allExpenses.filter(e => e.entityId === entityId);
+    allInventory = allInventory.filter(i => i.entityId === entityId);
+  }
+
   const { curStart, curEnd, prevStart, prevEnd } = getPeriodRanges(query);
 
   const curSales = filterListByRange(allSales, curStart, curEnd, 'date');
@@ -1082,7 +1093,7 @@ router.get(['/:bizId/cash-flow', '/:bizId/cashflow'], requireViewer, async (req,
 router.get(['/:bizId/balance-summary', '/:bizId/balancesummary'], requireViewer, async (req, res) => {
   const { bizId } = req.params;
   try {
-    const data = await getBizData(bizId, { period: 'year' });
+    const data = await getBizData(bizId, { ...req.query, period: 'year' });
     const { curSales, curExpenses, inventory } = data;
 
     const grossSales = curSales.reduce((a, s) => a + (parseFloat(s.total) || 0), 0);
