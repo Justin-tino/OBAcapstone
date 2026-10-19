@@ -557,7 +557,7 @@
             <option value="">All Categories</option>
             <option value="AGRI">Agriculture</option>
             <option value="NON_AGRI">Non-Agriculture</option>
-            <option value="MAIN">Main</option>
+            <option value="MAIN">OBA</option>
           </select>
         </div>
         <button class="btn-apply-filter" onclick="loadKPI()">
@@ -680,7 +680,7 @@
               <div class="kpi-icon-circle icon-bg-emerald">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
-              <span class="kpi-title-text">TOTAL NET PROFIT</span>
+              <span class="kpi-title-text">TOTAL NET INCOME</span>
             </div>
             <span class="kpi-pill-badge pill-green"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
           </div>
@@ -741,7 +741,6 @@
           </div>
           <div class="biz-cat-bottom">
             <div class="biz-cat-revenue">&#8369;0.00</div>
-            <div class="biz-cat-tax">Tax: <span id="tax_AGRI">&mdash;</span></div>
           </div>
         </div>
 
@@ -760,7 +759,6 @@
           </div>
           <div class="biz-cat-bottom">
             <div class="biz-cat-revenue">&#8369;0.00</div>
-            <div class="biz-cat-tax">Tax: <span id="tax_NON_AGRI">&mdash;</span></div>
           </div>
         </div>
 
@@ -771,7 +769,7 @@
                 <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </div>
               <div>
-                <div class="biz-cat-name">Main</div>
+                <div class="biz-cat-name">OBA</div>
                 <div class="biz-cat-count">0 products</div>
               </div>
             </div>
@@ -779,7 +777,6 @@
           </div>
           <div class="biz-cat-bottom">
             <div class="biz-cat-revenue">&#8369;0.00</div>
-            <div class="biz-cat-tax">Tax: <span id="tax_MAIN">&mdash;</span></div>
           </div>
         </div>
       </div>
@@ -829,7 +826,7 @@
               <div class="donut-legend-row">
                 <div class="donut-legend-left">
                   <span class="donut-dot" style="background:#0D6EFD"></span>
-                  <span>Main</span>
+                  <span>OBA</span>
                 </div>
                 <span class="donut-legend-percent" id="share_MAIN">0%</span>
               </div>
@@ -851,7 +848,7 @@
           <div class="card-header">
             <span class="card-title">Business Performance Ranking</span>
             <select id="rankMetric" class="biz-rank-select" onchange="renderBizRanking()">
-              <option value="profit">Rank by: Net Profit</option>
+              <option value="profit">Rank by: Net Income</option>
               <option value="revenue">Rank by: Revenue</option>
               <option value="margin">Rank by: Margin %</option>
               <option value="units">Rank by: Units Sold</option>
@@ -861,20 +858,6 @@
         </div>
       </div>
 
-      <!-- Tax Income Section -->
-      <div class="card-modern" style="margin-bottom:24px" id="taxIncomeCard">
-        <div class="card-header">
-          <span class="card-title">Tax Income Collected</span>
-          <button class="btn btn-outline btn-sm" onclick="printTaxIncome()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print
-          </button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px" id="taxIncomeGrid"></div>
-        <div style="text-align:right;font-size:1.1rem;font-weight:800;padding-top:12px;border-top:2px solid var(--gray-200)">
-          Total Tax Collected: <span id="totalTaxIncome" style="color:var(--green)">₱0.00</span>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -882,7 +865,7 @@
 <script src="/js/app.js?v=2"></script>
 <script>
 const CATS = ['AGRI','NON_AGRI','MAIN'];
-const CAT_NAMES = { AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main' };
+const CAT_NAMES = { AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'OBA' };
 const CAT_COLORS = { AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD' };
 const CAT_COLORS_LIGHT = { AGRI:'#FFE082', NON_AGRI:'#757575', MAIN:'#90CDF4' };
 let salesChart;
@@ -1051,50 +1034,6 @@ function computeKPIs() {
   }
 }
 
-function renderTaxIncome() {
-  const grid = document.getElementById('taxIncomeGrid');
-  if (!grid) return;
-  const cats = document.getElementById('fBizUnit').value ? [document.getElementById('fBizUnit').value] : CATS;
-  let totalTax = 0;
-  const rows = [];
-  cats.forEach(cat => {
-    const fSales = filterByDate(allData.sales[cat]||[]);
-    const taxCollected = fSales.reduce((a,s) => a + (parseFloat(s.taxAmount)||0), 0);
-    totalTax += taxCollected;
-    rows.push(`<div class="biz-cat-card" style="cursor:default">
-      <div class="biz-cat-name">${CAT_NAMES[cat]}</div>
-      <div class="biz-cat-revenue" style="color:${CAT_COLORS[cat]};font-size:1.2rem">&#8369;${taxCollected.toLocaleString('en',{minimumFractionDigits:2})}</div>
-      <div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">Tax Collected</div>
-    </div>`);
-  });
-  grid.innerHTML = rows.join('');
-  document.getElementById('totalTaxIncome').innerHTML = '&#8369;' + totalTax.toLocaleString('en',{minimumFractionDigits:2});
-}
-
-function printTaxIncome() {
-  const cats = document.getElementById('fBizUnit').value ? [document.getElementById('fBizUnit').value] : CATS;
-  let rows = '', totalTax = 0;
-  cats.forEach(cat => {
-    const fSales = filterByDate(allData.sales[cat]||[]);
-    const taxCollected = fSales.reduce((a,s) => a + (parseFloat(s.taxAmount)||0), 0);
-    totalTax += taxCollected;
-    rows += `<tr><td>${CAT_NAMES[cat]}</td><td style="text-align:right">&#8369;${taxCollected.toLocaleString('en',{minimumFractionDigits:2})}</td></tr>`;
-  });
-  const w = window.open('','_blank','width=600,height=400');
-  if (!w) { Toast.error('Popup blocked.'); return; }
-  w.document.write(`<html><head><title>Tax Income Report</title>
-    <style>body{font-family:Arial,sans-serif;padding:30px} h2{color:#2d6a2e} table{width:100%;border-collapse:collapse;margin-top:16px} th,td{padding:10px 14px;text-align:left;border-bottom:1px solid #ddd} th{background:#1A1A1A;color:#fff} .total{font-weight:800;border-top:2px solid #000}</style></head>
-    <body><h2>OBA Tax Income Report</h2>
-    <p style="color:#666">Generated: ${new Date().toLocaleString('en-PH')}</p>
-    <table><thead><tr><th>Category</th><th>Tax Collected</th></tr></thead><tbody>${rows}</tbody>
-    <tfoot><tr class="total"><td>Total</td><td style="text-align:right">&#8369;${totalTax.toLocaleString('en',{minimumFractionDigits:2})}</td></tr></tfoot></table>
-    <p style="margin-top:30px;font-size:0.82rem;color:#999">Office of Business Affairs — PSAU</p>
-    </body></html>`);
-  w.document.close();
-  w.focus();
-  setTimeout(() => w.print(), 500);
-}
-
 // ── Business Performance Ranking ─────────────────────────────────
 // Ranks all business categories against each other. Metric is
 // selectable (net profit / revenue / margin % / units sold) and all
@@ -1136,7 +1075,7 @@ function renderBizRanking() {
   el.innerHTML = stats.map((s, i) => {
     const name = CAT_NAMES[s.cat] || s.cat;
     const color = CAT_COLORS[s.cat] || '#64748b';
-    const metricLabel = { profit: 'Net Profit', revenue: 'Revenue', margin: 'Margin', units: 'Units Sold' }[metric];
+    const metricLabel = { profit: 'Net Income', revenue: 'Revenue', margin: 'Margin', units: 'Units Sold' }[metric];
     const metricText = metric === 'units'
       ? s.units.toLocaleString() + ' units'
       : metric === 'margin'
@@ -1212,7 +1151,7 @@ function renderSalesChart() {
       labels: CATS.map(c => CAT_NAMES[c]),
       datasets: [
         { label: 'Revenue', data: revData, backgroundColor: '#1e7e45', borderRadius: 6, barPercentage: 0.55, order: 2 },
-        { label: 'Net Profit (trend)', data: profitData, type: 'line', borderColor: '#064e3b', backgroundColor: '#064e3b', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#ffffff', pointBorderWidth: 2, tension: 0.35, order: 1 },
+        { label: 'Net Income (trend)', data: profitData, type: 'line', borderColor: '#064e3b', backgroundColor: '#064e3b', borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#ffffff', pointBorderWidth: 2, tension: 0.35, order: 1 },
       ]
     },
     options: {
@@ -1309,25 +1248,11 @@ async function loadKPI() {
   renderComparison();
   renderSalesChart();
   renderCategoryPie();
-  renderTaxIncome();
-}
-
-async function loadTaxRates() {
-  try {
-    const res = await API.get('/api/admin/taxes');
-    if (res.success && res.data) {
-      CATS.forEach(cat => {
-        const el = document.getElementById('tax_' + cat);
-        if (el) el.textContent = (res.data[cat] !== undefined ? res.data[cat] : 0) + '%';
-      });
-    }
-  } catch (e) { /* silent */ }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   updateGreeting();
   loadKPI();
-  loadTaxRates();
   // Module 4.2: real-time refresh — poll the Firestore-backed API every 30s
   // so the KPI dashboard reflects new transactions without a manual reload.
   // Skips while the tab is hidden to save resources.

@@ -339,7 +339,7 @@
                     </svg>
                   </div>
                   <div>
-                    <h3 style="margin:0; font-size:1.25rem; font-weight:700">Main</h3>
+                    <h3 style="margin:0; font-size:1.25rem; font-weight:700">OBA</h3>
                     <span class="badge" style="background:#E3F2FD; color:#0D6EFD; border:1px solid #0D6EFD; font-size:0.7rem; padding:1px 8px; margin-top:2px">MAIN</span>
                   </div>
                 </div>
@@ -382,7 +382,7 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-AGRI" onclick="selectCategory('AGRI')">Agriculture</button>
               <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-NON_AGRI" onclick="selectCategory('NON_AGRI')">Non-Agriculture</button>
-              <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-MAIN" onclick="selectCategory('MAIN')">Main</button>
+              <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-MAIN" onclick="selectCategory('MAIN')">OBA</button>
               <button class="btn btn-sm btn-outline cat-tab-btn" id="tab-all" onclick="selectCategory('all')">All Businesses</button>
             </div>
           </div>
@@ -397,29 +397,6 @@
             </div>
             <div class="table-wrap" id="entitiesTable">
               <div class="empty-state"><div class="spinner"></div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tax Configuration Card (Admin Only) -->
-        <div class="card" id="taxSettingsCard" style="margin-top: 32px; display: none;">
-          <div class="card-header">
-            <span class="card-title">Tax Configurations per Category</span>
-            <button class="btn btn-primary btn-sm" onclick="saveTaxes()">Save Tax Rates</button>
-          </div>
-          <div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:20px">Configure the tax percentage rate (e.g. VAT or Sales Tax) applied to transactions for each business category.</div>
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-            <div class="form-group">
-              <label class="form-label" style="color:#D4A915;font-weight:700">Agriculture Tax Rate (%)</label>
-              <input type="number" id="tax_AGRI" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 0">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="color:#1A1A1A;font-weight:700">Non-Agriculture Tax Rate (%)</label>
-              <input type="number" id="tax_NON_AGRI" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 12">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="color:#0D6EFD;font-weight:700">Main Tax Rate (%)</label>
-              <input type="number" id="tax_MAIN" class="form-control" min="0" max="100" step="0.1" placeholder="e.g. 12">
             </div>
           </div>
         </div>
@@ -441,7 +418,7 @@
           <select id="e_category" class="form-control">
             <option value="AGRI">Agriculture</option>
             <option value="NON_AGRI">Non-Agriculture</option>
-            <option value="MAIN">Main</option>
+            <option value="MAIN">OBA</option>
           </select>
         </div>
       </div>
@@ -471,7 +448,7 @@
           <select id="edit_e_category" class="form-control">
             <option value="AGRI">Agriculture</option>
             <option value="NON_AGRI">Non-Agriculture</option>
-            <option value="MAIN">Main</option>
+            <option value="MAIN">OBA</option>
           </select>
         </div>
       </div>
@@ -515,8 +492,8 @@
       },
       MAIN: {
         id: 'MAIN',
-        name: 'Main',
-        badge: 'MAIN',
+        name: 'OBA',
+        badge: 'OBA',
         desc: 'Central campus enterprises, university utilities, and main administration operations.',
         color: '#0D6EFD',
         bg: '#E3F2FD'
@@ -667,7 +644,7 @@
         ? entities.filter(e => e.categoryId === currentCategory)
         : entities;
 
-      const cats = {AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'Main'};
+      const cats = {AGRI:'Agriculture', NON_AGRI:'Non-Agriculture', MAIN:'OBA'};
       const colors = {AGRI:'#D4A915', NON_AGRI:'#1A1A1A', MAIN:'#0D6EFD'};
 
       if (!filtered.length) {
@@ -834,12 +811,6 @@
             }
           }
 
-          // Super admin: show tax settings (per-category tax still applies as label)
-          if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'system_administrator') {
-            document.getElementById('taxSettingsCard').style.display = 'block';
-            loadTaxes();
-          }
-
           // Viewer: hide management actions, show view-only badge
           if (user.role === 'viewer') {
             document.querySelectorAll('.sidebar-nav a').forEach(a => {
@@ -914,42 +885,6 @@
       }
     }
 
-    async function loadTaxes() {
-      try {
-        const res = await API.get('/api/admin/taxes');
-        if (res.success && res.data) {
-          document.getElementById('tax_AGRI').value = res.data.AGRI !== undefined ? res.data.AGRI : 0;
-          document.getElementById('tax_NON_AGRI').value = res.data.NON_AGRI !== undefined ? res.data.NON_AGRI : 12;
-          document.getElementById('tax_MAIN').value = res.data.MAIN !== undefined ? res.data.MAIN : 12;
-        }
-      } catch (err) { console.error('Error loading taxes:', err); }
-    }
-
-    let _savingTaxes = false;
-    async function saveTaxes() {
-      if (_savingTaxes) return; // prevent spam clicks while a save is in progress
-      _savingTaxes = true;
-      const btn = document.querySelector('button[onclick="saveTaxes()"]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; btn.style.opacity = '0.7'; btn.style.pointerEvents = 'none'; }
-      const taxes = {
-        AGRI: parseFloat(document.getElementById('tax_AGRI').value) || 0,
-        NON_AGRI: parseFloat(document.getElementById('tax_NON_AGRI').value) || 0,
-        MAIN: parseFloat(document.getElementById('tax_MAIN').value) || 0
-      };
-      try {
-        const res = await API.post('/api/admin/taxes', { taxes });
-        if (res.success) {
-          Toast.success('Tax rates updated successfully!');
-        } else {
-          Toast.error(res.message || 'Failed to update tax rates.');
-        }
-      } catch (err) {
-        Toast.error('Error saving tax rates.');
-      } finally {
-        _savingTaxes = false;
-        if (btn) { btn.disabled = false; btn.textContent = 'Save Tax Rates'; btn.style.opacity = ''; btn.style.pointerEvents = ''; }
-      }
-    }
   </script>
 </body>
 

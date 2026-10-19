@@ -68,7 +68,7 @@ function requireManagerOnly(req, res, next) {
 const BUSINESS_CATEGORIES = [
   { id: 'AGRI', name: 'Agriculture', type: 'Agriculture', description: 'Agricultural produce and farming operations', color: '#D4A915' },
   { id: 'NON_AGRI', name: 'Non-Agriculture', type: 'Non-Agriculture', description: 'Non-agricultural products and services', color: '#1A1A1A' },
-  { id: 'MAIN', name: 'Main', type: 'Main', description: 'Main business operations and services', color: '#0D6EFD' },
+  { id: 'MAIN', name: 'OBA', type: 'OBA', description: 'OBA business operations and services', color: '#0D6EFD' },
 ];
 
 // Mock business entities (sub-businesses under each category)

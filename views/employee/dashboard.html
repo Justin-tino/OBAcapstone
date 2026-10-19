@@ -625,7 +625,7 @@
               <div class="kpi-icon-circle icon-bg-emerald">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
-              <span class="kpi-title-text" id="kpiProfitLabel">NET PROFIT</span>
+              <span class="kpi-title-text" id="kpiProfitLabel">NET INCOME</span>
             </div>
             <span class="kpi-pill-badge pill-green"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></span>
           </div>
@@ -848,7 +848,7 @@ const BIZ_META = {
   BUSINESS: { name: 'Business', color: '#2d6a2e', bg: '#E8F5E9', desc: 'Commercial and trading operations' },
   AGRI:     { name: 'Agriculture', color: '#15803d', bg: '#FFF8E1', desc: 'Agricultural produce and farming' },
   NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A', bg: '#F5F5F5', desc: 'Non-agricultural products and services' },
-  MAIN:     { name: 'Main', color: '#0D6EFD', bg: '#E3F2FD', desc: 'Main business operations and services' },
+  MAIN:     { name: 'OBA', color: '#0D6EFD', bg: '#E3F2FD', desc: 'OBA business operations and services' },
 };
 
 // Workspace-aware (supports ?biz=CAT with optional ?entity=ID for B1 / B8-B17 workspaces)
@@ -1412,7 +1412,7 @@ function renderDashboard() {
   
   document.getElementById('kpiProfit').innerHTML = (isLoss ? '-&#8369;' : '&#8369;') + Math.abs(netProfit).toLocaleString('en',{minimumFractionDigits:2});
   document.getElementById('kpiProfit').style.color = isLoss ? '#ef4444' : '#10b981';
-  document.getElementById('kpiProfitLabel').textContent = isLoss ? 'Net Loss' : 'Net Profit';
+  document.getElementById('kpiProfitLabel').textContent = isLoss ? 'Net Loss' : 'Net Income';
 
   const invEl = document.getElementById('kpiInvValue');
   if (invEl) {

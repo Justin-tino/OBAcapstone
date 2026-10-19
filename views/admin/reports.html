@@ -126,7 +126,7 @@
           <div class="filter-label" style="font-weight:700">1 · Select Categories</div>
           <div id="genCatChips" style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px">
             <button type="button" class="btn btn-outline btn-sm gen-cat active" data-cat="ALL" onclick="toggleGenCat('ALL',this)">All Categories</button>
-            <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="MAIN" onclick="toggleGenCat('MAIN',this)">Main</button>
+            <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="MAIN" onclick="toggleGenCat('MAIN',this)">OBA</button>
             <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="AGRI" onclick="toggleGenCat('AGRI',this)">Agriculture</button>
             <button type="button" class="btn btn-outline btn-sm gen-cat" data-cat="NON_AGRI" onclick="toggleGenCat('NON_AGRI',this)">Non-Agriculture</button>
           </div>
@@ -186,7 +186,7 @@
 <script>
 // ═══════════ Report Generator ═══════════
 const GEN_CATS = ['AGRI', 'NON_AGRI', 'MAIN'];
-const GEN_CAT_META = { AGRI: { name: 'Agriculture' }, NON_AGRI: { name: 'Non-Agriculture' }, MAIN: { name: 'Main' } };
+const GEN_CAT_META = { AGRI: { name: 'Agriculture' }, NON_AGRI: { name: 'Non-Agriculture' }, MAIN: { name: 'OBA' } };
 let genBusinesses = [];
 let genSelectedBiz = new Set();
 let genCurrentUser = null;

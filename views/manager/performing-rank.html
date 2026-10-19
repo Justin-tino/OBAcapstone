@@ -124,7 +124,7 @@ function buildNav() {
 }
 
 // ── Performing Rank data & logic ──────────────────────────────────
-const CAT_NAMES = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'Main' };
+const CAT_NAMES = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'OBA' };
 const MEDALS = ['&#129351;', '&#129352;', '&#129353;']; // 🥇 🥈 🥉
 const CAT_COLORS = ['#16a34a', '#2563eb', '#7c3aed'];
 
@@ -250,12 +250,12 @@ function renderRanking() {
 
 async function initPage() {
   buildNav();
-  document.getElementById('rankCategoryBadge').textContent = BIZ === 'AGRI' ? 'Agriculture' : (BIZ === 'NON_AGRI' ? 'Non-Agriculture' : 'Main');
+  document.getElementById('rankCategoryBadge').textContent = BIZ === 'AGRI' ? 'Agriculture' : (BIZ === 'NON_AGRI' ? 'Non-Agriculture' : 'OBA');
   const u = await getCurrentUser();
   if (u) {
     const bizAccess = u.businessAccess || [];
     BIZ = bizAccess.includes('all') ? 'AGRI' : (bizAccess[0] || 'AGRI');
-    document.getElementById('rankCategoryBadge').textContent = BIZ === 'AGRI' ? 'Agriculture' : (BIZ === 'NON_AGRI' ? 'Non-Agriculture' : 'Main');
+    document.getElementById('rankCategoryBadge').textContent = BIZ === 'AGRI' ? 'Agriculture' : (BIZ === 'NON_AGRI' ? 'Non-Agriculture' : 'OBA');
     document.getElementById('rankScopeLabel').textContent = (CAT_NAMES[BIZ] || BIZ) + ' — Performing Rank';
     document.getElementById('sidebarName').textContent = u.name;
     document.querySelector('.sidebar-user-role').textContent = 'Logged in as: ' + formatRole(u.role);

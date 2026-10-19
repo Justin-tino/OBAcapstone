@@ -32,7 +32,7 @@ const VALID_CATS = ['AGRI', 'NON_AGRI', 'MAIN'];
 const CAT_META = {
   AGRI: { name: 'Agriculture', color: '#D4A915', bg: '#FFF8E1' },
   NON_AGRI: { name: 'Non-Agriculture', color: '#1A1A1A', bg: '#F5F5F5' },
-  MAIN: { name: 'Main', color: '#0D6EFD', bg: '#E3F2FD' },
+  MAIN: { name: 'OBA', color: '#0D6EFD', bg: '#E3F2FD' },
 };
 
 function computeStatus(stock, reorderLevel) {

@@ -160,7 +160,7 @@ async function loadEntities() {
     if (res.success) {
       entities = (res.data || []).filter(e => e.categoryId === BIZ && (e.status || 'active') === 'active');
       const sel = document.getElementById('fEntity');
-      sel.innerHTML = '<option value="">All Businesses in ' + (BIZ === 'AGRI' ? 'Agriculture' : (BIZ === 'NON_AGRI' ? 'Non-Agriculture' : 'Main')) + '</option>' +
+      sel.innerHTML = '<option value="">All Businesses in ' + (BIZ === 'AGRI' ? 'Agriculture' : (BIZ === 'NON_AGRI' ? 'Non-Agriculture' : 'OBA')) + '</option>' +
         entities.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
     }
   } catch(e) { console.error(e); }

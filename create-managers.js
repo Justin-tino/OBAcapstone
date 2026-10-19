@@ -15,7 +15,7 @@ const MANAGERS = [
   },
   {
     email: 'main_manager@psau.edu.ph',
-    name: 'Main Category Manager',
+    name: 'OBA Category Manager',
     businesses: ['MAIN']
   }
 ];

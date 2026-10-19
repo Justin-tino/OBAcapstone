@@ -395,7 +395,7 @@
             <option value="all">All Business Categories</option>
             <option value="AGRI">Agriculture Category</option>
             <option value="NON_AGRI">Non-Agriculture Category</option>
-            <option value="MAIN">Main Category</option>
+            <option value="MAIN">OBA Category</option>
           </select>
         </div>
         <div id="customDateWrap" style="display:none; gap: 10px;">
@@ -461,7 +461,7 @@ function syncNav() {
 const BIZ_META = {
   AGRI: { name: 'Agriculture Category', color: '#D4A915' },
   NON_AGRI: { name: 'Non-Agriculture Category', color: '#1A1A1A' },
-  MAIN: { name: 'Main Category', color: '#0D6EFD' },
+  MAIN: { name: 'OBA Category', color: '#0D6EFD' },
   all: { name: 'All Categories (Unified OBA)', color: '#2d6a2e' }
 };
 
@@ -896,7 +896,7 @@ function renderReportOutput(type, d) {
         ${kpiCardHTML('Gross Sales', fmt.currency(d.grossSales), t.grossSales, periodWord, false)}
         ${kpiCardHTML('Net Sales', fmt.currency(d.netSales), t.netSales, periodWord, false)}
         ${kpiCardHTML('Total Transactions', String(d.totalTransactions || 0), t.transactions, periodWord, false, true)}
-        ${kpiCardHTML('Net Profit', fmt.currency(d.netProfit), t.netProfit, periodWord, false)}
+        ${kpiCardHTML('Net Income', fmt.currency(d.netProfit), t.netProfit, periodWord, false)}
       </div>
 
       <div class="rs2-kpis" style="margin-top: 14px;">
@@ -920,7 +920,7 @@ function renderReportOutput(type, d) {
       <h4 style="margin: 24px 0 12px 0; border-bottom: 2px solid var(--gray-800); padding-bottom: 6px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--gray-600);">III. Profitability</h4>
       <div class="ledger-row-sub indent"><span class="lbl">Gross Profit (Gross Margin: ${d.grossMarginPercent})</span><span class="val" style="color:var(--green)">${fmt.currency(d.grossProfit)} ${renderTrendPill(t.grossProfit)}</span></div>
       <div class="ledger-row-sub grand-total" style="margin-top:16px;">
-        <span class="lbl">NET PROFIT / (LOSS) (Net Margin: ${d.netMarginPercent})</span>
+        <span class="lbl">NET INCOME / (LOSS) (Net Margin: ${d.netMarginPercent})</span>
         <span class="val" style="color:${d.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(d.netProfit)} ${renderTrendPill(t.netProfit)}</span>
       </div>
 
@@ -1504,7 +1504,7 @@ function renderReportOutput(type, d) {
           ${renderTrendPill(t.revenue)}
         </div>
         <div class="kpi-card green">
-          <div class="kpi-label">Net Profit Realized</div>
+          <div class="kpi-label">Net Income Realized</div>
           <div class="kpi-value" style="color:${totals.netProfit >= 0 ? 'var(--green)' : 'var(--danger)'}">${fmt.currency(totals.netProfit)}</div>
           ${renderTrendPill(t.netProfit)}
         </div>
@@ -1518,7 +1518,7 @@ function renderReportOutput(type, d) {
             <th style="text-align:center">Units Sold</th>
             <th style="text-align:right">Total Cost</th>
             <th style="text-align:right">Total Revenue</th>
-            <th style="text-align:right">Net Profit</th>
+            <th style="text-align:right">Net Income</th>
             <th style="text-align:right">ROI %</th>
           </tr>
         </thead>

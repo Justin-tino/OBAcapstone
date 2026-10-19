@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => { preserveWorkspaceNav(); })
 const BUSINESS_CATEGORIES = [
   { id: 'AGRI', name: 'Agriculture', color: '#D4A915' },
   { id: 'NON_AGRI', name: 'Non-Agriculture', color: '#1A1A1A' },
-  { id: 'MAIN', name: 'Main', color: '#0D6EFD' },
+  { id: 'MAIN', name: 'OBA', color: '#0D6EFD' },
 ];
 
 function getCategoryColor(catId) {

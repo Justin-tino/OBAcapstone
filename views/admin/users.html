@@ -654,7 +654,7 @@
           <option value="" disabled selected>— Select a category —</option>
           <option value="AGRI">Agriculture</option>
           <option value="NON_AGRI">Non-Agriculture</option>
-          <option value="MAIN">Main</option>
+          <option value="MAIN">OBA</option>
         </select>
         <div id="accountingNoticeBox" style="display:none;background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:0.82rem;color:#0D6EFD">
           <strong>Accounting Officer Scope:</strong> This user will have category-wide access to monitor expenses, income, ROI, taxes, and inventory across <strong>all businesses</strong> registered under this category.
@@ -686,7 +686,7 @@
 
 <script src="/js/app.js?v=2"></script>
 <script>
-const BIZ_MAP = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'Main' };
+const BIZ_MAP = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'OBA' };
 const BIZ_COLORS = { AGRI: '#D4A915', NON_AGRI: '#1A1A1A', MAIN: '#0D6EFD' };
 
 let users = [];
@@ -815,7 +815,7 @@ function renderTabs() {
     { id: 'all', label: 'All Accounts', count: counts.all },
     { id: 'AGRI', label: 'Agriculture', count: counts.AGRI },
     { id: 'NON_AGRI', label: 'Non-Agriculture', count: counts.NON_AGRI },
-    { id: 'MAIN', label: 'Main Category', count: counts.MAIN },
+    { id: 'MAIN', label: 'OBA Category', count: counts.MAIN },
     { id: 'ADMIN', label: 'System Admins', count: counts.ADMIN },
     { id: 'REQUESTS', label: 'Access Requests', count: pendingReqs, isAlert: pendingReqs > 0 }
   ];

@@ -1119,7 +1119,7 @@ router.get(['/:bizId/balance-summary', '/:bizId/balancesummary'], requireViewer,
 router.get('/all/comparison', requireViewer, async (req, res) => {
   try {
     const comparison = [];
-    const catsMap = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'Main' };
+    const catsMap = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'OBA' };
 
     let totalRev = 0;
     let totalExp = 0;
@@ -1417,7 +1417,7 @@ const GENERATOR_TYPES = {
   profitloss: 'Profit & Loss Statement'
 };
 const ADMIN_LEVEL_ROLES = ['super_admin', 'admin', 'system_administrator'];
-const CAT_NAMES = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'Main' };
+const CAT_NAMES = { AGRI: 'Agriculture', NON_AGRI: 'Non-Agriculture', MAIN: 'OBA' };
 
 async function resolveReportScope(user) {
   const access = (user && (user.businessAccess || user.businesses)) || [];
@@ -1618,7 +1618,7 @@ router.get('/generate', requireViewer, async (req, res) => {
         K('Gross Sales', curGross, calculateTrend(curGross, prevGross)),
         K('Net Sales', curNet, calculateTrend(curNet, prevNet)),
         K('Transactions', curSales.length, calculateTrend(curSales.length, prevSales.length), false),
-        K('Net Profit', curProfit, calculateTrend(curProfit, prevProfit))
+        K('Net Income', curProfit, calculateTrend(curProfit, prevProfit))
       ];
       lines = [
         L('Taxes Collected', curTaxes, calculateTrend(curTaxes, prevTaxes), true),
@@ -1642,7 +1642,7 @@ router.get('/generate', requireViewer, async (req, res) => {
         K('Gross Revenue', curGross, calculateTrend(curGross, prevGross)),
         K('Net Revenue', curNet, calculateTrend(curNet, prevNet)),
         K('Total Expenses', curCOGS + curOpExp, calculateTrend(curCOGS + curOpExp, prevCOGS + prevOpExp)),
-        K('Net Profit', curProfit, calculateTrend(curProfit, prevProfit))
+        K('Net Income', curProfit, calculateTrend(curProfit, prevProfit))
       ];
       lines = [
         L('Taxes Collected', curTaxes, calculateTrend(curTaxes, prevTaxes), true),
@@ -1709,7 +1709,7 @@ router.get('/generate', requireViewer, async (req, res) => {
         K('Gross Sales', curGross, calculateTrend(curGross, prevGross)),
         K('Net Sales', curNet, calculateTrend(curNet, prevNet)),
         K('Total Expenses', curCOGS + curOpExp, calculateTrend(curCOGS + curOpExp, prevCOGS + prevOpExp)),
-        K('Net Profit', curNetProfit, calculateTrend(curNetProfit, prevNetProfit)),
+        K('Net Income', curNetProfit, calculateTrend(curNetProfit, prevNetProfit)),
         K('Transactions', curSales.length, calculateTrend(curSales.length, prevSales.length), false),
         K('Average Order Value', curAOV, calculateTrend(curAOV, prevAOV))
       ];
@@ -1721,7 +1721,7 @@ router.get('/generate', requireViewer, async (req, res) => {
         L('Cost of Goods Sold', curCOGS, calculateTrend(curCOGS, prevCOGS), true),
         L('Gross Profit', curGrossProfit, calculateTrend(curGrossProfit, prevGrossProfit)),
         L('Operating Expenses', curOpExp, calculateTrend(curOpExp, prevOpExp), true),
-        L('Net Profit (Net Margin: ' + curMargin.toFixed(1) + '%)', curNetProfit, calculateTrend(curNetProfit, prevNetProfit))
+        L('Net Income (Net Margin: ' + curMargin.toFixed(1) + '%)', curNetProfit, calculateTrend(curNetProfit, prevNetProfit))
       ];
       // Calendar-day revenue breakdown across the entire period
       const dayMap = {};
@@ -1752,7 +1752,7 @@ router.get('/generate', requireViewer, async (req, res) => {
       kpis = [
         K('Net Sales', curNet, calculateTrend(curNet, prevNet)),
         K('Gross Profit', curGrossProfit, calculateTrend(curGrossProfit, prevGrossProfit)),
-        K('Net Profit', curNetProfit, calculateTrend(curNetProfit, prevNetProfit)),
+        K('Net Income', curNetProfit, calculateTrend(curNetProfit, prevNetProfit)),
         K('Net Margin', curMargin.toFixed(1) + '%', calculateTrend(curMargin, prevMargin), false)
       ];
       lines = [
@@ -1762,7 +1762,7 @@ router.get('/generate', requireViewer, async (req, res) => {
         L('Cost of Goods Sold', curCOGS, calculateTrend(curCOGS, prevCOGS), true),
         L('Gross Profit', curGrossProfit, calculateTrend(curGrossProfit, prevGrossProfit)),
         L('Operating Expenses', curOpExp, calculateTrend(curOpExp, prevOpExp), true),
-        L('Net Profit', curNetProfit, calculateTrend(curNetProfit, prevNetProfit))
+        L('Net Income', curNetProfit, calculateTrend(curNetProfit, prevNetProfit))
       ];
     }
 
