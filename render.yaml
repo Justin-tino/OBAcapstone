@@ -4,7 +4,7 @@
 # are never committed to the repository.
 services:
   - type: web
-    name: oba-system
+    name: oba-psau
     runtime: node
     plan: free
     region: singapore

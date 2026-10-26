@@ -8,7 +8,7 @@ This repository includes a [Render Blueprint](https://render.com/docs/blueprint-
 1. Push this repository to GitHub.
 2. In the Render Dashboard, choose **New → Blueprint**.
 3. Connect the repository and branch (`main`).
-4. Render detects `render.yaml` and creates the `oba-system` web service.
+4. Render detects `render.yaml` and creates the `oba-psau` web service.
 5. Click **Apply**.
 
 Render automatically provides `PORT`, sets up HTTPS, and uses `/healthz` as the
@@ -18,7 +18,7 @@ Render assigns.
 ## 2. Fill in the environment variables
 
 `render.yaml` marks passwords and keys as `sync: false`. Enter their values in
-**Dashboard → oba-system → Environment**:
+**Dashboard → oba-psau → Environment**:
 
 | Variable | Required | Notes |
 | --- | --- | --- |
