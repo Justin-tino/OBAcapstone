@@ -463,10 +463,14 @@ router.post('/api/forgot-password/send-link', resetLimiter, async (req, res) => 
       expiresAt
     });
 
-    // Use APP_BASE_URL when set (production), otherwise fall back to the request's
-    // own host (localhost dev). Using an explicit base URL prevents Host-header
-    // injection ("password reset poisoning") on the deployed site.
-    const baseUrl = (process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
+    // Use APP_BASE_URL when set (production/custom domain). On Render, fall back
+    // to the automatically-provided public URL. Locally, fall back to the request
+    // host. An explicit base URL prevents Host-header injection on the deployed site.
+    const baseUrl = (
+      process.env.APP_BASE_URL ||
+      process.env.RENDER_EXTERNAL_URL ||
+      `${req.protocol}://${req.get('host')}`
+    ).replace(/\/+$/, '');
     const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
     const mailOptions = {

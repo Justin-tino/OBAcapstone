@@ -27,8 +27,14 @@ app.set('trust proxy', 1);
 // ─── CORS (allow Live Server on port 5500 to access API) ──────────────────────
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowed = ['http://localhost:3000', 'http://localhost:5500', 'http://localhost:5501'];
-  if (allowed.includes(origin)) {
+  const allowed = new Set(['http://localhost:3000', 'http://localhost:5500', 'http://localhost:5501']);
+  // Render exposes the public service URL automatically; custom domains can be
+  // added through APP_BASE_URL.
+  for (const url of [process.env.APP_BASE_URL, process.env.RENDER_EXTERNAL_URL]) {
+    if (!url) continue;
+    try { allowed.add(new URL(url).origin); } catch (_) { /* ignore malformed URL */ }
+  }
+  if (allowed.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
@@ -212,6 +218,16 @@ app.post('/api/contact', contactLimiter, express.json(), async (req, res) => {
   }
 });
 
+// ─── Health Check (Render) ────────────────────────────────────────────────────
+// Render pings this path to decide whether a deploy is healthy.
+app.get('/healthz', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ─── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).send(`
@@ -231,8 +247,11 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start Server ──────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}`);
+// Bind explicitly to all interfaces: Render (and other containers) require the
+// process to accept connections on 0.0.0.0, not just loopback.
+const HOST = '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`Server listening on http://${HOST}:${PORT}`);
 
   // Scheduled Automated Database Backup (Section 5.3)
   if (adminRoutes && adminRoutes.executeAutoBackup) {

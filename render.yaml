@@ -1,0 +1,84 @@
+# Render Blueprint for the OBA System.
+# Connect this repository in Render and Render will read this file automatically.
+# Secret values (marked sync: false) are entered once in the Render dashboard and
+# are never committed to the repository.
+services:
+  - type: web
+    name: oba-system
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      # ── Runtime ──────────────────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      # PORT is injected by Render automatically; do not define it here.
+      - key: SESSION_SECRET
+        generateValue: true
+      # Optional: set this in the dashboard after the first deploy if you use a
+      # custom domain. Otherwise RENDER_EXTERNAL_URL is used automatically.
+      # - key: APP_BASE_URL
+      #   sync: false
+
+      # ── Datastore: Supabase Postgres ─────────────────────────────────────────
+      - key: DB_PROVIDER
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # ── Firebase (identity provider only) ────────────────────────────────────
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_CLIENT_ID
+        sync: false
+      - key: FIREBASE_AUTH_URI
+        value: https://accounts.google.com/o/oauth2/auth
+      - key: FIREBASE_TOKEN_URI
+        value: https://oauth2.googleapis.com/token
+
+      # ── Firebase browser SDK config (public values) ──────────────────────────
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: FIREBASE_APP_ID
+        sync: false
+
+      # ── Outbound email: Brevo HTTP API (recommended on Render) ───────────────
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: OBA System
+
+      # SMTP is only a fallback when BREVO_API_KEY is empty. Render blocks
+      # outbound SMTP on common ports, so leave these unset on Render.
+      # - key: SMTP_HOST
+      #   value: smtp.gmail.com
+      # - key: SMTP_PORT
+      #   value: "587"
+      # - key: SMTP_SECURE
+      #   value: "false"
+      # - key: EMAIL_USER
+      #   sync: false
+      # - key: EMAIL_PASS
+      #   sync: false
